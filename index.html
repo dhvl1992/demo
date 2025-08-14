@@ -1,9 +1,385 @@
-<iframe 
-  src="https://g.co/gemini/share/7ffb2b82c183" 
-  width="100%" 
-  height="600" 
-  style="border:1px solid #ccc;border-radius:12px;"
-  allowfullscreen
-  loading="lazy"
-  title="Gemini Conversation"
-></iframe>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Index</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Nunito:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+        }
+        
+        .pokemon-title {
+            font-family: 'Fredoka One', cursive;
+            background: linear-gradient(45deg, #ffdc00, #ff6b6b, #4ecdc4, #45b7d1);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .pokemon-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        
+        .pokemon-card:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+        
+        .pokemon-card.expanded {
+            transform: scale(1.05);
+        }
+        
+        .card-content {
+            transition: all 0.4s ease-in-out;
+        }
+        
+        .pokemon-image {
+            transition: transform 0.3s ease;
+            image-rendering: pixelated;
+        }
+        
+        .pokemon-card:hover .pokemon-image {
+            transform: scale(1.1);
+        }
+        
+        .type-badge {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .type-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+        
+        .type-badge:hover::before {
+            left: 100%;
+        }
+        
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffdc00;
+            border-radius: 50%;
+            animation: sparkleAnimation 2s infinite;
+        }
+        
+        @keyframes sparkleAnimation {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+        
+        .electric { background: linear-gradient(135deg, #ffdc00, #ffd700); }
+        .grass { background: linear-gradient(135deg, #78c850, #a8d982); }
+        .poison { background: linear-gradient(135deg, #a040a0, #c183c1); }
+        .normal { background: linear-gradient(135deg, #a8a878, #c5c5a8); }
+        .fairy { background: linear-gradient(135deg, #ee99ac, #f4c2c2); }
+        .fire { background: linear-gradient(135deg, #f08030, #ff9966); }
+        .flying { background: linear-gradient(135deg, #a890f0, #c8b5ff); }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+    <!-- Background decoration -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="sparkle" style="top: 10%; left: 15%; animation-delay: 0s;"></div>
+        <div class="sparkle" style="top: 20%; right: 20%; animation-delay: 0.5s;"></div>
+        <div class="sparkle" style="bottom: 30%; left: 25%; animation-delay: 1s;"></div>
+        <div class="sparkle" style="top: 60%; right: 15%; animation-delay: 1.5s;"></div>
+        <div class="sparkle" style="bottom: 20%; right: 35%; animation-delay: 2s;"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="pokemon-title text-5xl md:text-7xl font-bold mb-4">
+                Pokédex
+            </h1>
+            <p class="text-white text-lg md:text-xl font-semibold opacity-90">
+                Click on any Pokémon card to discover more information!
+            </p>
+        </div>
+
+        <!-- Pokemon Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div class="pokemon-card bg-white rounded-3xl shadow-2xl overflow-hidden cursor-pointer relative" data-pokemon="pikachu">
+                <div class="card-content p-6">
+                    <div class="text-center mb-4">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif" 
+                             alt="Pikachu" 
+                             class="pokemon-image w-24 h-24 mx-auto mb-3"
+                             onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'">
+                        <h3 class="text-2xl font-bold text-gray-800">Pikachu</h3>
+                    </div>
+                    <div class="details opacity-0 max-h-0 overflow-hidden transition-all duration-400">
+                        <div class="space-y-3">
+                            <div class="flex justify-center">
+                                <span class="type-badge electric px-4 py-2 rounded-full text-white font-semibold text-sm">
+                                    ⚡ Electric
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Height</div>
+                                    <div class="text-gray-600">0.4 m</div>
+                                </div>
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Weight</div>
+                                    <div class="text-gray-600">6.0 kg</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pokemon-card bg-white rounded-3xl shadow-2xl overflow-hidden cursor-pointer relative" data-pokemon="bulbasaur">
+                <div class="card-content p-6">
+                    <div class="text-center mb-4">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/1.gif" 
+                             alt="Bulbasaur" 
+                             class="pokemon-image w-24 h-24 mx-auto mb-3"
+                             onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png'">
+                        <h3 class="text-2xl font-bold text-gray-800">Bulbasaur</h3>
+                    </div>
+                    <div class="details opacity-0 max-h-0 overflow-hidden transition-all duration-400">
+                        <div class="space-y-3">
+                            <div class="flex justify-center gap-2">
+                                <span class="type-badge grass px-3 py-2 rounded-full text-white font-semibold text-sm">
+                                    🌿 Grass
+                                </span>
+                                <span class="type-badge poison px-3 py-2 rounded-full text-white font-semibold text-sm">
+                                    ☠️ Poison
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Height</div>
+                                    <div class="text-gray-600">0.7 m</div>
+                                </div>
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Weight</div>
+                                    <div class="text-gray-600">6.9 kg</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pokemon-card bg-white rounded-3xl shadow-2xl overflow-hidden cursor-pointer relative" data-pokemon="jigglypuff">
+                <div class="card-content p-6">
+                    <div class="text-center mb-4">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/39.gif" 
+                             alt="Jigglypuff" 
+                             class="pokemon-image w-24 h-24 mx-auto mb-3"
+                             onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/39.png'">
+                        <h3 class="text-2xl font-bold text-gray-800">Jigglypuff</h3>
+                    </div>
+                    <div class="details opacity-0 max-h-0 overflow-hidden transition-all duration-400">
+                        <div class="space-y-3">
+                            <div class="flex justify-center gap-2">
+                                <span class="type-badge normal px-3 py-2 rounded-full text-white font-semibold text-sm">
+                                    ⚪ Normal
+                                </span>
+                                <span class="type-badge fairy px-3 py-2 rounded-full text-white font-semibold text-sm">
+                                    🧚 Fairy
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Height</div>
+                                    <div class="text-gray-600">0.5 m</div>
+                                </div>
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Weight</div>
+                                    <div class="text-gray-600">5.5 kg</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pokemon-card bg-white rounded-3xl shadow-2xl overflow-hidden cursor-pointer relative" data-pokemon="meowth">
+                <div class="card-content p-6">
+                    <div class="text-center mb-4">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/52.gif" 
+                             alt="Meowth" 
+                             class="pokemon-image w-24 h-24 mx-auto mb-3"
+                             onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png'">
+                        <h3 class="text-2xl font-bold text-gray-800">Meowth</h3>
+                    </div>
+                    <div class="details opacity-0 max-h-0 overflow-hidden transition-all duration-400">
+                        <div class="space-y-3">
+                            <div class="flex justify-center">
+                                <span class="type-badge normal px-4 py-2 rounded-full text-white font-semibold text-sm">
+                                    ⚪ Normal
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Height</div>
+                                    <div class="text-gray-600">0.4 m</div>
+                                </div>
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Weight</div>
+                                    <div class="text-gray-600">4.2 kg</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pokemon-card bg-white rounded-3xl shadow-2xl overflow-hidden cursor-pointer relative" data-pokemon="charizard">
+                <div class="card-content p-6">
+                    <div class="text-center mb-4">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/6.gif" 
+                             alt="Charizard" 
+                             class="pokemon-image w-24 h-24 mx-auto mb-3"
+                             onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png'">
+                        <h3 class="text-2xl font-bold text-gray-800">Charizard</h3>
+                    </div>
+                    <div class="details opacity-0 max-h-0 overflow-hidden transition-all duration-400">
+                        <div class="space-y-3">
+                            <div class="flex justify-center gap-2">
+                                <span class="type-badge fire px-3 py-2 rounded-full text-white font-semibold text-sm">
+                                    🔥 Fire
+                                </span>
+                                <span class="type-badge flying px-3 py-2 rounded-full text-white font-semibold text-sm">
+                                    🕊️ Flying
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Height</div>
+                                    <div class="text-gray-600">1.7 m</div>
+                                </div>
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Weight</div>
+                                    <div class="text-gray-600">90.5 kg</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pokemon-card bg-white rounded-3xl shadow-2xl overflow-hidden cursor-pointer relative" data-pokemon="eevee">
+                <div class="card-content p-6">
+                    <div class="text-center mb-4">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/133.gif" 
+                             alt="Eevee" 
+                             class="pokemon-image w-24 h-24 mx-auto mb-3"
+                             onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png'">
+                        <h3 class="text-2xl font-bold text-gray-800">Eevee</h3>
+                    </div>
+                    <div class="details opacity-0 max-h-0 overflow-hidden transition-all duration-400">
+                        <div class="space-y-3">
+                            <div class="flex justify-center">
+                                <span class="type-badge normal px-4 py-2 rounded-full text-white font-semibold text-sm">
+                                    ⚪ Normal
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Height</div>
+                                    <div class="text-gray-600">0.3 m</div>
+                                </div>
+                                <div class="bg-gray-100 rounded-lg p-3 text-center">
+                                    <div class="font-bold text-gray-700">Weight</div>
+                                    <div class="text-gray-600">6.5 kg</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12">
+            <p class="text-white text-sm opacity-75">
+                ✨ Gotta catch 'em all! ✨
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Add click functionality to toggle card details
+        document.addEventListener('DOMContentLoaded', function() {
+            const pokemonCards = document.querySelectorAll('.pokemon-card');
+            
+            pokemonCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const details = this.querySelector('.details');
+                    const isExpanded = this.classList.contains('expanded');
+                    
+                    // Close all other cards
+                    pokemonCards.forEach(otherCard => {
+                        if (otherCard !== this) {
+                            otherCard.classList.remove('expanded');
+                            const otherDetails = otherCard.querySelector('.details');
+                            otherDetails.style.maxHeight = '0';
+                            otherDetails.style.opacity = '0';
+                        }
+                    });
+                    
+                    // Toggle current card
+                    if (isExpanded) {
+                        this.classList.remove('expanded');
+                        details.style.maxHeight = '0';
+                        details.style.opacity = '0';
+                    } else {
+                        this.classList.add('expanded');
+                        details.style.maxHeight = details.scrollHeight + 'px';
+                        details.style.opacity = '1';
+                    }
+                });
+            });
+            
+            // Add some interactive sparkle effects on hover
+            pokemonCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    // Create temporary sparkle effect
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            const sparkle = document.createElement('div');
+                            sparkle.className = 'sparkle';
+                            sparkle.style.position = 'absolute';
+                            sparkle.style.left = Math.random() * 100 + '%';
+                            sparkle.style.top = Math.random() * 100 + '%';
+                            sparkle.style.animationDelay = Math.random() * 1 + 's';
+                            this.appendChild(sparkle);
+                            
+                            setTimeout(() => {
+                                if (sparkle.parentNode) {
+                                    sparkle.remove();
+                                }
+                            }, 2000);
+                        }, i * 100);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
