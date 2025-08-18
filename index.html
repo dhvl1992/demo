@@ -3,477 +3,2108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neural Network Animation</title>
+    <title>Virtual Electronics Lab - Equipment Mastery</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *{margin:0;padding:0;box-sizing:border-box}
+        
+        body{
+            font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #475569);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color:#f8fafc;
+            line-height:1.6;
+            overflow-x:hidden;
         }
-
-        body {
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .title {
-            color: #fff;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 3s ease-in-out infinite;
-        }
-
+        
         @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
+            0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-
-        .neural-network {
+        
+        #particles-canvas{
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            z-index:-1;
+            opacity:0.3;
+        }
+        
+        nav{
+            position:fixed;
+            top:0;
+            width:100%;
+            background: rgba(15,23,42,0.95);
+            backdrop-filter: blur(20px);
+            z-index:1000;
+            padding:1rem 2rem;
+            border-bottom: 2px solid #3b82f6;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        nav ul{list-style:none;display:flex;justify-content:center;flex-wrap:wrap;gap:2rem}
+        
+        nav a{
+            color:#f8fafc;
+            text-decoration:none;
+            font-weight:600;
+            transition:all .3s;
+            padding:.5rem 1rem;
+            border-radius:15px;
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.3);
+        }
+        
+        nav a:hover{
+            background: rgba(59,130,246,0.3);
+            color:#60a5fa;
+            transform:translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59,130,246,0.4);
+        }
+        
+        .progress-bar{
+            position:fixed;
+            top:70px;
+            left:0;
+            height:4px;
+            background:linear-gradient(90deg,#3b82f6,#10b981,#8b5cf6);
+            z-index:999;
+            transform-origin:left;
+            transform:scaleX(0);
+            transition:transform .1s;
+            box-shadow: 0 0 20px rgba(59,130,246,0.6);
+        }
+        
+        .container{max-width:1400px;margin:0 auto;padding:100px 20px 20px}
+        
+        .slide{
+            background: rgba(15,23,42,0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59,130,246,0.3);
+            margin-bottom:30px;
+            padding:40px;
+            border-radius:25px;
+            border-left:5px solid #3b82f6;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transition:all .8s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height:600px;
+            transform:translateY(50px);
+            opacity:0;
             position: relative;
-            width: 900px;
-            height: 500px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .slide.visible{
+            transform:translateY(0);
+            opacity:1;
+        }
+        
+        .slide:hover{
+            transform:translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 70px rgba(0,0,0,0.4);
+        }
+        
+        .title-slide{
+            background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(59,130,246,0.9), rgba(16,185,129,0.9));
+            color:#f8fafc;
+            text-align:center;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+        }
+        
+        .title-slide h1{
+            font-size:4em;
+            margin-bottom:30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,.5);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            0% { text-shadow: 2px 2px 4px rgba(0,0,0,.5), 0 0 30px rgba(59,130,246,0.5); }
+            100% { text-shadow: 2px 2px 4px rgba(0,0,0,.5), 0 0 50px rgba(59,130,246,0.8); }
+        }
+        
+        .lab-intro{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:40px;
+            align-items:center;
+        }
+        
+        .intro-text h2{
+            font-size:2.5em;
+            color:#60a5fa;
+            margin-bottom:20px;
+        }
+        
+        .intro-visual{
+            position:relative;
+            height:400px;
+            background: linear-gradient(45deg, #1e293b, #334155);
+            border-radius:20px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border:2px solid #3b82f6;
+            overflow:hidden;
+        }
+        
+        .equipment-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+            gap:15px;
+            padding:20px;
+        }
+        
+        .equipment-item{
+            background: rgba(59,130,246,0.2);
+            border-radius:10px;
+            padding:15px;
+            text-align:center;
+            transition:all 0.3s;
+            cursor:pointer;
+            border:1px solid rgba(59,130,246,0.5);
+        }
+        
+        .equipment-item:hover{
+            background: rgba(59,130,246,0.4);
+            transform:scale(1.1);
+            box-shadow: 0 10px 30px rgba(59,130,246,0.3);
+        }
+        
+        .equipment-item .icon{
+            width:40px;
+            height:40px;
+            margin:0 auto 10px;
+            background: linear-gradient(45deg, #3b82f6, #60a5fa);
+            border-radius:8px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.5em;
+        }
+        
+        .interactive-demo{
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius:20px;
+            padding:30px;
+            margin:20px 0;
+            border:2px solid #3b82f6;
+            position:relative;
+        }
+        
+        .demo-title{
+            font-size:1.8em;
+            color:#60a5fa;
+            margin-bottom:20px;
+            text-align:center;
+        }
+        
+        .power-supply-demo{
+            display:grid;
+            grid-template-columns:1fr 2fr;
+            gap:30px;
+            align-items:start;
+        }
+        
+        .control-panel{
+            background: #374151;
+            padding:25px;
+            border-radius:15px;
+            border:1px solid #6b7280;
+        }
+        
+        .control-group{
+            margin-bottom:20px;
+        }
+        
+        .control-group label{
+            display:block;
+            margin-bottom:8px;
+            color:#d1d5db;
+            font-weight:600;
+        }
+        
+        .slider-container{
+            position:relative;
+            margin-bottom:15px;
+        }
+        
+        .slider{
+            width:100%;
+            height:8px;
+            background: #4b5563;
+            border-radius:5px;
+            outline:none;
+            -webkit-appearance:none;
+        }
+        
+        .slider::-webkit-slider-thumb{
+            -webkit-appearance:none;
+            width:20px;
+            height:20px;
+            background: linear-gradient(45deg, #3b82f6, #60a5fa);
+            border-radius:50%;
+            cursor:pointer;
+            box-shadow: 0 2px 10px rgba(59,130,246,0.5);
+        }
+        
+        .value-display{
+            background: #1f2937;
+            color:#3b82f6;
+            padding:8px 15px;
+            border-radius:8px;
+            font-family:monospace;
+            font-size:1.2em;
+            text-align:center;
+            border:1px solid #3b82f6;
+            min-width:80px;
+            display:inline-block;
+            margin-top:5px;
+        }
+        
+        .circuit-display{
+            background: #1f2937;
+            border-radius:15px;
+            padding:30px;
+            position:relative;
+            min-height:300px;
+            border:2px dashed #3b82f6;
+        }
+        
+        .led-indicator{
+            width:30px;
+            height:30px;
+            border-radius:50%;
+            margin:10px auto;
+            transition:all 0.3s;
+            border:2px solid #4b5563;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        
+        .led-indicator.on{
+            background: radial-gradient(circle, #fbbf24, #f59e0b);
+            border-color:#f59e0b;
+            box-shadow: 0 0 30px #fbbf24;
+        }
+        
+        .led-indicator.off{
+            background: #374151;
+            border-color:#6b7280;
+        }
+        
+        .waveform-container{
+            background: #000;
+            border-radius:10px;
+            padding:20px;
+            margin:20px 0;
+            border:2px solid #10b981;
+            position:relative;
+            height:250px;
+        }
+        
+        .waveform-canvas{
+            width:100%;
+            height:100%;
+            border-radius:5px;
+        }
+        
+        .oscilloscope-demo{
+            display:grid;
+            grid-template-columns:1fr 2fr;
+            gap:30px;
+        }
+        
+        .function-generator-demo{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:30px;
+        }
+        
+        .waveform-controls{
+            background: #374151;
+            padding:25px;
+            border-radius:15px;
+        }
+        
+        .waveform-select{
+            display:grid;
+            grid-template-columns:repeat(3, 1fr);
+            gap:10px;
+            margin-bottom:20px;
+        }
+        
+        .wave-btn{
+            background: #4b5563;
+            border:2px solid #6b7280;
+            color:#d1d5db;
+            padding:10px;
+            border-radius:8px;
+            cursor:pointer;
+            transition:all 0.3s;
+            text-align:center;
+            font-weight:600;
+        }
+        
+        .wave-btn.active{
+            background: #3b82f6;
+            border-color:#60a5fa;
+            color:#f8fafc;
+            box-shadow: 0 0 20px rgba(59,130,246,0.5);
+        }
+        
+        .wave-btn:hover{
+            background: #374151;
+            border-color:#9ca3af;
+        }
+        
+        .multimeter-demo{
+            display:grid;
+            grid-template-columns:1fr 2fr;
+            gap:30px;
+        }
+        
+        .meter-display{
+            background: #000;
+            color:#00ff00;
+            padding:30px;
+            border-radius:15px;
+            text-align:center;
+            font-family:monospace;
+            font-size:3em;
+            font-weight:bold;
+            border:3px solid #10b981;
+            box-shadow: 0 0 30px rgba(16,185,129,0.3);
+            min-height:150px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        
+        .measurement-modes{
+            display:grid;
+            grid-template-columns:repeat(3, 1fr);
+            gap:15px;
+            margin:20px 0;
+        }
+        
+        .mode-btn{
+            background: #1f2937;
+            border:2px solid #374151;
+            color:#d1d5db;
+            padding:15px 10px;
+            border-radius:10px;
+            cursor:pointer;
+            transition:all 0.3s;
+            text-align:center;
+            font-weight:600;
+        }
+        
+        .mode-btn.active{
+            background: #10b981;
+            border-color:#34d399;
+            color:#f8fafc;
+            box-shadow: 0 0 20px rgba(16,185,129,0.5);
+        }
+        
+        .circuit-diagram{
+            background: #f8fafc;
+            color:#1f2937;
+            border-radius:15px;
+            padding:30px;
+            margin:20px 0;
+            border:2px solid #3b82f6;
+            position:relative;
+            min-height:200px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        
+        .connection-point{
+            width:12px;
+            height:12px;
+            background: #dc2626;
+            border-radius:50%;
+            position:absolute;
+            border:2px solid #1f2937;
+            cursor:pointer;
+            transition:all 0.3s;
+        }
+        
+        .connection-point:hover{
+            background: #ef4444;
+            transform:scale(1.3);
+            box-shadow: 0 0 15px #dc2626;
+        }
+        
+        .probe-wire{
+            position:absolute;
+            height:2px;
+            background: linear-gradient(90deg, #dc2626, #ef4444);
+            transition:all 0.5s;
+            border-radius:1px;
+            box-shadow: 0 0 5px rgba(220,38,38,0.5);
+        }
+        
+        .stats-display{
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+            gap:20px;
+            margin:30px 0;
+        }
+        
+        .stat-card{
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            padding:25px;
+            border-radius:15px;
+            text-align:center;
+            border:1px solid rgba(255,255,255,0.1);
+            transition:all 0.3s;
+        }
+        
+        .stat-card:hover{
+            transform:translateY(-5px);
+            box-shadow: 0 20px 40px rgba(59,130,246,0.3);
+        }
+        
+        .stat-number{
+            font-size:2.5em;
+            font-weight:bold;
+            margin-bottom:10px;
+            color:#f8fafc;
+        }
+        
+        .stat-label{
+            color:#bfdbfe;
+            font-weight:600;
+        }
+        
+        .quiz-section{
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
+            border-radius:20px;
+            padding:30px;
+            margin:30px 0;
+            border:2px solid #a855f7;
+        }
+        
+        .quiz-question{
+            font-size:1.3em;
+            margin-bottom:20px;
+            color:#f8fafc;
+        }
+        
+        .quiz-options{
+            display:grid;
+            gap:15px;
+        }
+        
+        .quiz-option{
+            background: rgba(255,255,255,0.1);
+            border:2px solid rgba(255,255,255,0.2);
+            color:#f8fafc;
+            padding:15px;
+            border-radius:10px;
+            cursor:pointer;
+            transition:all 0.3s;
+        }
+        
+        .quiz-option:hover{
+            background: rgba(255,255,255,0.2);
+            border-color:rgba(255,255,255,0.4);
+        }
+        
+        .quiz-option.correct{
+            background: #10b981;
+            border-color:#34d399;
+        }
+        
+        .quiz-option.incorrect{
+            background: #dc2626;
+            border-color:#ef4444;
+        }
+        
+        .safety-alert{
+            background: linear-gradient(45deg, #dc2626, #ef4444);
+            color:#f8fafc;
+            padding:20px;
+            border-radius:15px;
+            margin:20px 0;
+            border-left:5px solid #fee2e2;
+            box-shadow: 0 10px 30px rgba(220,38,38,0.3);
+        }
+        
+        .safety-alert h3{
+            margin-bottom:10px;
+            font-size:1.3em;
+        }
+        
+        .back-to-top{
+            position:fixed;
+            bottom:30px;
+            right:30px;
+            background: linear-gradient(45deg,#3b82f6,#1d4ed8);
+            color:#f8fafc;
+            border:none;
+            border-radius:50%;
+            width:60px;
+            height:60px;
+            font-size:1.5rem;
+            cursor:pointer;
+            opacity:0;
+            transition:all .3s;
+            z-index:1000;
+            box-shadow: 0 10px 30px rgba(59,130,246,0.3);
+        }
+        
+        .back-to-top.visible{opacity:1}
+        
+        .back-to-top:hover{
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 15px 40px rgba(59,130,246,0.5);
+        }
+        
+        /* Enhanced Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 95%;
+                padding: 90px 15px 20px;
+            }
+            
+            .title-slide h1 {
+                font-size: 3.5em;
+            }
+            
+            .stats-display {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+        
+        @media (max-width: 992px) {
+            nav ul {
+                gap: 1rem;
+                font-size: 0.9em;
+            }
+            
+            .lab-intro, .power-supply-demo, .oscilloscope-demo, 
+            .function-generator-demo, .multimeter-demo {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .vs-divider {
+                position: relative;
+                left: auto;
+                top: auto;
+                transform: none;
+                margin: 20px auto;
+                display: block;
+                width: fit-content;
+            }
+            
+            .title-slide h1 {
+                font-size: 3em;
+            }
+            
+            .intro-text h2 {
+                font-size: 2.2em;
+            }
         }
 
-        .layer {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            height: 100%;
-            padding: 50px 0;
+        @media (max-width: 768px) {
+            /* Mobile Navigation */
+            nav {
+                padding: 0.8rem 1rem;
+                position: relative;
+            }
+            
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(15,23,42,0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                gap: 0;
+                z-index: 1001;
+                border-top: 1px solid rgba(59,130,246,0.3);
+            }
+            
+            nav ul.show {
+                display: flex;
+            }
+            
+            nav li {
+                width: 100%;
+            }
+            
+            nav a {
+                display: block;
+                width: 100%;
+                padding: 1rem;
+                border-radius: 0;
+                border-bottom: 1px solid rgba(59,130,246,0.1);
+                text-align: center;
+            }
+            
+            /* Mobile menu button */
+            .mobile-menu-btn {
+                display: block;
+                background: none;
+                border: 2px solid #3b82f6;
+                color: #f8fafc;
+                padding: 8px 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 1.2em;
+                margin-left: auto;
+            }
+            
+            .container {
+                padding: 80px 15px 20px;
+            }
+            
+            .slide {
+                padding: 20px 15px;
+                min-height: auto;
+                margin-bottom: 20px;
+            }
+            
+            .title-slide h1 {
+                font-size: 2.5em;
+                margin-bottom: 20px;
+            }
+            
+            .intro-text h2 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+            
+            .intro-text p {
+                font-size: 1em;
+            }
+            
+            .equipment-grid {
+                grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .equipment-item {
+                padding: 10px 5px;
+            }
+            
+            .equipment-item .icon {
+                width: 30px;
+                height: 30px;
+                font-size: 1.2em;
+            }
+            
+            /* Mobile Control Panels */
+            .control-panel {
+                padding: 20px 15px;
+            }
+            
+            .control-group {
+                margin-bottom: 25px;
+            }
+            
+            .control-group label {
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+            
+            .slider {
+                height: 12px;
+            }
+            
+            .slider::-webkit-slider-thumb {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .value-display {
+                font-size: 1em;
+                padding: 10px 12px;
+                margin-top: 8px;
+                width: 100%;
+                text-align: center;
+            }
+            
+            /* Mobile Demo Areas */
+            .circuit-display, .waveform-container {
+                min-height: 200px;
+                padding: 15px;
+            }
+            
+            .waveform-canvas, .scope-canvas {
+                width: 100%;
+                height: 180px;
+            }
+            
+            .meter-display {
+                font-size: 2em;
+                padding: 20px;
+                min-height: 100px;
+            }
+            
+            /* Mobile Button Grids */
+            .waveform-select {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .measurement-modes {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .wave-btn, .mode-btn {
+                padding: 12px 8px;
+                font-size: 0.9em;
+            }
+            
+            /* Mobile Stats */
+            .stats-display {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .stat-card {
+                padding: 20px 15px;
+            }
+            
+            .stat-number {
+                font-size: 2em;
+            }
+            
+            .stat-label {
+                font-size: 0.9em;
+            }
+            
+            /* Mobile Quiz */
+            .quiz-section {
+                padding: 20px 15px;
+            }
+            
+            .quiz-question {
+                font-size: 1.1em;
+                margin-bottom: 15px;
+            }
+            
+            .quiz-option {
+                padding: 12px;
+                font-size: 0.95em;
+            }
+            
+            /* Mobile Safety Alerts */
+            .safety-alert {
+                padding: 15px;
+                margin: 15px 0;
+            }
+            
+            .safety-alert h3 {
+                font-size: 1.1em;
+            }
+            
+            /* Touch-friendly interactions */
+            .equipment-item:hover {
+                transform: none;
+            }
+            
+            .equipment-item:active {
+                transform: scale(0.95);
+                background: rgba(59,130,246,0.4);
+            }
+            
+            .slide:hover {
+                transform: none;
+            }
+            
+            /* Mobile Canvas Sizing */
+            #power-triangle {
+                width: 100%;
+                height: 150px;
+            }
         }
 
-        .input-layer { left: 50px; }
-        .hidden-layer1 { left: 250px; }
-        .hidden-layer2 { left: 450px; }
-        .output-layer { left: 650px; }
-
-        .neuron {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            position: relative;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        @media (max-width: 480px) {
+            .title-slide h1 {
+                font-size: 2em;
+                line-height: 1.2;
+            }
+            
+            .title-slide p {
+                font-size: 1em;
+            }
+            
+            .slide {
+                padding: 15px 10px;
+            }
+            
+            .intro-text h2 {
+                font-size: 1.6em;
+            }
+            
+            .equipment-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            .equipment-item {
+                padding: 8px 4px;
+            }
+            
+            .equipment-item .icon {
+                width: 25px;
+                height: 25px;
+                font-size: 1em;
+                margin-bottom: 5px;
+            }
+            
+            .equipment-item div:last-child {
+                font-size: 0.8em;
+            }
+            
+            .control-panel {
+                padding: 15px 10px;
+            }
+            
+            .measurement-modes {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .stats-display {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 15px 10px;
+            }
+            
+            .meter-display {
+                font-size: 1.8em;
+                padding: 15px;
+            }
+            
+            .back-to-top {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .progress-bar {
+                height: 3px;
+            }
         }
 
-        .neuron.active {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
-            box-shadow: 0 0 25px rgba(255, 107, 107, 0.8);
-            transform: scale(1.1);
+        @media (max-width: 360px) {
+            .container {
+                padding: 75px 10px 20px;
+            }
+            
+            .slide {
+                padding: 12px 8px;
+            }
+            
+            .title-slide h1 {
+                font-size: 1.8em;
+            }
+            
+            .control-group {
+                margin-bottom: 20px;
+            }
+            
+            .value-display {
+                font-size: 0.9em;
+                padding: 8px 10px;
+            }
+            
+            .quiz-option {
+                padding: 10px;
+                font-size: 0.9em;
+            }
         }
 
-        .neuron.input {
-            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        /* Landscape mobile orientation */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .title-slide h1 {
+                font-size: 2em;
+                margin-bottom: 15px;
+            }
+            
+            .slide {
+                min-height: auto;
+                padding: 15px;
+            }
+            
+            .waveform-container {
+                min-height: 150px;
+            }
+            
+            .circuit-display {
+                min-height: 150px;
+            }
         }
 
-        .neuron.output {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .connection {
-            position: absolute;
-            height: 2px;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-            transform-origin: left center;
-            transition: all 0.3s ease;
-        }
-
-        .connection.active {
-            background: linear-gradient(90deg, #ff6b6b, #ffa726);
-            height: 3px;
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
-        }
-
-        .signal {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #ff6b6b 0%, #ffa726 100%);
-            box-shadow: 0 0 15px rgba(255, 107, 107, 1);
-            opacity: 0;
-            animation: signal-flow 2s ease-in-out;
-        }
-
-        @keyframes signal-flow {
-            0% { opacity: 0; transform: scale(0.5); }
-            20% { opacity: 1; transform: scale(1); }
-            80% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0.5); }
-        }
-
-        .controls {
-            margin-top: 30px;
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .info {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
-            max-width: 300px;
-        }
-
-        .layer-label {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .neuron.pulse {
-            animation: pulse 0.6s ease-in-out;
+        /* Desktop menu button hidden by default */
+        .mobile-menu-btn {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="title">Neural Network in Action</div>
+    <canvas id="particles-canvas"></canvas>
+    <div class="progress-bar" id="progress-bar"></div>
     
-    <div class="neural-network" id="network">
-        <!-- Layers will be dynamically created -->
-        <div class="info">
-            <strong>How it works:</strong><br>
-            Click "Send Signal" to see data flow through the network. 
-            Each neuron processes information and passes it forward through weighted connections.
+    <nav id="navbar">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        <ul id="nav-menu">
+            <li><a href="#intro" onclick="closeMobileMenu()">Introduction</a></li>
+            <li><a href="#power-supply" onclick="closeMobileMenu()">Power Supply</a></li>
+            <li><a href="#function-gen" onclick="closeMobileMenu()">Function Gen</a></li>
+            <li><a href="#oscilloscope" onclick="closeMobileMenu()">Oscilloscope</a></li>
+            <li><a href="#multimeter" onclick="closeMobileMenu()">Multimeter</a></li>
+            <li><a href="#wattmeter" onclick="closeMobileMenu()">Wattmeter</a></li>
+            <li><a href="#practical" onclick="closeMobileMenu()">Practical</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Title Slide -->
+        <div id="intro" class="slide title-slide">
+            <h1>🧪 Virtual Electronics Lab</h1>
+            <p style="font-size:1.5em;margin-bottom:20px;">Master Essential Laboratory Equipment</p>
+            <p style="font-size:1.2em;opacity:0.9;">Interactive Learning Experience</p>
+        </div>
+
+        <!-- Introduction -->
+        <div class="slide">
+            <div class="lab-intro">
+                <div class="intro-text">
+                    <h2>Welcome to Your Virtual Lab! 🔬</h2>
+                    <p style="font-size:1.2em;margin-bottom:20px;">Every great engineer starts here - understanding the tools that measure and control electrical energy.</p>
+                    <p>Today, we'll explore 5 essential instruments that form the backbone of every electronics lab:</p>
+                    <ul style="margin:20px 0;padding-left:20px;">
+                        <li>🔋 DC Power Supply - Your circuit's energy source</li>
+                        <li>📡 Function Generator - Signal creation master</li>
+                        <li>📊 Digital Storage Oscilloscope - Time's window into signals</li>
+                        <li>⚡ Multimeter - The universal detective</li>
+                        <li>⚗️ Wattmeter - Power consumption analyzer</li>
+                    </ul>
+                </div>
+                <div class="intro-visual">
+                    <div class="equipment-grid">
+                        <div class="equipment-item" onclick="scrollToElement('power-supply')">
+                            <div class="icon">🔋</div>
+                            <div style="font-size:0.9em;">Power Supply</div>
+                        </div>
+                        <div class="equipment-item" onclick="scrollToElement('function-gen')">
+                            <div class="icon">📡</div>
+                            <div style="font-size:0.9em;">Function Gen</div>
+                        </div>
+                        <div class="equipment-item" onclick="scrollToElement('oscilloscope')">
+                            <div class="icon">📊</div>
+                            <div style="font-size:0.9em;">Oscilloscope</div>
+                        </div>
+                        <div class="equipment-item" onclick="scrollToElement('multimeter')">
+                            <div class="icon">⚡</div>
+                            <div style="font-size:0.9em;">Multimeter</div>
+                        </div>
+                        <div class="equipment-item" onclick="scrollToElement('wattmeter')">
+                            <div class="icon">⚗️</div>
+                            <div style="font-size:0.9em;">Wattmeter</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DC Power Supply -->
+        <div id="power-supply" class="slide">
+            <h2 style="font-size:2.5em;color:#60a5fa;margin-bottom:30px;">🔋 DC Power Supply: The Circuit's Heartbeat</h2>
+            
+            <div class="interactive-demo">
+                <div class="demo-title">Interactive Power Supply Simulator</div>
+                <div class="power-supply-demo">
+                    <div class="control-panel">
+                        <h3 style="color:#60a5fa;margin-bottom:20px;">Controls</h3>
+                        
+                        <div class="control-group">
+                            <label>Voltage Setting (0-30V)</label>
+                            <div class="slider-container">
+                                <input type="range" class="slider" id="voltage-slider" min="0" max="30" value="12" step="0.1">
+                                <div class="value-display" id="voltage-display">12.0V</div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Current Limit (0-5A)</label>
+                            <div class="slider-container">
+                                <input type="range" class="slider" id="current-slider" min="0" max="5" value="1" step="0.1">
+                                <div class="value-display" id="current-display">1.0A</div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Load Resistance (1-100Ω)</label>
+                            <div class="slider-container">
+                                <input type="range" class="slider" id="resistance-slider" min="1" max="100" value="12" step="1">
+                                <div class="value-display" id="resistance-display">12Ω</div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="togglePower()" id="power-btn" style="width:100%;padding:15px;margin-top:20px;background:#10b981;border:none;color:white;border-radius:10px;font-size:1.1em;cursor:pointer;">🔌 POWER ON</button>
+                    </div>
+                    
+                    <div class="circuit-display">
+                        <h3 style="color:#60a5fa;text-align:center;margin-bottom:20px;">Circuit Simulation</h3>
+                        <div style="text-align:center;">
+                            <div style="margin:20px 0;">
+                                <strong>LED Indicator:</strong>
+                                <div class="led-indicator" id="led-indicator"></div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:30px;">
+                                <div style="background:#374151;padding:15px;border-radius:10px;">
+                                    <strong>Actual Current:</strong><br>
+                                    <span id="actual-current" style="font-size:1.5em;color:#10b981;">0.00A</span>
+                                </div>
+                                <div style="background:#374151;padding:15px;border-radius:10px;">
+                                    <strong>Power Consumed:</strong><br>
+                                    <span id="power-consumed" style="font-size:1.5em;color:#f59e0b;">0.00W</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:30px;">
+                <h3 style="color:#60a5fa;margin-bottom:15px;">🔍 Key Learning Points:</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;">
+                    <div style="background:rgba(59,130,246,0.1);padding:20px;border-radius:15px;border-left:4px solid #3b82f6;">
+                        <h4>Voltage Control</h4>
+                        <p>The power supply provides adjustable DC voltage. Think of it as controlling the "pressure" that pushes electrons through your circuit.</p>
+                    </div>
+                    <div style="background:rgba(16,185,129,0.1);padding:20px;border-radius:15px;border-left:4px solid #10b981;">
+                        <h4>Current Limiting</h4>
+                        <p>Current limiting protects your circuit. It's like a safety valve that prevents too much "flow" of electrons.</p>
+                    </div>
+                    <div style="background:rgba(245,158,11,0.1);padding:20px;border-radius:15px;border-left:4px solid #f59e0b;">
+                        <h4>Ohm's Law in Action</h4>
+                        <p>Watch how V = I × R plays out in real-time. Change resistance and see current adjust automatically!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Function Generator -->
+        <div id="function-gen" class="slide">
+            <h2 style="font-size:2.5em;color:#60a5fa;margin-bottom:30px;">📡 Function Generator: The Signal Architect</h2>
+            
+            <div class="interactive-demo">
+                <div class="demo-title">Waveform Generator Simulator</div>
+                <div class="function-generator-demo">
+                    <div class="waveform-controls">
+                        <h3 style="color:#60a5fa;margin-bottom:20px;">Waveform Controls</h3>
+                        
+                        <label>Waveform Type:</label>
+                        <div class="waveform-select">
+                            <button class="wave-btn active" onclick="selectWaveform('sine')">🌊 Sine</button>
+                            <button class="wave-btn" onclick="selectWaveform('square')">⬜ Square</button>
+                            <button class="wave-btn" onclick="selectWaveform('triangle')">🔺 Triangle</button>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Frequency (1Hz - 1000Hz)</label>
+                            <input type="range" class="slider" id="freq-slider" min="1" max="1000" value="100" step="1">
+                            <div class="value-display" id="freq-display">100Hz</div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Amplitude (0.1V - 10V)</label>
+                            <input type="range" class="slider" id="amp-slider" min="0.1" max="10" value="5" step="0.1">
+                            <div class="value-display" id="amp-display">5.0V</div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Duty Cycle (10% - 90%)</label>
+                            <input type="range" class="slider" id="duty-slider" min="10" max="90" value="50" step="1">
+                            <div class="value-display" id="duty-display">50%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="waveform-container">
+                        <canvas class="waveform-canvas" id="waveform-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="safety-alert">
+                <h3>💡 Pro Tip</h3>
+                <p>Function generators are like musical instruments for electronics! Different waveforms test different aspects of your circuits - sine waves for smooth AC analysis, square waves for digital logic, and triangle waves for linear response testing.</p>
+            </div>
+        </div>
+
+        <!-- Digital Storage Oscilloscope -->
+        <div id="oscilloscope" class="slide">
+            <h2 style="font-size:2.5em;color:#60a5fa;margin-bottom:30px;">📊 Digital Storage Oscilloscope: Time's Window</h2>
+            
+            <div class="interactive-demo">
+                <div class="demo-title">Virtual Oscilloscope</div>
+                <div class="oscilloscope-demo">
+                    <div class="waveform-controls">
+                        <h3 style="color:#60a5fa;margin-bottom:20px;">Scope Controls</h3>
+                        
+                        <div class="control-group">
+                            <label>Time/Div (μs)</label>
+                            <input type="range" class="slider" id="time-div" min="10" max="1000" value="100" step="10">
+                            <div class="value-display" id="time-display">100μs</div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Volts/Div</label>
+                            <input type="range" class="slider" id="volt-div" min="0.1" max="5" value="1" step="0.1">
+                            <div class="value-display" id="volt-display">1V</div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Trigger Level</label>
+                            <input type="range" class="slider" id="trigger-level" min="-5" max="5" value="0" step="0.1">
+                            <div class="value-display" id="trigger-display">0V</div>
+                        </div>
+                        
+                        <button onclick="triggerSingle()" style="width:100%;padding:10px;margin:10px 0;background:#7c3aed;border:none;color:white;border-radius:8px;cursor:pointer;">📸 Single Trigger</button>
+                        <button onclick="toggleAuto()" id="auto-btn" style="width:100%;padding:10px;background:#10b981;border:none;color:white;border-radius:8px;cursor:pointer;">🔄 Auto Mode: ON</button>
+                    </div>
+                    
+                    <div class="waveform-container">
+                        <canvas class="waveform-canvas" id="scope-canvas"></canvas>
+                        <div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.7);padding:10px;border-radius:5px;color:#00ff00;font-family:monospace;">
+                            <div>CH1: <span id="scope-freq">100Hz</span></div>
+                            <div>Vpp: <span id="scope-vpp">5.0V</span></div>
+                            <div>RMS: <span id="scope-rms">1.77V</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:30px;">
+                <h3 style="color:#60a5fa;margin-bottom:15px;">🎯 DSO Superpowers:</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;">
+                    <div style="background:rgba(124,58,237,0.1);padding:20px;border-radius:15px;border-left:4px solid #7c3aed;">
+                        <h4>Time Domain Analysis</h4>
+                        <p>See how signals change over time - catch glitches, measure rise times, analyze signal integrity.</p>
+                    </div>
+                    <div style="background:rgba(16,185,129,0.1);padding:20px;border-radius:15px;border-left:4px solid #10b981;">
+                        <h4>Triggering Magic</h4>
+                        <p>Capture specific signal events - rising edges, falling edges, or specific voltage levels.</p>
+                    </div>
+                    <div style="background:rgba(245,158,11,0.1);padding:20px;border-radius:15px;border-left:4px solid #f59e0b;">
+                        <h4>Digital Storage</h4>
+                        <p>Unlike analog scopes, DSOs can freeze, store, and analyze waveforms for detailed study.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multimeter -->
+        <div id="multimeter" class="slide">
+            <h2 style="font-size:2.5em;color:#60a5fa;margin-bottom:30px;">⚡ Multimeter: The Universal Detective</h2>
+            
+            <div class="interactive-demo">
+                <div class="demo-title">Virtual Multimeter</div>
+                <div class="multimeter-demo">
+                    <div class="waveform-controls">
+                        <h3 style="color:#60a5fa;margin-bottom:20px;">Measurement Mode</h3>
+                        
+                        <div class="measurement-modes">
+                            <button class="mode-btn active" onclick="setMeterMode('voltage')">🔋 Voltage</button>
+                            <button class="mode-btn" onclick="setMeterMode('current')">⚡ Current</button>
+                            <button class="mode-btn" onclick="setMeterMode('resistance')">🔧 Resistance</button>
+                            <button class="mode-btn" onclick="setMeterMode('continuity')">🔗 Continuity</button>
+                            <button class="mode-btn" onclick="setMeterMode('capacitance')">🔋 Capacitance</button>
+                            <button class="mode-btn" onclick="setMeterMode('frequency')">📡 Frequency</button>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Test Value</label>
+                            <input type="range" class="slider" id="test-slider" min="0" max="100" value="50" step="1">
+                            <div class="value-display" id="test-display">50</div>
+                        </div>
+                        
+                        <div style="margin-top:20px;">
+                            <strong>Probe Placement:</strong>
+                            <div class="circuit-diagram" id="meter-circuit">
+                                <div style="position:relative;width:200px;height:150px;border:2px solid #1f2937;border-radius:10px;background:linear-gradient(45deg,#f3f4f6,#e5e7eb);">
+                                    <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);background:#dc2626;width:30px;height:30px;border-radius:50%;border:3px solid #1f2937;"></div>
+                                    <div style="position:absolute;bottom:20px;left:30%;background:#1f2937;width:40px;height:10px;"></div>
+                                    <div style="position:absolute;bottom:20px;right:30%;background:#1f2937;width:40px;height:10px;"></div>
+                                    <div class="connection-point" style="top:10px;left:30%;" onclick="connectProbe('red')"></div>
+                                    <div class="connection-point" style="bottom:10px;left:30%;" onclick="connectProbe('black')"></div>
+                                    <div class="connection-point" style="bottom:10px;right:30%;" onclick="connectProbe('black')"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="meter-display" id="meter-reading">
+                            <span id="meter-value">0.00</span>
+                        </div>
+                        <div style="text-align:center;margin-top:20px;color:#10b981;font-weight:bold;" id="meter-unit">
+                            DC Voltage Mode
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:30px;">
+                <h3 style="color:#60a5fa;margin-bottom:15px;">🔍 Multimeter Mastery:</h3>
+                <div style="background:rgba(16,185,129,0.1);padding:25px;border-radius:15px;border-left:4px solid #10b981;">
+                    <h4>The Three Sacred Rules of Multimeter Use:</h4>
+                    <ol style="margin-left:20px;margin-top:10px;">
+                        <li><strong>Voltage in Parallel:</strong> Connect probes across the component (like reading pressure difference)</li>
+                        <li><strong>Current in Series:</strong> Break the circuit and insert meter (like measuring water flow rate)</li>
+                        <li><strong>Resistance when OFF:</strong> Never measure resistance in powered circuits (component isolation)</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wattmeter -->
+        <div id="wattmeter" class="slide">
+            <h2 style="font-size:2.5em;color:#60a5fa;margin-bottom:30px;">⚗️ Wattmeter: The Power Analyst</h2>
+            
+            <div class="interactive-demo">
+                <div class="demo-title">Power Measurement Simulator</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;">
+                    <div class="waveform-controls">
+                        <h3 style="color:#60a5fa;margin-bottom:20px;">Load Parameters</h3>
+                        
+                        <div class="control-group">
+                            <label>Voltage (V)</label>
+                            <input type="range" class="slider" id="watt-voltage" min="100" max="240" value="120" step="1">
+                            <div class="value-display" id="watt-v-display">120V</div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Current (A)</label>
+                            <input type="range" class="slider" id="watt-current" min="0.1" max="10" value="5" step="0.1">
+                            <div class="value-display" id="watt-i-display">5.0A</div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Power Factor</label>
+                            <input type="range" class="slider" id="power-factor" min="0.1" max="1" value="0.8" step="0.01">
+                            <div class="value-display" id="pf-display">0.80</div>
+                        </div>
+                        
+                        <div style="margin-top:20px;padding:15px;background:rgba(124,58,237,0.2);border-radius:10px;">
+                            <strong>Load Type:</strong><br>
+                            <select id="load-type" onchange="updateLoadType()" style="width:100%;padding:8px;margin-top:5px;border-radius:5px;border:1px solid #6b7280;background:#374151;color:#f8fafc;">
+                                <option value="resistive">Resistive (Heater)</option>
+                                <option value="inductive">Inductive (Motor)</option>
+                                <option value="capacitive">Capacitive (Capacitor Bank)</option>
+                                <option value="mixed">Mixed Load</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="stats-display">
+                            <div class="stat-card">
+                                <div class="stat-number" id="real-power">480</div>
+                                <div class="stat-label">Real Power (W)</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="apparent-power">600</div>
+                                <div class="stat-label">Apparent Power (VA)</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="reactive-power">360</div>
+                                <div class="stat-label">Reactive Power (VAR)</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="efficiency">80</div>
+                                <div class="stat-label">Efficiency (%)</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background:#1f2937;padding:20px;border-radius:15px;margin-top:20px;border:2px solid #10b981;">
+                            <h4 style="color:#10b981;margin-bottom:15px;">Power Triangle Visualization</h4>
+                            <canvas id="power-triangle" width="300" height="200" style="width:100%;max-width:300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:30px;">
+                <h3 style="color:#60a5fa;margin-bottom:15px;">⚡ Power Concepts Explained:</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+                    <div style="background:rgba(59,130,246,0.1);padding:20px;border-radius:15px;border-left:4px solid #3b82f6;">
+                        <h4>Real Power (W)</h4>
+                        <p>The actual power consumed by the load - what you pay for on your electricity bill!</p>
+                    </div>
+                    <div style="background:rgba(16,185,129,0.1);padding:20px;border-radius:15px;border-left:4px solid #10b981;">
+                        <h4>Reactive Power (VAR)</h4>
+                        <p>Power that oscillates between source and load - needed for magnetic fields in motors and inductors.</p>
+                    </div>
+                    <div style="background:rgba(124,58,237,0.1);padding:20px;border-radius:15px;border-left:4px solid #7c3aed;">
+                        <h4>Apparent Power (VA)</h4>
+                        <p>The total power supplied by the source - combination of real and reactive power.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Practical Application -->
+        <div id="practical" class="slide">
+            <h2 style="font-size:2.5em;color:#60a5fa;margin-bottom:30px;">🔧 Putting It All Together: Lab Mastery</h2>
+            
+            <div class="quiz-section">
+                <h3 style="margin-bottom:20px;">Knowledge Check Quiz 🧠</h3>
+                <div id="quiz-container">
+                    <div class="quiz-question" id="quiz-question">
+                        Which instrument would you use to measure the voltage across a resistor?
+                    </div>
+                    <div class="quiz-options" id="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(0, 2)">Function Generator</div>
+                        <div class="quiz-option" onclick="checkAnswer(1, 2)">Oscilloscope</div>
+                        <div class="quiz-option" onclick="checkAnswer(2, 2)">Multimeter (Voltage Mode)</div>
+                        <div class="quiz-option" onclick="checkAnswer(3, 2)">Wattmeter</div>
+                    </div>
+                </div>
+                <button onclick="nextQuestion()" id="next-btn" style="margin-top:20px;padding:10px 20px;background:#10b981;border:none;color:white;border-radius:8px;cursor:pointer;display:none;">Next Question ➡️</button>
+            </div>
+
+            <div style="margin-top:40px;">
+                <h3 style="color:#60a5fa;margin-bottom:20px;">🎯 Your Lab Journey Summary</h3>
+                <div class="stats-display">
+                    <div class="stat-card">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Instruments Mastered</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">∞</div>
+                        <div class="stat-label">Circuits You Can Now Analyze</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Ready for Real Lab Work</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="safety-alert">
+                <h3>🛡️ Safety First - Always Remember</h3>
+                <ul style="margin-top:10px;padding-left:20px;">
+                    <li><strong>Power OFF:</strong> Always turn off power before connecting/disconnecting circuits</li>
+                    <li><strong>Probe Placement:</strong> Double-check connections before energizing</li>
+                    <li><strong>Range Selection:</strong> Start with highest range and work down</li>
+                    <li><strong>Current Limiting:</strong> Always set appropriate current limits on power supplies</li>
+                    <li><strong>Ground Safety:</strong> Ensure proper grounding of equipment and circuits</li>
+                </ul>
+            </div>
+
+            <div style="background:linear-gradient(135deg,#10b981,#059669);padding:30px;border-radius:20px;text-align:center;margin-top:30px;">
+                <h3 style="color:#f8fafc;margin-bottom:15px;">🎉 Congratulations!</h3>
+                <p style="color:#f8fafc;font-size:1.2em;">You've completed your virtual lab training! You now understand the fundamental instruments that power electronic engineering. Ready to tackle real circuits with confidence!</p>
+            </div>
         </div>
     </div>
 
-    <div class="controls">
-        <button class="btn" onclick="sendSignal()">Send Signal</button>
-        <button class="btn" onclick="continuousMode()">Continuous Mode</button>
-        <button class="btn" onclick="stopContinuous()">Stop</button>
-        <button class="btn" onclick="resetNetwork()">Reset</button>
-    </div>
+    <button class="back-to-top" id="backToTop">↑</button>
 
     <script>
-        let isAnimating = false;
-        let continuousInterval = null;
-        let networkStructure = {
-            input: 4,
-            hidden1: 6,
-            hidden2: 4,
-            output: 2
-        };
+        // Particle System
+        class Particle {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.6 + 0.2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > this.canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > this.canvas.height) this.vy *= -1;
+            }
+            
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = '#3b82f6';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
 
-        class NeuralNetwork {
+        class ParticleSystem {
             constructor() {
-                this.layers = [];
-                this.connections = [];
-                this.signals = [];
+                this.canvas = document.getElementById('particles-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
                 this.init();
             }
-
+            
             init() {
-                this.createLayers();
-                this.createConnections();
-            }
-
-            createLayers() {
-                const network = document.getElementById('network');
-                const layerPositions = [
-                    { name: 'input', x: 50, count: networkStructure.input, class: 'input' },
-                    { name: 'hidden1', x: 250, count: networkStructure.hidden1, class: 'hidden' },
-                    { name: 'hidden2', x: 450, count: networkStructure.hidden2, class: 'hidden' },
-                    { name: 'output', x: 650, count: networkStructure.output, class: 'output' }
-                ];
-
-                layerPositions.forEach(layerInfo => {
-                    const layer = document.createElement('div');
-                    layer.className = `layer ${layerInfo.name}-layer`;
-                    layer.style.left = layerInfo.x + 'px';
-
-                    const label = document.createElement('div');
-                    label.className = 'layer-label';
-                    label.textContent = layerInfo.name.charAt(0).toUpperCase() + layerInfo.name.slice(1);
-                    layer.appendChild(label);
-
-                    const neurons = [];
-                    const spacing = 400 / (layerInfo.count + 1);
-
-                    for (let i = 0; i < layerInfo.count; i++) {
-                        const neuron = document.createElement('div');
-                        neuron.className = `neuron ${layerInfo.class}`;
-                        neuron.style.position = 'absolute';
-                        neuron.style.top = (spacing * (i + 1) - 30) + 'px';
-                        neuron.textContent = layerInfo.class === 'input' ? `I${i+1}` : 
-                                           layerInfo.class === 'output' ? `O${i+1}` : `H${i+1}`;
-                        
-                        layer.appendChild(neuron);
-                        neurons.push({
-                            element: neuron,
-                            x: layerInfo.x + 30,
-                            y: spacing * (i + 1) + 20
-                        });
-                    }
-
-                    this.layers.push(neurons);
-                    network.appendChild(layer);
+                this.resize();
+                this.createParticles();
+                window.addEventListener('resize', () => {
+                    this.resize();
+                    this.createParticles();
                 });
+                this.animate();
             }
-
-            createConnections() {
-                const network = document.getElementById('network');
-
-                for (let layerIndex = 0; layerIndex < this.layers.length - 1; layerIndex++) {
-                    const currentLayer = this.layers[layerIndex];
-                    const nextLayer = this.layers[layerIndex + 1];
-
-                    currentLayer.forEach((neuron1, i) => {
-                        nextLayer.forEach((neuron2, j) => {
-                            const connection = document.createElement('div');
-                            connection.className = 'connection';
-                            
-                            const dx = neuron2.x - neuron1.x;
-                            const dy = neuron2.y - neuron1.y;
-                            const length = Math.sqrt(dx * dx + dy * dy);
-                            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-
-                            connection.style.left = neuron1.x + 'px';
-                            connection.style.top = neuron1.y + 'px';
-                            connection.style.width = length + 'px';
-                            connection.style.transform = `rotate(${angle}deg)`;
-                            connection.style.zIndex = '1';
-
-                            network.appendChild(connection);
-                            this.connections.push({
-                                element: connection,
-                                from: neuron1,
-                                to: neuron2,
-                                fromLayer: layerIndex,
-                                toLayer: layerIndex + 1
-                            });
-                        });
-                    });
+            
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+            
+            createParticles() {
+                this.particles = [];
+                const particleCount = Math.floor((window.innerWidth * window.innerHeight) / 15000);
+                for (let i = 0; i < particleCount; i++) {
+                    this.particles.push(new Particle(this.canvas));
                 }
             }
-
-            async sendSignal() {
-                if (isAnimating) return;
-                isAnimating = true;
-
-                // Reset all neurons and connections
-                this.resetVisualState();
-
-                // Activate input neurons
-                this.layers[0].forEach(neuron => {
-                    neuron.element.classList.add('active', 'pulse');
-                    setTimeout(() => neuron.element.classList.remove('pulse'), 600);
+            
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.particles.forEach(particle => {
+                    particle.update();
+                    particle.draw(this.ctx);
                 });
+                requestAnimationFrame(() => this.animate());
+            }
+        }
 
-                // Process through each layer
-                for (let layerIndex = 0; layerIndex < this.layers.length - 1; layerIndex++) {
-                    await this.processLayer(layerIndex);
+        new ParticleSystem();
+
+        // Scroll animations
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
                 }
+            });
+        }, { threshold: 0.1 });
 
-                setTimeout(() => {
-                    isAnimating = false;
-                    this.resetVisualState();
-                }, 1000);
-            }
+        document.querySelectorAll('.slide').forEach(slide => observer.observe(slide));
 
-            async processLayer(layerIndex) {
-                const currentLayer = this.layers[layerIndex];
-                const nextLayer = this.layers[layerIndex + 1];
+        // Progress bar and navigation
+        const updateProgress = () => {
+            const scrolled = window.scrollY;
+            const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = scrolled / documentHeight;
+            document.getElementById('progress-bar').style.transform = `scaleX(${progress})`;
+            
+            document.getElementById('navbar').classList.toggle('scrolled', scrolled > 100);
+            document.getElementById('backToTop').classList.toggle('visible', scrolled > 300);
+        };
 
-                // Create signals from current layer to next layer
-                const signalPromises = [];
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        document.getElementById('backToTop').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                currentLayer.forEach((fromNeuron, i) => {
-                    nextLayer.forEach((toNeuron, j) => {
-                        const connectionIndex = i * nextLayer.length + j;
-                        const connection = this.connections.filter(conn => 
-                            conn.fromLayer === layerIndex && 
-                            conn.from === fromNeuron && 
-                            conn.to === toNeuron
-                        )[0];
-
-                        if (connection) {
-                            signalPromises.push(this.createSignal(connection));
-                        }
-                    });
-                });
-
-                await Promise.all(signalPromises);
-
-                // Activate next layer neurons
-                await new Promise(resolve => {
-                    setTimeout(() => {
-                        nextLayer.forEach(neuron => {
-                            neuron.element.classList.add('active', 'pulse');
-                            setTimeout(() => neuron.element.classList.remove('pulse'), 600);
-                        });
-                        resolve();
-                    }, 100);
-                });
-
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-
-            createSignal(connection) {
-                return new Promise((resolve) => {
-                    const signal = document.createElement('div');
-                    signal.className = 'signal';
-                    
-                    const network = document.getElementById('network');
-                    network.appendChild(signal);
-
-                    connection.element.classList.add('active');
-
-                    const dx = connection.to.x - connection.from.x;
-                    const dy = connection.to.y - connection.from.y;
-
-                    signal.style.left = connection.from.x + 'px';
-                    signal.style.top = connection.from.y + 'px';
-                    signal.style.zIndex = '10';
-
-                    // Animate signal movement
-                    signal.style.animation = 'signal-flow 1s ease-in-out forwards';
-                    
-                    const keyframes = [
-                        { 
-                            transform: 'translate(0, 0) scale(0.5)', 
-                            opacity: 0 
-                        },
-                        { 
-                            transform: 'translate(0, 0) scale(1)', 
-                            opacity: 1,
-                            offset: 0.2
-                        },
-                        { 
-                            transform: `translate(${dx}px, ${dy}px) scale(1)`, 
-                            opacity: 1,
-                            offset: 0.8
-                        },
-                        { 
-                            transform: `translate(${dx}px, ${dy}px) scale(0.5)`, 
-                            opacity: 0 
-                        }
-                    ];
-
-                    signal.animate(keyframes, {
-                        duration: 1000,
-                        easing: 'ease-in-out'
-                    });
-
-                    setTimeout(() => {
-                        connection.element.classList.remove('active');
-                        signal.remove();
-                        resolve();
-                    }, 1000);
+        function scrollToElement(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                window.scrollTo({
+                    top: element.offsetTop - 80,
+                    behavior: 'smooth'
                 });
             }
+        }
 
-            resetVisualState() {
-                // Remove active states
-                document.querySelectorAll('.neuron').forEach(neuron => {
-                    neuron.classList.remove('active', 'pulse');
+        // Mobile menu functionality
+        function toggleMobileMenu() {
+            const menu = document.getElementById('nav-menu');
+            menu.classList.toggle('show');
+        }
+
+        function closeMobileMenu() {
+            const menu = document.getElementById('nav-menu');
+            menu.classList.remove('show');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const nav = document.getElementById('navbar');
+            const menu = document.getElementById('nav-menu');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            
+            if (!nav.contains(event.target) && menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Handle window resize for responsive canvas
+        function handleResize() {
+            if (waveformCanvas) {
+                const container = waveformCanvas.parentElement;
+                waveformCanvas.width = container.offsetWidth;
+                waveformCanvas.height = window.innerWidth <= 768 ? 180 : 250;
+                updateWaveform();
+            }
+            
+            if (scopeCanvas) {
+                const container = scopeCanvas.parentElement;
+                scopeCanvas.width = container.offsetWidth;
+                scopeCanvas.height = window.innerWidth <= 768 ? 180 : 250;
+                updateScope();
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        // Touch event improvements for mobile
+        function addTouchSupport() {
+            // Add touch event listeners for better mobile interaction
+            const sliders = document.querySelectorAll('.slider');
+            sliders.forEach(slider => {
+                slider.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
                 });
                 
-                document.querySelectorAll('.connection').forEach(connection => {
-                    connection.classList.remove('active');
+                slider.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
                 });
+            });
 
-                // Remove any remaining signals
-                document.querySelectorAll('.signal').forEach(signal => {
-                    signal.remove();
+            // Improve button interactions on mobile
+            const buttons = document.querySelectorAll('.wave-btn, .mode-btn, .quiz-option');
+            buttons.forEach(button => {
+                button.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
                 });
-            }
+                
+                button.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+            });
         }
 
-        // Initialize the neural network
-        const neuralNet = new NeuralNetwork();
+        // Power Supply Simulation
+        let powerOn = false;
 
-        // Control functions
-        function sendSignal() {
-            neuralNet.sendSignal();
-        }
-
-        function continuousMode() {
-            if (continuousInterval) return;
+        function updatePowerSupply() {
+            const voltage = parseFloat(document.getElementById('voltage-slider').value);
+            const currentLimit = parseFloat(document.getElementById('current-slider').value);
+            const resistance = parseFloat(document.getElementById('resistance-slider').value);
             
-            continuousInterval = setInterval(() => {
-                if (!isAnimating) {
-                    neuralNet.sendSignal();
+            document.getElementById('voltage-display').textContent = voltage.toFixed(1) + 'V';
+            document.getElementById('current-display').textContent = currentLimit.toFixed(1) + 'A';
+            document.getElementById('resistance-display').textContent = resistance + 'Ω';
+            
+            if (powerOn) {
+                const actualCurrent = Math.min(voltage / resistance, currentLimit);
+                const power = voltage * actualCurrent;
+                
+                document.getElementById('actual-current').textContent = actualCurrent.toFixed(2) + 'A';
+                document.getElementById('power-consumed').textContent = power.toFixed(2) + 'W';
+                
+                const led = document.getElementById('led-indicator');
+                if (actualCurrent > 0.1) {
+                    led.className = 'led-indicator on';
+                } else {
+                    led.className = 'led-indicator off';
                 }
-            }, 3000);
-        }
-
-        function stopContinuous() {
-            if (continuousInterval) {
-                clearInterval(continuousInterval);
-                continuousInterval = null;
+            } else {
+                document.getElementById('actual-current').textContent = '0.00A';
+                document.getElementById('power-consumed').textContent = '0.00W';
+                document.getElementById('led-indicator').className = 'led-indicator off';
             }
         }
 
-        function resetNetwork() {
-            stopContinuous();
-            neuralNet.resetVisualState();
-            isAnimating = false;
+        function togglePower() {
+            powerOn = !powerOn;
+            const btn = document.getElementById('power-btn');
+            if (powerOn) {
+                btn.textContent = '🔌 POWER OFF';
+                btn.style.background = '#dc2626';
+            } else {
+                btn.textContent = '🔌 POWER ON';
+                btn.style.background = '#10b981';
+            }
+            updatePowerSupply();
         }
 
-        // Auto-start with a demo
+        // Event listeners for power supply
+        ['voltage-slider', 'current-slider', 'resistance-slider'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updatePowerSupply);
+        });
+
+        // Function Generator
+        let currentWaveform = 'sine';
+        let waveformCanvas, waveformCtx;
+
+        function initWaveformCanvas() {
+            waveformCanvas = document.getElementById('waveform-canvas');
+            if (waveformCanvas) {
+                waveformCtx = waveformCanvas.getContext('2d');
+                const container = waveformCanvas.parentElement;
+                waveformCanvas.width = container.offsetWidth;
+                waveformCanvas.height = window.innerWidth <= 768 ? 180 : 250;
+                updateWaveform();
+            }
+        }
+
+        function selectWaveform(type) {
+            currentWaveform = type;
+            document.querySelectorAll('.wave-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateWaveform();
+        }
+
+        function updateWaveform() {
+            if (!waveformCtx) return;
+            
+            const frequency = parseFloat(document.getElementById('freq-slider').value);
+            const amplitude = parseFloat(document.getElementById('amp-slider').value);
+            const dutyCycle = parseFloat(document.getElementById('duty-slider').value) / 100;
+            
+            document.getElementById('freq-display').textContent = frequency + 'Hz';
+            document.getElementById('amp-display').textContent = amplitude.toFixed(1) + 'V';
+            document.getElementById('duty-display').textContent = dutyCycle * 100 + '%';
+            
+            // Clear canvas
+            waveformCtx.fillStyle = '#000';
+            waveformCtx.fillRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+            
+            // Draw grid
+            waveformCtx.strokeStyle = '#333';
+            waveformCtx.lineWidth = 1;
+            for (let i = 0; i < waveformCanvas.width; i += 40) {
+                waveformCtx.beginPath();
+                waveformCtx.moveTo(i, 0);
+                waveformCtx.lineTo(i, waveformCanvas.height);
+                waveformCtx.stroke();
+            }
+            for (let i = 0; i < waveformCanvas.height; i += 30) {
+                waveformCtx.beginPath();
+                waveformCtx.moveTo(0, i);
+                waveformCtx.lineTo(waveformCanvas.width, i);
+                waveformCtx.stroke();
+            }
+            
+            // Draw waveform
+            waveformCtx.strokeStyle = '#10b981';
+            waveformCtx.lineWidth = 3;
+            waveformCtx.beginPath();
+            
+            const centerY = waveformCanvas.height / 2;
+            const amplitudePixels = (amplitude / 10) * (waveformCanvas.height / 2) * 0.8;
+            
+            for (let x = 0; x < waveformCanvas.width; x++) {
+                const t = (x / waveformCanvas.width) * 4 * Math.PI;
+                let y = centerY;
+                
+                switch (currentWaveform) {
+                    case 'sine':
+                        y = centerY - amplitudePixels * Math.sin(t);
+                        break;
+                    case 'square':
+                        const period = (2 * Math.PI) / frequency * 100;
+                        const phase = (t * frequency / 100) % (2 * Math.PI);
+                        y = centerY - amplitudePixels * (phase < 2 * Math.PI * dutyCycle ? 1 : -1);
+                        break;
+                    case 'triangle':
+                        const triPhase = (t * frequency / 100) % (2 * Math.PI);
+                        if (triPhase < Math.PI) {
+                            y = centerY - amplitudePixels * (2 * triPhase / Math.PI - 1);
+                        } else {
+                            y = centerY - amplitudePixels * (3 - 2 * triPhase / Math.PI);
+                        }
+                        break;
+                }
+                
+                if (x === 0) {
+                    waveformCtx.moveTo(x, y);
+                } else {
+                    waveformCtx.lineTo(x, y);
+                }
+            }
+            waveformCtx.stroke();
+        }
+
+        // Oscilloscope
+        let scopeCanvas, scopeCtx;
+        let autoMode = true;
+
+        function initScopeCanvas() {
+            scopeCanvas = document.getElementById('scope-canvas');
+            if (scopeCanvas) {
+                scopeCtx = scopeCanvas.getContext('2d');
+                const container = scopeCanvas.parentElement;
+                scopeCanvas.width = container.offsetWidth;
+                scopeCanvas.height = window.innerWidth <= 768 ? 180 : 250;
+                updateScope();
+            }
+        }
+
+        function updateScope() {
+            if (!scopeCtx) return;
+            
+            const timeDiv = parseFloat(document.getElementById('time-div').value);
+            const voltDiv = parseFloat(document.getElementById('volt-div').value);
+            const triggerLevel = parseFloat(document.getElementById('trigger-level').value);
+            
+            document.getElementById('time-display').textContent = timeDiv + 'μs';
+            document.getElementById('volt-display').textContent = voltDiv.toFixed(1) + 'V';
+            document.getElementById('trigger-display').textContent = triggerLevel.toFixed(1) + 'V';
+            
+            // Clear canvas
+            scopeCtx.fillStyle = '#000';
+            scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
+            
+            // Draw grid
+            scopeCtx.strokeStyle = '#333';
+            scopeCtx.lineWidth = 1;
+            for (let i = 0; i < scopeCanvas.width; i += 50) {
+                scopeCtx.beginPath();
+                scopeCtx.moveTo(i, 0);
+                scopeCtx.lineTo(i, scopeCanvas.height);
+                scopeCtx.stroke();
+            }
+            for (let i = 0; i < scopeCanvas.height; i += 40) {
+                scopeCtx.beginPath();
+                scopeCtx.moveTo(0, i);
+                scopeCtx.lineTo(scopeCanvas.width, i);
+                scopeCtx.stroke();
+            }
+            
+            // Draw trigger level
+            const triggerY = scopeCanvas.height / 2 - (triggerLevel / voltDiv) * 40;
+            scopeCtx.strokeStyle = '#ff6600';
+            scopeCtx.lineWidth = 2;
+            scopeCtx.setLineDash([5, 5]);
+            scopeCtx.beginPath();
+            scopeCtx.moveTo(0, triggerY);
+            scopeCtx.lineTo(scopeCanvas.width, triggerY);
+            scopeCtx.stroke();
+            scopeCtx.setLineDash([]);
+            
+            // Draw signal
+            scopeCtx.strokeStyle = '#00ff00';
+            scopeCtx.lineWidth = 2;
+            scopeCtx.beginPath();
+            
+            const centerY = scopeCanvas.height / 2;
+            const frequency = 100; // Use function generator frequency
+            const amplitude = 2; // Use function generator amplitude
+            
+            for (let x = 0; x < scopeCanvas.width; x++) {
+                const t = (x / scopeCanvas.width) * (timeDiv / 10) * 2 * Math.PI;
+                const y = centerY - (amplitude / voltDiv) * 40 * Math.sin(t * frequency / 10);
+                
+                if (x === 0) {
+                    scopeCtx.moveTo(x, y);
+                } else {
+                    scopeCtx.lineTo(x, y);
+                }
+            }
+            scopeCtx.stroke();
+            
+            // Update measurements
+            document.getElementById('scope-freq').textContent = frequency + 'Hz';
+            document.getElementById('scope-vpp').textContent = (amplitude * 2).toFixed(1) + 'V';
+            document.getElementById('scope-rms').textContent = (amplitude / Math.sqrt(2)).toFixed(2) + 'V';
+        }
+
+        function triggerSingle() {
+            updateScope();
+        }
+
+        function toggleAuto() {
+            autoMode = !autoMode;
+            const btn = document.getElementById('auto-btn');
+            btn.textContent = autoMode ? '🔄 Auto Mode: ON' : '🔄 Auto Mode: OFF';
+            btn.style.background = autoMode ? '#10b981' : '#6b7280';
+        }
+
+        // Multimeter
+        let meterMode = 'voltage';
+
+        function setMeterMode(mode) {
+            meterMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateMeterReading();
+        }
+
+        function updateMeterReading() {
+            const testValue = parseFloat(document.getElementById('test-slider').value);
+            const meterValue = document.getElementById('meter-value');
+            const meterUnit = document.getElementById('meter-unit');
+            const testDisplay = document.getElementById('test-display');
+            
+            switch (meterMode) {
+                case 'voltage':
+                    meterValue.textContent = (testValue * 0.24).toFixed(2);
+                    meterUnit.textContent = 'DC Voltage Mode';
+                    testDisplay.textContent = (testValue * 0.24).toFixed(1) + 'V';
+                    break;
+                case 'current':
+                    meterValue.textContent = (testValue * 0.05).toFixed(3);
+                    meterUnit.textContent = 'DC Current Mode';
+                    testDisplay.textContent = (testValue * 0.05).toFixed(2) + 'A';
+                    break;
+                case 'resistance':
+                    meterValue.textContent = (testValue * 10).toFixed(0);
+                    meterUnit.textContent = 'Resistance Mode';
+                    testDisplay.textContent = (testValue * 10).toFixed(0) + 'Ω';
+                    break;
+                case 'continuity':
+                    meterValue.textContent = testValue > 70 ? '0.001' : 'OL';
+                    meterUnit.textContent = 'Continuity Test';
+                    testDisplay.textContent = testValue > 70 ? 'CONNECTED' : 'OPEN';
+                    break;
+                case 'capacitance':
+                    meterValue.textContent = (testValue * 0.1).toFixed(2);
+                    meterUnit.textContent = 'Capacitance Mode';
+                    testDisplay.textContent = (testValue * 0.1).toFixed(1) + 'μF';
+                    break;
+                case 'frequency':
+                    meterValue.textContent = (testValue * 20).toFixed(0);
+                    meterUnit.textContent = 'Frequency Mode';
+                    testDisplay.textContent = (testValue * 20).toFixed(0) + 'Hz';
+                    break;
+            }
+        }
+
+        function connectProbe(color) {
+            // Visual feedback for probe connection
+            event.target.style.background = color === 'red' ? '#dc2626' : '#1f2937';
+            updateMeterReading();
+        }
+
+        // Wattmeter
+        function updateWattmeter() {
+            const voltage = parseFloat(document.getElementById('watt-voltage').value);
+            const current = parseFloat(document.getElementById('watt-current').value);
+            const powerFactor = parseFloat(document.getElementById('power-factor').value);
+            
+            document.getElementById('watt-v-display').textContent = voltage + 'V';
+            document.getElementById('watt-i-display').textContent = current.toFixed(1) + 'A';
+            document.getElementById('pf-display').textContent = powerFactor.toFixed(2);
+            
+            const apparentPower = voltage * current;
+            const realPower = apparentPower * powerFactor;
+            const reactivePower = apparentPower * Math.sin(Math.acos(powerFactor));
+            const efficiency = powerFactor * 100;
+            
+            document.getElementById('real-power').textContent = realPower.toFixed(0);
+            document.getElementById('apparent-power').textContent = apparentPower.toFixed(0);
+            document.getElementById('reactive-power').textContent = reactivePower.toFixed(0);
+            document.getElementById('efficiency').textContent = efficiency.toFixed(0);
+            
+            drawPowerTriangle(realPower, reactivePower, apparentPower);
+        }
+
+        function drawPowerTriangle(real, reactive, apparent) {
+            const canvas = document.getElementById('power-triangle');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const isMobile = window.innerWidth <= 768;
+            
+            // Set canvas size based on screen size
+            if (isMobile) {
+                canvas.width = 280;
+                canvas.height = 150;
+            } else {
+                canvas.width = 300;
+                canvas.height = 200;
+            }
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const scale = (isMobile ? 160 : 200) / apparent;
+            const realLength = real * scale;
+            const reactiveLength = reactive * scale;
+            const startX = isMobile ? 40 : 50;
+            const startY = isMobile ? 120 : 150;
+            
+            // Draw triangle
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX + realLength, startY);
+            ctx.lineTo(startX + realLength, startY - reactiveLength);
+            ctx.lineTo(startX, startY);
+            ctx.stroke();
+            
+            // Labels with responsive font size
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = isMobile ? '10px sans-serif' : '12px sans-serif';
+            ctx.fillText('Real (W)', startX + realLength/2 - 20, startY + 15);
+            ctx.fillText('Reactive (VAR)', startX + realLength + 5, startY - reactiveLength/2);
+            ctx.fillText('Apparent (VA)', startX - 10, startY - 20);
+        }
+
+        function updateLoadType() {
+            const loadType = document.getElementById('load-type').value;
+            const powerFactorSlider = document.getElementById('power-factor');
+            
+            switch (loadType) {
+                case 'resistive':
+                    powerFactorSlider.value = 1.0;
+                    break;
+                case 'inductive':
+                    powerFactorSlider.value = 0.7;
+                    break;
+                case 'capacitive':
+                    powerFactorSlider.value = 0.6;
+                    break;
+                case 'mixed':
+                    powerFactorSlider.value = 0.8;
+                    break;
+            }
+            updateWattmeter();
+        }
+
+        // Quiz System
+        const quizQuestions = [
+            {
+                question: "Which instrument would you use to measure the voltage across a resistor?",
+                options: ["Function Generator", "Oscilloscope", "Multimeter (Voltage Mode)", "Wattmeter"],
+                correct: 2
+            },
+            {
+                question: "What does a function generator primarily produce?",
+                options: ["DC Power", "Various AC Waveforms", "Current Measurements", "Power Readings"],
+                correct: 1
+            },
+            {
+                question: "What is the main advantage of a Digital Storage Oscilloscope over an analog one?",
+                options: ["Higher Cost", "Data Storage and Analysis", "Less Accuracy", "Smaller Size"],
+                correct: 1
+            },
+            {
+                question: "When measuring current, how should you connect a multimeter?",
+                options: ["In Parallel", "In Series", "Across the Load", "To Ground Only"],
+                correct: 1
+            },
+            {
+                question: "What does a power factor of 0.8 mean?",
+                options: ["80% Efficiency", "80% of Apparent Power is Real Power", "80% Voltage", "80% Current"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let quizCompleted = false;
+
+        function checkAnswer(selectedIndex, correctIndex) {
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach((option, index) => {
+                if (index === correctIndex) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== correctIndex) {
+                    option.classList.add('incorrect');
+                }
+                option.style.pointerEvents = 'none';
+            });
+            
+            document.getElementById('next-btn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizQuestions.length) {
+                loadQuestion();
+            } else {
+                document.getElementById('quiz-container').innerHTML = '<div style="text-align:center;color:#10b981;font-size:1.5em;">🎉 Quiz Complete! You\'re ready for the lab!</div>';
+                document.getElementById('next-btn').style.display = 'none';
+            }
+        }
+
+        function loadQuestion() {
+            const question = quizQuestions[currentQuestionIndex];
+            document.getElementById('quiz-question').textContent = question.question;
+            
+            const optionsHtml = question.options.map((option, index) => 
+                `<div class="quiz-option" onclick="checkAnswer(${index}, ${question.correct})">${option}</div>`
+            ).join('');
+            
+            document.getElementById('quiz-options').innerHTML = optionsHtml;
+            document.getElementById('next-btn').style.display = 'none';
+        }
+
+        // Event listeners
+        ['freq-slider', 'amp-slider', 'duty-slider'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.addEventListener('input', updateWaveform);
+        });
+
+        ['time-div', 'volt-div', 'trigger-level'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.addEventListener('input', updateScope);
+        });
+
+        const testSlider = document.getElementById('test-slider');
+        if (testSlider) testSlider.addEventListener('input', updateMeterReading);
+
+        ['watt-voltage', 'watt-current', 'power-factor'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.addEventListener('input', updateWattmeter);
+        });
+
+        // Navigation links
+        document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+            link.onclick = e => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - (window.innerWidth <= 768 ? 60 : 80),
+                        behavior: 'smooth'
+                    });
+                }
+            };
+        });
+
+        // Initialize everything
         setTimeout(() => {
-            neuralNet.sendSignal();
-        }, 1000);
+            initWaveformCanvas();
+            initScopeCanvas();
+            updatePowerSupply();
+            updateWaveform();
+            updateScope();
+            updateMeterReading();
+            updateWattmeter();
+            loadQuestion();
+            addTouchSupport(); // Add touch support for mobile
+        }, 100);
+
+        updateProgress();
     </script>
 </body>
 </html>
