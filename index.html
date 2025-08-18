@@ -3,1106 +3,893 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual RLC Circuit Lab - Interactive Learning</title>
+    <title>Professional Oscilloscope</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #475569);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-            color: #f8fafc;
-            line-height: 1.6;
-            overflow-x: hidden;
-            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            color: #fff;
+            overflow: hidden;
+            user-select: none;
         }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .lab-header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 30px;
-            background: rgba(15, 23, 42, 0.8);
-            border-radius: 20px;
-            border: 2px solid #3b82f6;
-        }
-        
-        .lab-header h1 {
-            font-size: 3em;
-            color: #60a5fa;
-            margin-bottom: 15px;
-            text-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
-        }
-        
-        .lab-header p {
-            font-size: 1.2em;
-            color: #cbd5e1;
-        }
-        
-        .lab-workspace {
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            gap: 30px;
-            margin-bottom: 40px;
-            min-height: 600px;
-        }
-        
-        .instrument-panel {
-            background: rgba(15, 23, 42, 0.9);
-            border-radius: 20px;
-            padding: 25px;
-            border: 2px solid #3b82f6;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-        }
-        
-        .function-generator {
-            border-color: #10b981;
-        }
-        
+
         .oscilloscope {
-            border-color: #f59e0b;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+            border: 3px solid #333;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
         }
-        
-        .instrument-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
-            padding: 10px;
-            border-radius: 10px;
-        }
-        
-        .fg-title {
-            background: linear-gradient(45deg, #10b981, #059669);
-            color: white;
-        }
-        
-        .dso-title {
-            background: linear-gradient(45deg, #f59e0b, #d97706);
-            color: white;
-        }
-        
-        .control-group {
-            margin-bottom: 20px;
-        }
-        
-        .control-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #d1d5db;
-            font-weight: 600;
-        }
-        
-        .slider {
-            width: 100%;
-            height: 8px;
-            background: #4b5563;
-            border-radius: 5px;
-            outline: none;
-            -webkit-appearance: none;
-            margin-bottom: 10px;
-        }
-        
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(45deg, #3b82f6, #60a5fa);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.5);
-        }
-        
-        .value-display {
-            background: #1f2937;
-            color: #3b82f6;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 1.1em;
-            text-align: center;
-            border: 1px solid #3b82f6;
-        }
-        
-        .waveform-select {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .wave-btn {
-            background: #4b5563;
-            border: 2px solid #6b7280;
-            color: #d1d5db;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-        
-        .wave-btn.active {
-            background: #10b981;
-            border-color: #34d399;
-            color: #f8fafc;
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-        }
-        
-        .circuit-area {
-            background: rgba(15, 23, 42, 0.9);
-            border-radius: 20px;
-            padding: 30px;
-            border: 2px solid #7c3aed;
-            position: relative;
+
+        .screen-section {
+            flex: 1;
             display: flex;
             flex-direction: column;
-        }
-        
-        .circuit-title {
-            background: linear-gradient(45deg, #7c3aed, #5b21b6);
-            color: white;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
-            padding: 10px;
-            border-radius: 10px;
-        }
-        
-        .circuit-builder {
-            background: #1f2937;
-            border-radius: 15px;
             padding: 20px;
-            margin-bottom: 20px;
-            border: 2px dashed #7c3aed;
-            min-height: 300px;
+            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+        }
+
+        .screen-container {
             position: relative;
-        }
-        
-        .breadboard {
-            background: linear-gradient(45deg, #065f46, #047857);
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            border: 2px solid #10b981;
-            position: relative;
-            min-height: 200px;
-        }
-        
-        .connection-point {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            position: absolute;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid #1f2937;
-        }
-        
-        .input-terminal {
-            background: #dc2626;
-            top: 20px;
-            left: 20px;
-        }
-        
-        .output-terminal {
-            background: #dc2626;
-            top: 20px;
-            right: 20px;
-        }
-        
-        .ground-terminal {
-            background: #1f2937;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .connection-point:hover {
-            transform: scale(1.3);
-            box-shadow: 0 0 15px currentColor;
-        }
-        
-        .cable {
-            position: absolute;
-            height: 4px;
-            border-radius: 2px;
-            transition: all 0.5s;
-            z-index: 10;
-        }
-        
-        .cable-red {
-            background: linear-gradient(90deg, #dc2626, #ef4444);
-            box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
-        }
-        
-        .cable-black {
-            background: linear-gradient(90deg, #1f2937, #374151);
-            box-shadow: 0 0 10px rgba(31, 41, 55, 0.5);
-        }
-        
-        .component-selector {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .component-btn {
-            background: #374151;
-            border: 2px solid #6b7280;
-            color: #d1d5db;
-            padding: 15px 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-            font-weight: 600;
-        }
-        
-        .component-btn.active {
-            background: #7c3aed;
-            border-color: #a855f7;
-            color: #f8fafc;
-            box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
-        }
-        
-        .component-values {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .scope-display {
+            flex: 1;
             background: #000;
-            border-radius: 10px;
-            padding: 20px;
-            border: 2px solid #f59e0b;
-            position: relative;
-            height: 300px;
+            border: 4px solid #333;
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
-        
-        .scope-screen {
+
+        #oscilloscope-screen {
             width: 100%;
             height: 100%;
-            border-radius: 5px;
-            background: #001122;
+            background: #001100;
+            border-radius: 4px;
         }
-        
-        .scope-controls {
-            margin-top: 20px;
+
+        .controls-panel {
+            width: 300px;
+            background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+            padding: 20px;
+            border-left: 3px solid #333;
+            overflow-y: auto;
         }
-        
-        .scope-measurements {
-            background: #1f2937;
+
+        .control-group {
+            margin-bottom: 25px;
             padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            border: 1px solid #f59e0b;
+            background: linear-gradient(145deg, #333, #2a2a2a);
+            border-radius: 8px;
+            border: 1px solid #444;
         }
-        
-        .measurement-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+
+        .control-group h3 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .knob-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .knob {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #666, #333, #111);
+            border: 3px solid #444;
+            position: relative;
+            cursor: pointer;
+            margin-right: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+
+        .knob::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            width: 3px;
+            height: 15px;
+            background: #00ff00;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            box-shadow: 0 0 4px #00ff00;
+        }
+
+        .knob-label {
+            font-size: 11px;
+            color: #ccc;
+            flex: 1;
+        }
+
+        .button {
+            background: linear-gradient(145deg, #444, #222);
+            border: 2px solid #555;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            margin: 2px;
+            transition: all 0.1s;
+        }
+
+        .button:hover {
+            background: linear-gradient(145deg, #555, #333);
+            border-color: #666;
+        }
+
+        .button.active {
+            background: linear-gradient(145deg, #006600, #004400);
+            border-color: #00aa00;
+            box-shadow: 0 0 8px rgba(0,255,0,0.3);
+        }
+
+        .channel-controls {
+            display: flex;
+            flex-direction: column;
             gap: 10px;
         }
-        
-        .measurement-item {
-            color: #00ff00;
-            font-family: monospace;
-            font-size: 0.9em;
-        }
-        
-        .power-btn {
-            width: 100%;
-            padding: 15px;
-            margin: 15px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .fg-power {
-            background: #10b981;
-            color: white;
-        }
-        
-        .fg-power:hover {
-            background: #059669;
-            transform: translateY(-2px);
-        }
-        
-        .dso-power {
-            background: #f59e0b;
-            color: white;
-        }
-        
-        .dso-power:hover {
-            background: #d97706;
-            transform: translateY(-2px);
-        }
-        
-        .analysis-panel {
-            background: rgba(15, 23, 42, 0.9);
-            border-radius: 20px;
-            padding: 25px;
-            border: 2px solid #8b5cf6;
-            margin-top: 30px;
-        }
-        
-        .analysis-title {
-            background: linear-gradient(45deg, #8b5cf6, #7c3aed);
-            color: white;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
+
+        .channel {
             padding: 10px;
-            border-radius: 10px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
         }
-        
-        .analysis-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+
+        .channel.ch1 {
+            border-left: 4px solid #ffff00;
         }
-        
-        .analysis-card {
-            background: rgba(139, 92, 246, 0.1);
-            padding: 20px;
-            border-radius: 15px;
-            border-left: 4px solid #8b5cf6;
-            text-align: center;
+
+        .channel.ch2 {
+            border-left: 4px solid #00ffff;
         }
-        
-        .analysis-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #a855f7;
-            margin-bottom: 10px;
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
         }
-        
-        .analysis-label {
-            color: #cbd5e1;
-            font-weight: 600;
+
+        .slider {
+            flex: 1;
+            margin: 0 10px;
+            appearance: none;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
         }
-        
-        @media (max-width: 1200px) {
-            .lab-workspace {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .container {
-                padding: 15px;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .lab-header h1 {
-                font-size: 2.5em;
-            }
-            
-            .component-selector,
-            .component-values,
-            .waveform-select {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            
-            .measurement-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .instrument-panel {
-                padding: 20px;
-            }
-            
-            .circuit-area {
-                padding: 20px;
-            }
-        }
-        
-        .component-symbol {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        
-        .status-indicator {
-            width: 12px;
-            height: 12px;
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
+            background: #00ff00;
+            cursor: pointer;
+            box-shadow: 0 0 4px rgba(0,255,0,0.5);
         }
-        
-        .status-on {
-            background: #10b981;
-            box-shadow: 0 0 10px #10b981;
+
+        .value-display {
+            min-width: 60px;
+            text-align: center;
+            font-size: 10px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
         }
-        
-        .status-off {
-            background: #6b7280;
+
+        .signal-generator {
+            background: linear-gradient(145deg, #1a3d1a, #0d2d0d);
+            border: 1px solid #00aa00;
         }
-        
-        .lab-info {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid #3b82f6;
-            border-radius: 10px;
+
+        .readout {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .readout-item {
+            color: #00ff00;
+        }
+
+        .trigger-controls {
+            background: linear-gradient(145deg, #3d1a1a, #2d0d0d);
+            border: 1px solid #aa0000;
+        }
+
+        .waveform-select {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .measurement-display {
+            background: #000;
             padding: 15px;
-            margin: 20px 0;
+            border-radius: 4px;
+            border: 1px solid #333;
+            margin-top: 10px;
         }
-        
-        .lab-info h4 {
-            color: #60a5fa;
-            margin-bottom: 10px;
+
+        .measurement-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+            font-size: 10px;
         }
-        
-        .theoretical-display {
-            background: #1f2937;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            border: 1px solid #6b7280;
+
+        .measurement-label {
+            color: #888;
         }
-        
-        .theoretical-display h5 {
-            color: #10b981;
-            margin-bottom: 10px;
+
+        .measurement-value {
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
         }
-        
-        .formula {
-            font-family: monospace;
-            background: #374151;
-            padding: 8px;
-            border-radius: 5px;
-            margin: 5px 0;
-            color: #fbbf24;
+
+        .status-bar {
+            height: 30px;
+            background: linear-gradient(145deg, #333, #222);
+            border-top: 1px solid #444;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 11px;
+            color: #888;
+        }
+
+        .run-stop {
+            background: linear-gradient(145deg, #006600, #004400);
+            color: #fff;
+            border: 2px solid #00aa00;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0,255,0,0.3);
+        }
+
+        .run-stop.stopped {
+            background: linear-gradient(145deg, #660000, #440000);
+            border-color: #aa0000;
+            box-shadow: 0 0 10px rgba(255,0,0,0.3);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="lab-header">
-            <h1>🔬 Virtual RLC Circuit Laboratory</h1>
-            <p>Interactive Circuit Analysis with Function Generator and Digital Storage Oscilloscope</p>
-            <div style="margin-top: 15px;">
-                <span class="status-indicator status-on"></span>Function Generator
-                <span style="margin: 0 20px;">⚡</span>
-                <span class="status-indicator status-on"></span>Circuit Under Test
-                <span style="margin: 0 20px;">⚡</span>
-                <span class="status-indicator status-on"></span>Digital Storage Oscilloscope
+    <div class="oscilloscope">
+        <div class="screen-section">
+            <div class="screen-container">
+                <canvas id="oscilloscope-screen"></canvas>
+            </div>
+            <div class="readout">
+                <div class="readout-item">CH1: <span id="ch1-freq">1.00kHz</span></div>
+                <div class="readout-item">CH2: <span id="ch2-freq">2.50kHz</span></div>
+                <div class="readout-item">Time/Div: <span id="time-div">1.0ms</span></div>
+                <div class="readout-item">Trigger: <span id="trigger-status">AUTO</span></div>
+                <div class="readout-item">Rate: <span id="sample-rate">25.0kS/s</span></div>
+            </div>
+            <div class="status-bar">
+                <span>TDS2024C Digital Storage Oscilloscope • 200MHz • 4CH • 2GS/s</span>
             </div>
         </div>
 
-        <div class="lab-workspace">
-            <!-- Function Generator -->
-            <div class="instrument-panel function-generator">
-                <div class="instrument-title fg-title">📡 Function Generator</div>
-                
-                <div class="control-group">
-                    <label>Waveform Type:</label>
-                    <div class="waveform-select">
-                        <button class="wave-btn active" onclick="selectWaveform('sine')">Sine</button>
-                        <button class="wave-btn" onclick="selectWaveform('square')">Square</button>
-                        <button class="wave-btn" onclick="selectWaveform('triangle')">Triangle</button>
-                    </div>
-                </div>
-                
-                <div class="control-group">
-                    <label>Frequency</label>
-                    <input type="range" class="slider" id="freq-slider" min="1" max="10000" value="1000" step="1">
-                    <div class="value-display" id="freq-display">1000 Hz</div>
-                </div>
-                
-                <div class="control-group">
-                    <label>Amplitude</label>
-                    <input type="range" class="slider" id="amp-slider" min="0.1" max="10" value="5" step="0.1">
-                    <div class="value-display" id="amp-display">5.0 V</div>
-                </div>
-                
-                <div class="control-group">
-                    <label>DC Offset</label>
-                    <input type="range" class="slider" id="offset-slider" min="-5" max="5" value="0" step="0.1">
-                    <div class="value-display" id="offset-display">0.0 V</div>
-                </div>
-                
-                <button class="power-btn fg-power" onclick="toggleFGPower()">
-                    <span class="status-indicator status-on"></span>OUTPUT ON
-                </button>
-                
-                <div class="lab-info">
-                    <h4>Output Status</h4>
-                    <div style="font-family: monospace; color: #10b981;">
-                        <div>CH1: <span id="fg-status">ACTIVE</span></div>
-                        <div>Load: <span id="fg-load">50Ω</span></div>
-                    </div>
+        <div class="controls-panel">
+            <div class="control-group">
+                <h3>Acquisition</h3>
+                <button class="run-stop" id="run-stop">RUN</button>
+                <div class="button-row" style="margin-top: 10px;">
+                    <button class="button" id="single">SINGLE</button>
+                    <button class="button" id="auto-set">AUTO SET</button>
                 </div>
             </div>
 
-            <!-- Circuit Area -->
-            <div class="circuit-area">
-                <div class="circuit-title">🔧 Circuit Under Test</div>
-                
-                <div class="component-selector">
-                    <button class="component-btn active" onclick="selectCircuitType('rlc')" data-type="rlc">
-                        <div class="component-symbol">⚡</div>RLC Series
-                    </button>
-                    <button class="component-btn" onclick="selectCircuitType('rc')" data-type="rc">
-                        <div class="component-symbol">🔋</div>RC Filter
-                    </button>
-                    <button class="component-btn" onclick="selectCircuitType('rl')" data-type="rl">
-                        <div class="component-symbol">🌀</div>RL Filter
-                    </button>
+            <div class="control-group">
+                <h3>Horizontal</h3>
+                <div class="knob-container">
+                    <div class="knob" id="time-scale-knob"></div>
+                    <div class="knob-label">TIME/DIV<br><span id="time-scale-value">1.0ms</span></div>
                 </div>
-                
-                <div class="component-values">
-                    <div class="control-group">
-                        <label>Resistance (Ω)</label>
-                        <input type="range" class="slider" id="resistance-slider" min="1" max="10000" value="1000" step="1">
-                        <div class="value-display" id="resistance-display">1000 Ω</div>
-                    </div>
-                    <div class="control-group">
-                        <label>Inductance (mH)</label>
-                        <input type="range" class="slider" id="inductance-slider" min="0.1" max="100" value="10" step="0.1">
-                        <div class="value-display" id="inductance-display">10.0 mH</div>
-                    </div>
-                    <div class="control-group">
-                        <label>Capacitance (μF)</label>
-                        <input type="range" class="slider" id="capacitance-slider" min="0.01" max="100" value="1" step="0.01">
-                        <div class="value-display" id="capacitance-display">1.00 μF</div>
-                    </div>
-                </div>
-                
-                <div class="breadboard">
-                    <div class="connection-point input-terminal" title="Input Terminal"></div>
-                    <div class="connection-point output-terminal" title="Output Terminal"></div>
-                    <div class="connection-point ground-terminal" title="Ground"></div>
-                    
-                    <!-- Cables -->
-                    <div class="cable cable-red" id="input-cable" style="top: 27px; left: 35px; width: 100px;"></div>
-                    <div class="cable cable-black" id="ground-cable-in" style="bottom: 27px; left: 35px; width: 100px;"></div>
-                    <div class="cable cable-red" id="output-cable" style="top: 27px; right: 35px; width: 100px;"></div>
-                    <div class="cable cable-black" id="ground-cable-out" style="bottom: 27px; right: 35px; width: 100px;"></div>
-                    
-                    <!-- Circuit Components Visualization -->
-                    <div id="circuit-diagram" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold; text-align: center;">
-                        <div style="background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px;">
-                            <div id="circuit-type">RLC Series Circuit</div>
-                            <div id="circuit-values" style="font-size: 0.9em; margin-top: 5px;">R=1kΩ, L=10mH, C=1μF</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="theoretical-display">
-                    <h5>Circuit Analysis</h5>
-                    <div class="formula">f₀ = 1/(2π√LC) = <span id="resonant-freq">159 Hz</span></div>
-                    <div class="formula">Z = √(R² + (ωL - 1/ωC)²) = <span id="impedance">1.58 kΩ</span></div>
-                    <div class="formula">φ = arctan((ωL - 1/ωC)/R) = <span id="phase-angle">-45°</span></div>
+                <div class="knob-container">
+                    <div class="knob" id="horizontal-pos-knob"></div>
+                    <div class="knob-label">POSITION<br><span id="horizontal-pos-value">0.0s</span></div>
                 </div>
             </div>
 
-            <!-- Digital Storage Oscilloscope -->
-            <div class="instrument-panel oscilloscope">
-                <div class="instrument-title dso-title">📊 Digital Storage Oscilloscope</div>
-                
-                <div class="scope-display">
-                    <canvas class="scope-screen" id="scope-canvas" width="300" height="250"></canvas>
-                    <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; color: #00ff00; font-family: monospace; font-size: 0.8em;">
-                        <div>CH1: <span style="color: #00ff00;">■</span> Input</div>
-                        <div>CH2: <span style="color: #ff6600;">■</span> Output</div>
-                        <div>Timebase: <span id="timebase-display">1ms/div</span></div>
-                    </div>
+            <div class="control-group trigger-controls">
+                <h3>Trigger</h3>
+                <div class="knob-container">
+                    <div class="knob" id="trigger-level-knob"></div>
+                    <div class="knob-label">LEVEL<br><span id="trigger-level-value">0.0V</span></div>
                 </div>
-                
-                <div class="scope-controls">
-                    <div class="control-group">
-                        <label>Time/Div</label>
-                        <input type="range" class="slider" id="timebase-slider" min="1" max="1000" value="100" step="1">
-                        <div class="value-display" id="timebase-value">100 μs/div</div>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>CH1 V/Div</label>
-                        <input type="range" class="slider" id="ch1-scale" min="0.1" max="5" value="2" step="0.1">
-                        <div class="value-display" id="ch1-scale-display">2.0 V/div</div>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>CH2 V/Div</label>
-                        <input type="range" class="slider" id="ch2-scale" min="0.1" max="5" value="2" step="0.1">
-                        <div class="value-display" id="ch2-scale-display">2.0 V/div</div>
-                    </div>
+                <div class="button-row">
+                    <button class="button" id="trigger-auto">AUTO</button>
+                    <button class="button active" id="trigger-normal">NORM</button>
+                    <button class="button" id="trigger-single">SINGLE</button>
                 </div>
-                
-                <button class="power-btn dso-power" onclick="toggleDSOPower()">
-                    <span class="status-indicator status-on"></span>ACQUISITION ON
-                </button>
-                
-                <div class="scope-measurements">
-                    <h4 style="color: #f59e0b; margin-bottom: 10px;">Measurements</h4>
-                    <div class="measurement-grid">
-                        <div class="measurement-item">CH1 Freq: <span id="ch1-freq">1000 Hz</span></div>
-                        <div class="measurement-item">CH1 Vpp: <span id="ch1-vpp">10.0 V</span></div>
-                        <div class="measurement-item">CH2 Freq: <span id="ch2-freq">1000 Hz</span></div>
-                        <div class="measurement-item">CH2 Vpp: <span id="ch2-vpp">6.32 V</span></div>
-                        <div class="measurement-item">Phase Diff: <span id="phase-diff">-45°</span></div>
-                        <div class="measurement-item">Gain: <span id="gain-db">-3.98 dB</span></div>
-                    </div>
+                <div class="slider-container">
+                    <span style="font-size: 10px;">SLOPE:</span>
+                    <button class="button" id="trigger-slope">↗</button>
                 </div>
             </div>
-        </div>
 
-        <!-- Analysis Panel -->
-        <div class="analysis-panel">
-            <div class="analysis-title">📈 Real-Time Circuit Analysis</div>
-            <div class="analysis-grid">
-                <div class="analysis-card">
-                    <div class="analysis-value" id="analysis-gain">-3.98</div>
-                    <div class="analysis-label">Gain (dB)</div>
+            <div class="control-group channel ch1">
+                <h3>Channel 1</h3>
+                <div class="knob-container">
+                    <div class="knob" id="ch1-scale-knob"></div>
+                    <div class="knob-label">VOLTS/DIV<br><span id="ch1-scale-value">1.0V</span></div>
                 </div>
-                <div class="analysis-card">
-                    <div class="analysis-value" id="analysis-phase">-45°</div>
-                    <div class="analysis-label">Phase Shift</div>
+                <div class="knob-container">
+                    <div class="knob" id="ch1-pos-knob"></div>
+                    <div class="knob-label">POSITION<br><span id="ch1-pos-value">0.0V</span></div>
                 </div>
-                <div class="analysis-card">
-                    <div class="analysis-value" id="analysis-impedance">1.58k</div>
-                    <div class="analysis-label">Impedance (Ω)</div>
+                <div class="button-row">
+                    <button class="button active" id="ch1-enable">ON</button>
+                    <button class="button" id="ch1-coupling">DC</button>
+                    <button class="button" id="ch1-bw">20MHz</button>
                 </div>
-                <div class="analysis-card">
-                    <div class="analysis-value" id="analysis-resonant">159</div>
-                    <div class="analysis-label">Resonant Freq (Hz)</div>
+            </div>
+
+            <div class="control-group channel ch2">
+                <h3>Channel 2</h3>
+                <div class="knob-container">
+                    <div class="knob" id="ch2-scale-knob"></div>
+                    <div class="knob-label">VOLTS/DIV<br><span id="ch2-scale-value">1.0V</span></div>
                 </div>
-                <div class="analysis-card">
-                    <div class="analysis-value" id="analysis-q">0.63</div>
-                    <div class="analysis-label">Quality Factor</div>
+                <div class="knob-container">
+                    <div class="knob" id="ch2-pos-knob"></div>
+                    <div class="knob-label">POSITION<br><span id="ch2-pos-value">0.0V</span></div>
                 </div>
-                <div class="analysis-card">
-                    <div class="analysis-value" id="analysis-bandwidth">251</div>
-                    <div class="analysis-label">3dB Bandwidth (Hz)</div>
+                <div class="button-row">
+                    <button class="button active" id="ch2-enable">ON</button>
+                    <button class="button" id="ch2-coupling">DC</button>
+                    <button class="button" id="ch2-bw">20MHz</button>
+                </div>
+            </div>
+
+            <div class="control-group signal-generator">
+                <h3>Signal Generator</h3>
+                <div class="waveform-select">
+                    <button class="button active" id="gen-sine">SINE</button>
+                    <button class="button" id="gen-square">SQUARE</button>
+                    <button class="button" id="gen-triangle">TRIANGLE</button>
+                    <button class="button" id="gen-sawtooth">SAWTOOTH</button>
+                </div>
+                <div class="slider-container">
+                    <span style="font-size: 10px;">FREQ:</span>
+                    <input type="range" class="slider" id="gen-freq" min="10" max="10000" value="1000">
+                    <span class="value-display" id="gen-freq-value">1.0kHz</span>
+                </div>
+                <div class="slider-container">
+                    <span style="font-size: 10px;">AMP:</span>
+                    <input type="range" class="slider" id="gen-amp" min="0.1" max="5" step="0.1" value="2">
+                    <span class="value-display" id="gen-amp-value">2.0V</span>
+                </div>
+            </div>
+
+            <div class="measurement-display">
+                <div class="measurement-row">
+                    <span class="measurement-label">CH1 Frequency:</span>
+                    <span class="measurement-value" id="meas-ch1-freq">1.000kHz</span>
+                </div>
+                <div class="measurement-row">
+                    <span class="measurement-label">CH1 Amplitude:</span>
+                    <span class="measurement-value" id="meas-ch1-amp">2.00V</span>
+                </div>
+                <div class="measurement-row">
+                    <span class="measurement-label">CH1 RMS:</span>
+                    <span class="measurement-value" id="meas-ch1-rms">1.41V</span>
+                </div>
+                <div class="measurement-row">
+                    <span class="measurement-label">CH2 Frequency:</span>
+                    <span class="measurement-value" id="meas-ch2-freq">2.500kHz</span>
+                </div>
+                <div class="measurement-row">
+                    <span class="measurement-label">CH2 Amplitude:</span>
+                    <span class="measurement-value" id="meas-ch2-amp">1.50V</span>
+                </div>
+                <div class="measurement-row">
+                    <span class="measurement-label">Phase Diff:</span>
+                    <span class="measurement-value" id="meas-phase">0.0°</span>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables
-        let fgPowerOn = true;
-        let dsoPowerOn = true;
-        let currentWaveform = 'sine';
-        let currentCircuitType = 'rlc';
-        let scopeCanvas, scopeCtx;
-        let animationId;
-
-        // Initialize canvas
-        function initScopeCanvas() {
-            scopeCanvas = document.getElementById('scope-canvas');
-            if (scopeCanvas) {
-                scopeCtx = scopeCanvas.getContext('2d');
-                scopeCanvas.width = 300;
-                scopeCanvas.height = 250;
-                updateScope();
-            }
-        }
-
-        // Function Generator Controls
-        function selectWaveform(type) {
-            currentWaveform = type;
-            document.querySelectorAll('.wave-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            updateCircuitAnalysis();
-        }
-
-        function toggleFGPower() {
-            fgPowerOn = !fgPowerOn;
-            const btn = event.target;
-            const statusIndicator = btn.querySelector('.status-indicator');
-            
-            if (fgPowerOn) {
-                btn.innerHTML = '<span class="status-indicator status-on"></span>OUTPUT ON';
-                document.getElementById('fg-status').textContent = 'ACTIVE';
-            } else {
-                btn.innerHTML = '<span class="status-indicator status-off"></span>OUTPUT OFF';
-                document.getElementById('fg-status').textContent = 'DISABLED';
-            }
-            updateCircuitAnalysis();
-        }
-
-        function toggleDSOPower() {
-            dsoPowerOn = !dsoPowerOn;
-            const btn = event.target;
-            
-            if (dsoPowerOn) {
-                btn.innerHTML = '<span class="status-indicator status-on"></span>ACQUISITION ON';
-                updateScope();
-            } else {
-                btn.innerHTML = '<span class="status-indicator status-off"></span>ACQUISITION OFF';
-                if (animationId) {
-                    cancelAnimationFrame(animationId);
-                }
-                // Clear scope
-                if (scopeCtx) {
-                    scopeCtx.fillStyle = '#001122';
-                    scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
-                }
-            }
-        }
-
-        // Circuit Type Selection
-        function selectCircuitType(type) {
-            currentCircuitType = type;
-            document.querySelectorAll('.component-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            updateCircuitDisplay();
-            updateCircuitAnalysis();
-        }
-
-        function updateCircuitDisplay() {
-            const circuitType = document.getElementById('circuit-type');
-            const circuitValues = document.getElementById('circuit-values');
-            const R = parseFloat(document.getElementById('resistance-slider').value);
-            const L = parseFloat(document.getElementById('inductance-slider').value);
-            const C = parseFloat(document.getElementById('capacitance-slider').value);
-            
-            switch (currentCircuitType) {
-                case 'rlc':
-                    circuitType.textContent = 'RLC Series Circuit';
-                    circuitValues.textContent = `R=${R}Ω, L=${L}mH, C=${C}μF`;
-                    break;
-                case 'rc':
-                    circuitType.textContent = 'RC Low-Pass Filter';
-                    circuitValues.textContent = `R=${R}Ω, C=${C}μF`;
-                    break;
-                case 'rl':
-                    circuitType.textContent = 'RL High-Pass Filter';
-                    circuitValues.textContent = `R=${R}Ω, L=${L}mH`;
-                    break;
-            }
-        }
-
-        // Circuit Analysis
-        function updateCircuitAnalysis() {
-            if (!fgPowerOn) {
-                // Clear all measurements when FG is off
-                updateMeasurements(0, 0, 0, 0, 0, 0);
-                return;
-            }
-
-            const frequency = parseFloat(document.getElementById('freq-slider').value);
-            const amplitude = parseFloat(document.getElementById('amp-slider').value);
-            const R = parseFloat(document.getElementById('resistance-slider').value);
-            const L = parseFloat(document.getElementById('inductance-slider').value) * 1e-3; // Convert to H
-            const C = parseFloat(document.getElementById('capacitance-slider').value) * 1e-6; // Convert to F
-            
-            const omega = 2 * Math.PI * frequency;
-            let impedance, phase, outputAmplitude, gain;
-            
-            switch (currentCircuitType) {
-                case 'rlc':
-                    const XL = omega * L;
-                    const XC = 1 / (omega * C);
-                    const X = XL - XC;
-                    impedance = Math.sqrt(R * R + X * X);
-                    phase = Math.atan2(X, R) * 180 / Math.PI;
-                    const resonantFreq = 1 / (2 * Math.PI * Math.sqrt(L * C));
-                    const Q = resonantFreq * L / R;
-                    const bandwidth = resonantFreq / Q;
-                    
-                    // Update theoretical displays
-                    document.getElementById('resonant-freq').textContent = resonantFreq.toFixed(0) + ' Hz';
-                    document.getElementById('analysis-resonant').textContent = resonantFreq.toFixed(0);
-                    document.getElementById('analysis-q').textContent = Q.toFixed(2);
-                    document.getElementById('analysis-bandwidth').textContent = bandwidth.toFixed(0);
-                    break;
-                    
-                case 'rc':
-                    const XC_rc = 1 / (omega * C);
-                    impedance = Math.sqrt(R * R + XC_rc * XC_rc);
-                    phase = -Math.atan2(XC_rc, R) * 180 / Math.PI;
-                    const fc_rc = 1 / (2 * Math.PI * R * C);
-                    document.getElementById('resonant-freq').textContent = fc_rc.toFixed(0) + ' Hz (Cutoff)';
-                    break;
-                    
-                case 'rl':
-                    const XL_rl = omega * L;
-                    impedance = Math.sqrt(R * R + XL_rl * XL_rl);
-                    phase = Math.atan2(XL_rl, R) * 180 / Math.PI;
-                    const fc_rl = R / (2 * Math.PI * L);
-                    document.getElementById('resonant-freq').textContent = fc_rl.toFixed(0) + ' Hz (Cutoff)';
-                    break;
-            }
-            
-            // Calculate transfer function (assuming voltage divider for output)
-            outputAmplitude = amplitude * (R / impedance);
-            gain = 20 * Math.log10(outputAmplitude / amplitude);
-            
-            // Update displays
-            document.getElementById('impedance').textContent = (impedance / 1000).toFixed(2) + ' kΩ';
-            document.getElementById('phase-angle').textContent = phase.toFixed(1) + '°';
-            
-            updateMeasurements(frequency, amplitude, frequency, outputAmplitude, phase, gain);
-            updateAnalysisCards(gain, phase, impedance);
-            
-            if (dsoPowerOn) {
-                updateScope();
-            }
-        }
-
-        function updateMeasurements(ch1Freq, ch1Amp, ch2Freq, ch2Amp, phaseDiff, gainDb) {
-            document.getElementById('ch1-freq').textContent = ch1Freq.toFixed(0) + ' Hz';
-            document.getElementById('ch1-vpp').textContent = (ch1Amp * 2).toFixed(1) + ' V';
-            document.getElementById('ch2-freq').textContent = ch2Freq.toFixed(0) + ' Hz';
-            document.getElementById('ch2-vpp').textContent = (ch2Amp * 2).toFixed(1) + ' V';
-            document.getElementById('phase-diff').textContent = phaseDiff.toFixed(1) + '°';
-            document.getElementById('gain-db').textContent = gainDb.toFixed(2) + ' dB';
-        }
-
-        function updateAnalysisCards(gain, phase, impedance) {
-            document.getElementById('analysis-gain').textContent = gain.toFixed(2);
-            document.getElementById('analysis-phase').textContent = phase.toFixed(1) + '°';
-            document.getElementById('analysis-impedance').textContent = (impedance / 1000).toFixed(2) + 'k';
-        }
-
-        // Oscilloscope Display
-        function updateScope() {
-            if (!dsoPowerOn || !scopeCtx) return;
-            
-            // Clear canvas
-            scopeCtx.fillStyle = '#001122';
-            scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
-            
-            // Draw grid
-            drawGrid();
-            
-            if (fgPowerOn) {
-                drawWaveforms();
-            }
-            
-            if (dsoPowerOn) {
-                animationId = requestAnimationFrame(updateScope);
-            }
-        }
-
-        function drawGrid() {
-            scopeCtx.strokeStyle = '#003366';
-            scopeCtx.lineWidth = 1;
-            
-            // Vertical lines
-            for (let x = 30; x < scopeCanvas.width; x += 30) {
-                scopeCtx.beginPath();
-                scopeCtx.moveTo(x, 0);
-                scopeCtx.lineTo(x, scopeCanvas.height);
-                scopeCtx.stroke();
-            }
-            
-            // Horizontal lines
-            for (let y = 25; y < scopeCanvas.height; y += 25) {
-                scopeCtx.beginPath();
-                scopeCtx.moveTo(0, y);
-                scopeCtx.lineTo(scopeCanvas.width, y);
-                scopeCtx.stroke();
-            }
-            
-            // Center lines
-            scopeCtx.strokeStyle = '#006699';
-            scopeCtx.lineWidth = 2;
-            scopeCtx.beginPath();
-            scopeCtx.moveTo(0, scopeCanvas.height / 2);
-            scopeCtx.lineTo(scopeCanvas.width, scopeCanvas.height / 2);
-            scopeCtx.stroke();
-        }
-
-        function drawWaveforms() {
-            const frequency = parseFloat(document.getElementById('freq-slider').value);
-            const amplitude = parseFloat(document.getElementById('amp-slider').value);
-            const offset = parseFloat(document.getElementById('offset-slider').value);
-            const timebase = parseFloat(document.getElementById('timebase-slider').value);
-            const ch1Scale = parseFloat(document.getElementById('ch1-scale').value);
-            const ch2Scale = parseFloat(document.getElementById('ch2-scale').value);
-            
-            // Get circuit response
-            const { outputAmplitude, phase } = getCircuitResponse();
-            
-            const centerY = scopeCanvas.height / 2;
-            const cycles = 4;
-            const phaseShiftRadians = phase * Math.PI / 180;
-            const timeOffset = Date.now() * 0.002; // For animation
-            
-            // Draw input signal (CH1)
-            scopeCtx.strokeStyle = '#00ff00';
-            scopeCtx.lineWidth = 2;
-            scopeCtx.beginPath();
-            
-            for (let x = 0; x < scopeCanvas.width; x++) {
-                const t = (x / scopeCanvas.width) * cycles * 2 * Math.PI + timeOffset;
-                let y = centerY;
+        class ProfessionalOscilloscope {
+            constructor() {
+                this.canvas = document.getElementById('oscilloscope-screen');
+                this.ctx = this.canvas.getContext('2d');
+                this.setupCanvas();
                 
-                if (currentWaveform === 'sine') {
-                    y = centerY - ((amplitude / ch1Scale) * 25 * Math.sin(t)) - ((offset / ch1Scale) * 25);
-                } else if (currentWaveform === 'square') {
-                    y = centerY - ((amplitude / ch1Scale) * 25 * Math.sign(Math.sin(t))) - ((offset / ch1Scale) * 25);
-                } else if (currentWaveform === 'triangle') {
-                    const phase = t % (2 * Math.PI);
-                    const triangleValue = phase < Math.PI ? (2 * phase / Math.PI - 1) : (3 - 2 * phase / Math.PI);
-                    y = centerY - ((amplitude / ch1Scale) * 25 * triangleValue) - ((offset / ch1Scale) * 25);
+                // Oscilloscope parameters
+                this.timeScale = 0.001; // 1ms/div
+                this.ch1Scale = 1.0; // 1V/div
+                this.ch2Scale = 1.0; // 1V/div
+                this.ch1Position = 0;
+                this.ch2Position = 0;
+                this.horizontalPosition = 0;
+                this.triggerLevel = 0;
+                this.triggerSlope = 1; // 1 for rising, -1 for falling
+                this.triggerMode = 'normal';
+                
+                // Signal generation
+                this.genFreq = 1000; // Hz
+                this.genAmp = 2.0; // V
+                this.genWaveform = 'sine';
+                this.ch1Enabled = true;
+                this.ch2Enabled = true;
+                this.running = true;
+                
+                // Data arrays
+                this.sampleRate = 25000; // Samples per second
+                this.bufferSize = 2500; // Number of samples in buffer
+                this.ch1Data = new Float32Array(this.bufferSize);
+                this.ch2Data = new Float32Array(this.bufferSize);
+                this.timeData = new Float32Array(this.bufferSize);
+                
+                // Initialize time data
+                for (let i = 0; i < this.bufferSize; i++) {
+                    this.timeData[i] = i / this.sampleRate;
                 }
                 
-                if (x === 0) {
-                    scopeCtx.moveTo(x, y);
-                } else {
-                    scopeCtx.lineTo(x, y);
-                }
+                this.setupEventListeners();
+                this.setupKnobs();
+                this.startAcquisition();
             }
-            scopeCtx.stroke();
             
-            // Draw output signal (CH2)
-            scopeCtx.strokeStyle = '#ff6600';
-            scopeCtx.lineWidth = 2;
-            scopeCtx.beginPath();
-            
-            for (let x = 0; x < scopeCanvas.width; x++) {
-                const t = (x / scopeCanvas.width) * cycles * 2 * Math.PI + timeOffset + phaseShiftRadians;
-                let y = centerY;
+            setupCanvas() {
+                const resizeCanvas = () => {
+                    const rect = this.canvas.parentElement.getBoundingClientRect();
+                    this.canvas.width = rect.width;
+                    this.canvas.height = rect.height;
+                };
                 
-                if (currentWaveform === 'sine') {
-                    y = centerY - ((outputAmplitude / ch2Scale) * 25 * Math.sin(t));
-                } else if (currentWaveform === 'square') {
-                    y = centerY - ((outputAmplitude / ch2Scale) * 25 * Math.sign(Math.sin(t)));
-                } else if (currentWaveform === 'triangle') {
-                    const phase = t % (2 * Math.PI);
-                    const triangleValue = phase < Math.PI ? (2 * phase / Math.PI - 1) : (3 - 2 * phase / Math.PI);
-                    y = centerY - ((outputAmplitude / ch2Scale) * 25 * triangleValue);
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+            }
+            
+            setupKnobs() {
+                const knobs = {
+                    'time-scale-knob': { 
+                        value: 4, 
+                        min: 0, 
+                        max: 8, 
+                        values: [0.0001, 0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05],
+                        labels: ['100µs', '200µs', '500µs', '1.0ms', '2.0ms', '5.0ms', '10ms', '20ms', '50ms'],
+                        callback: (val) => {
+                            this.timeScale = knobs['time-scale-knob'].values[val];
+                            document.getElementById('time-scale-value').textContent = knobs['time-scale-knob'].labels[val];
+                            document.getElementById('time-div').textContent = knobs['time-scale-knob'].labels[val];
+                        }
+                    },
+                    'ch1-scale-knob': {
+                        value: 4,
+                        min: 0,
+                        max: 8,
+                        values: [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0],
+                        labels: ['10mV', '20mV', '50mV', '100mV', '200mV', '500mV', '1.0V', '2.0V', '5.0V'],
+                        callback: (val) => {
+                            this.ch1Scale = knobs['ch1-scale-knob'].values[val];
+                            document.getElementById('ch1-scale-value').textContent = knobs['ch1-scale-knob'].labels[val];
+                        }
+                    },
+                    'ch2-scale-knob': {
+                        value: 4,
+                        min: 0,
+                        max: 8,
+                        values: [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0],
+                        labels: ['10mV', '20mV', '50mV', '100mV', '200mV', '500mV', '1.0V', '2.0V', '5.0V'],
+                        callback: (val) => {
+                            this.ch2Scale = knobs['ch2-scale-knob'].values[val];
+                            document.getElementById('ch2-scale-value').textContent = knobs['ch2-scale-knob'].labels[val];
+                        }
+                    },
+                    'trigger-level-knob': {
+                        value: 50,
+                        min: 0,
+                        max: 100,
+                        callback: (val) => {
+                            this.triggerLevel = (val - 50) * 0.1; // -5V to +5V
+                            document.getElementById('trigger-level-value').textContent = this.triggerLevel.toFixed(1) + 'V';
+                        }
+                    }
+                };
+                
+                Object.keys(knobs).forEach(knobId => {
+                    const knob = document.getElementById(knobId);
+                    const config = knobs[knobId];
+                    let isDragging = false;
+                    let lastY = 0;
+                    
+                    knob.addEventListener('mousedown', (e) => {
+                        isDragging = true;
+                        lastY = e.clientY;
+                        knob.style.cursor = 'grabbing';
+                        e.preventDefault();
+                    });
+                    
+                    document.addEventListener('mousemove', (e) => {
+                        if (!isDragging) return;
+                        
+                        const deltaY = lastY - e.clientY;
+                        config.value = Math.max(config.min, Math.min(config.max, config.value + deltaY * 0.1));
+                        lastY = e.clientY;
+                        
+                        const rotation = ((config.value - config.min) / (config.max - config.min)) * 270 - 135;
+                        knob.style.transform = `rotate(${rotation}deg)`;
+                        
+                        if (config.callback) {
+                            config.callback(Math.round(config.value));
+                        }
+                    });
+                    
+                    document.addEventListener('mouseup', () => {
+                        isDragging = false;
+                        knob.style.cursor = 'pointer';
+                    });
+                    
+                    // Initialize knob position
+                    const rotation = ((config.value - config.min) / (config.max - config.min)) * 270 - 135;
+                    knob.style.transform = `rotate(${rotation}deg)`;
+                    if (config.callback) {
+                        config.callback(config.values ? config.value : Math.round(config.value));
+                    }
+                });
+            }
+            
+            setupEventListeners() {
+                // Run/Stop control
+                document.getElementById('run-stop').addEventListener('click', () => {
+                    this.running = !this.running;
+                    const btn = document.getElementById('run-stop');
+                    btn.textContent = this.running ? 'RUN' : 'STOP';
+                    btn.className = this.running ? 'run-stop' : 'run-stop stopped';
+                });
+                
+                // Channel enable/disable
+                document.getElementById('ch1-enable').addEventListener('click', (e) => {
+                    this.ch1Enabled = !this.ch1Enabled;
+                    e.target.classList.toggle('active', this.ch1Enabled);
+                    e.target.textContent = this.ch1Enabled ? 'ON' : 'OFF';
+                });
+                
+                document.getElementById('ch2-enable').addEventListener('click', (e) => {
+                    this.ch2Enabled = !this.ch2Enabled;
+                    e.target.classList.toggle('active', this.ch2Enabled);
+                    e.target.textContent = this.ch2Enabled ? 'ON' : 'OFF';
+                });
+                
+                // Signal generator controls
+                document.getElementById('gen-freq').addEventListener('input', (e) => {
+                    this.genFreq = parseFloat(e.target.value);
+                    const freqText = this.genFreq >= 1000 ? 
+                        (this.genFreq/1000).toFixed(1) + 'kHz' : 
+                        this.genFreq.toFixed(0) + 'Hz';
+                    document.getElementById('gen-freq-value').textContent = freqText;
+                });
+                
+                document.getElementById('gen-amp').addEventListener('input', (e) => {
+                    this.genAmp = parseFloat(e.target.value);
+                    document.getElementById('gen-amp-value').textContent = this.genAmp.toFixed(1) + 'V';
+                });
+                
+                // Waveform selection
+                const waveformButtons = ['gen-sine', 'gen-square', 'gen-triangle', 'gen-sawtooth'];
+                waveformButtons.forEach(btnId => {
+                    document.getElementById(btnId).addEventListener('click', (e) => {
+                        waveformButtons.forEach(id => document.getElementById(id).classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.genWaveform = btnId.replace('gen-', '');
+                    });
+                });
+                
+                // Trigger slope
+                document.getElementById('trigger-slope').addEventListener('click', (e) => {
+                    this.triggerSlope *= -1;
+                    e.target.textContent = this.triggerSlope > 0 ? '↗' : '↘';
+                });
+                
+                // Auto set
+                document.getElementById('auto-set').addEventListener('click', () => {
+                    this.autoSet();
+                });
+            }
+            
+            generateWaveform(freq, amp, phase, samples, waveform) {
+                const data = new Float32Array(samples);
+                const omega = 2 * Math.PI * freq;
+                
+                for (let i = 0; i < samples; i++) {
+                    const t = this.timeData[i] + phase;
+                    
+                    switch (waveform) {
+                        case 'sine':
+                            data[i] = amp * Math.sin(omega * t);
+                            break;
+                        case 'square':
+                            data[i] = amp * Math.sign(Math.sin(omega * t));
+                            break;
+                        case 'triangle':
+                            data[i] = amp * (2/Math.PI) * Math.asin(Math.sin(omega * t));
+                            break;
+                        case 'sawtooth':
+                            data[i] = amp * (2 * ((omega * t / (2 * Math.PI)) % 1) - 1);
+                            break;
+                    }
+                    
+                    // Add small amount of noise for realism
+                    data[i] += (Math.random() - 0.5) * 0.02 * amp;
                 }
                 
-                if (x === 0) {
-                    scopeCtx.moveTo(x, y);
-                } else {
-                    scopeCtx.lineTo(x, y);
+                return data;
+            }
+            
+            updateSignals() {
+                if (!this.running) return;
+                
+                const time = performance.now() / 1000;
+                
+                // Generate CH1 signal
+                this.ch1Data = this.generateWaveform(
+                    this.genFreq, 
+                    this.genAmp, 
+                    time, 
+                    this.bufferSize, 
+                    this.genWaveform
+                );
+                
+                // Generate CH2 signal (different frequency for demo)
+                this.ch2Data = this.generateWaveform(
+                    this.genFreq * 2.5, 
+                    this.genAmp * 0.75, 
+                    time + Math.PI/4, 
+                    this.bufferSize, 
+                    'sine'
+                );
+                
+                this.updateMeasurements();
+            }
+            
+            updateMeasurements() {
+                // Calculate frequency from zero crossings
+                const calcFreq = (data) => {
+                    let crossings = 0;
+                    for (let i = 1; i < data.length; i++) {
+                        if ((data[i-1] < 0 && data[i] >= 0) || (data[i-1] >= 0 && data[i] < 0)) {
+                            crossings++;
+                        }
+                    }
+                    return (crossings / 2) / (this.bufferSize / this.sampleRate);
+                };
+                
+                // Calculate RMS
+                const calcRMS = (data) => {
+                    let sum = 0;
+                    for (let i = 0; i < data.length; i++) {
+                        sum += data[i] * data[i];
+                    }
+                    return Math.sqrt(sum / data.length);
+                };
+                
+                // Calculate peak-to-peak amplitude
+                const calcAmplitude = (data) => {
+                    let min = data[0], max = data[0];
+                    for (let i = 1; i < data.length; i++) {
+                        if (data[i] < min) min = data[i];
+                        if (data[i] > max) max = data[i];
+                    }
+                    return max - min;
+                };
+                
+                if (this.ch1Enabled) {
+                    const ch1Freq = calcFreq(this.ch1Data);
+                    const ch1Amp = calcAmplitude(this.ch1Data);
+                    const ch1RMS = calcRMS(this.ch1Data);
+                    
+                    document.getElementById('meas-ch1-freq').textContent = 
+                        ch1Freq >= 1000 ? (ch1Freq/1000).toFixed(3) + 'kHz' : ch1Freq.toFixed(0) + 'Hz';
+                    document.getElementById('meas-ch1-amp').textContent = ch1Amp.toFixed(2) + 'V';
+                    document.getElementById('meas-ch1-rms').textContent = ch1RMS.toFixed(2) + 'V';
+                    document.getElementById('ch1-freq').textContent = 
+                        ch1Freq >= 1000 ? (ch1Freq/1000).toFixed(2) + 'kHz' : ch1Freq.toFixed(0) + 'Hz';
+                }
+                
+                if (this.ch2Enabled) {
+                    const ch2Freq = calcFreq(this.ch2Data);
+                    const ch2Amp = calcAmplitude(this.ch2Data);
+                    
+                    document.getElementById('meas-ch2-freq').textContent = 
+                        ch2Freq >= 1000 ? (ch2Freq/1000).toFixed(3) + 'kHz' : ch2Freq.toFixed(0) + 'Hz';
+                    document.getElementById('meas-ch2-amp').textContent = ch2Amp.toFixed(2) + 'V';
+                    document.getElementById('ch2-freq').textContent = 
+                        ch2Freq >= 1000 ? (ch2Freq/1000).toFixed(2) + 'kHz' : ch2Freq.toFixed(0) + 'Hz';
                 }
             }
-            scopeCtx.stroke();
-        }
-
-        function getCircuitResponse() {
-            const frequency = parseFloat(document.getElementById('freq-slider').value);
-            const amplitude = parseFloat(document.getElementById('amp-slider').value);
-            const R = parseFloat(document.getElementById('resistance-slider').value);
-            const L = parseFloat(document.getElementById('inductance-slider').value) * 1e-3;
-            const C = parseFloat(document.getElementById('capacitance-slider').value) * 1e-6;
             
-            const omega = 2 * Math.PI * frequency;
-            let outputAmplitude, phase;
-            
-            switch (currentCircuitType) {
-                case 'rlc':
-                    const XL = omega * L;
-                    const XC = 1 / (omega * C);
-                    const X = XL - XC;
-                    const impedance = Math.sqrt(R * R + X * X);
-                    outputAmplitude = amplitude * (R / impedance);
-                    phase = Math.atan2(X, R) * 180 / Math.PI;
-                    break;
-                    
-                case 'rc':
-                    const XC_rc = 1 / (omega * C);
-                    const impedance_rc = Math.sqrt(R * R + XC_rc * XC_rc);
-                    outputAmplitude = amplitude * (XC_rc / impedance_rc);
-                    phase = -Math.atan2(XC_rc, R) * 180 / Math.PI;
-                    break;
-                    
-                case 'rl':
-                    const XL_rl = omega * L;
-                    const impedance_rl = Math.sqrt(R * R + XL_rl * XL_rl);
-                    outputAmplitude = amplitude * (R / impedance_rl);
-                    phase = Math.atan2(XL_rl, R) * 180 / Math.PI;
-                    break;
+            drawGrid() {
+                const { width, height } = this.canvas;
+                this.ctx.strokeStyle = '#003300';
+                this.ctx.lineWidth = 1;
+                
+                // Vertical grid lines (time divisions)
+                const divisions = 10;
+                for (let i = 0; i <= divisions; i++) {
+                    const x = (width / divisions) * i;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, height);
+                    this.ctx.stroke();
+                }
+                
+                // Horizontal grid lines (voltage divisions)
+                for (let i = 0; i <= 8; i++) {
+                    const y = (height / 8) * i;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(width, y);
+                    this.ctx.stroke();
+                }
+                
+                // Center lines (brighter)
+                this.ctx.strokeStyle = '#006600';
+                this.ctx.lineWidth = 1.5;
+                
+                // Center vertical line
+                this.ctx.beginPath();
+                this.ctx.moveTo(width / 2, 0);
+                this.ctx.lineTo(width / 2, height);
+                this.ctx.stroke();
+                
+                // Center horizontal line
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, height / 2);
+                this.ctx.lineTo(width, height);
+                this.ctx.stroke();
             }
             
-            return { outputAmplitude, phase };
+            drawWaveform(data, color, scale, position) {
+                if (!data || data.length === 0) return;
+                
+                const { width, height } = this.canvas;
+                const centerY = height / 2;
+                const pixelsPerSample = width / this.bufferSize;
+                const pixelsPerDiv = height / 8;
+                const samplesPerDiv = this.timeScale * this.sampleRate;
+                const startSample = Math.max(0, Math.floor((this.bufferSize / 2) - (5 * samplesPerDiv)));
+                
+                this.ctx.strokeStyle = color;
+                this.ctx.lineWidth = 2;
+                this.ctx.shadowColor = color;
+                this.ctx.shadowBlur = 3;
+                this.ctx.beginPath();
+                
+                let firstPoint = true;
+                for (let i = startSample; i < Math.min(data.length, startSample + (10 * samplesPerDiv)); i++) {
+                    const x = ((i - startSample) / samplesPerDiv) * (width / 10);
+                    const voltage = data[i] + position;
+                    const y = centerY - (voltage / scale) * pixelsPerDiv;
+                    
+                    if (firstPoint) {
+                        this.ctx.moveTo(x, y);
+                        firstPoint = false;
+                    } else {
+                        this.ctx.lineTo(x, y);
+                    }
+                }
+                
+                this.ctx.stroke();
+                this.ctx.shadowBlur = 0;
+            }
+            
+            drawTrigger() {
+                const { width, height } = this.canvas;
+                const centerY = height / 2;
+                const pixelsPerDiv = height / 8;
+                const triggerY = centerY - (this.triggerLevel / this.ch1Scale) * pixelsPerDiv;
+                
+                if (triggerY >= 0 && triggerY <= height) {
+                    this.ctx.strokeStyle = '#ff6600';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.setLineDash([5, 5]);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, triggerY);
+                    this.ctx.lineTo(width, triggerY);
+                    this.ctx.stroke();
+                    this.ctx.setLineDash([]);
+                    
+                    // Trigger arrow
+                    this.ctx.fillStyle = '#ff6600';
+                    this.ctx.fillText('T', 5, triggerY - 5);
+                }
+            }
+            
+            render() {
+                // Clear canvas
+                this.ctx.fillStyle = '#001100';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw grid
+                this.drawGrid();
+                
+                // Draw trigger level
+                this.drawTrigger();
+                
+                // Draw waveforms
+                if (this.ch1Enabled) {
+                    this.drawWaveform(this.ch1Data, '#ffff00', this.ch1Scale, this.ch1Position);
+                }
+                
+                if (this.ch2Enabled) {
+                    this.drawWaveform(this.ch2Data, '#00ffff', this.ch2Scale, this.ch2Position);
+                }
+            }
+            
+            autoSet() {
+                // Auto-scale based on signal amplitude
+                if (this.ch1Enabled && this.ch1Data) {
+                    let max = Math.max(...this.ch1Data);
+                    let min = Math.min(...this.ch1Data);
+                    let amplitude = max - min;
+                    
+                    // Set scale to show ~6 divisions of the signal
+                    const scales = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0];
+                    for (let i = 0; i < scales.length; i++) {
+                        if (amplitude / scales[i] <= 6) {
+                            this.ch1Scale = scales[i];
+                            document.getElementById('ch1-scale-value').textContent = 
+                                scales[i] >= 1 ? scales[i].toFixed(1) + 'V' : 
+                                (scales[i] * 1000).toFixed(0) + 'mV';
+                            break;
+                        }
+                    }
+                }
+                
+                // Auto-trigger level to signal midpoint
+                if (this.ch1Data) {
+                    let max = Math.max(...this.ch1Data);
+                    let min = Math.min(...this.ch1Data);
+                    this.triggerLevel = (max + min) / 2;
+                    document.getElementById('trigger-level-value').textContent = 
+                        this.triggerLevel.toFixed(1) + 'V';
+                }
+            }
+            
+            startAcquisition() {
+                const acquisitionLoop = () => {
+                    this.updateSignals();
+                    this.render();
+                    requestAnimationFrame(acquisitionLoop);
+                };
+                
+                acquisitionLoop();
+            }
         }
-
-        // Event Listeners
-        function setupEventListeners() {
-            // Function generator controls
-            document.getElementById('freq-slider').addEventListener('input', function() {
-                document.getElementById('freq-display').textContent = this.value + ' Hz';
-                updateCircuitAnalysis();
-            });
-            
-            document.getElementById('amp-slider').addEventListener('input', function() {
-                document.getElementById('amp-display').textContent = parseFloat(this.value).toFixed(1) + ' V';
-                updateCircuitAnalysis();
-            });
-            
-            document.getElementById('offset-slider').addEventListener('input', function() {
-                document.getElementById('offset-display').textContent = parseFloat(this.value).toFixed(1) + ' V';
-                updateCircuitAnalysis();
-            });
-            
-            // Circuit component controls
-            document.getElementById('resistance-slider').addEventListener('input', function() {
-                document.getElementById('resistance-display').textContent = this.value + ' Ω';
-                updateCircuitDisplay();
-                updateCircuitAnalysis();
-            });
-            
-            document.getElementById('inductance-slider').addEventListener('input', function() {
-                document.getElementById('inductance-display').textContent = parseFloat(this.value).toFixed(1) + ' mH';
-                updateCircuitDisplay();
-                updateCircuitAnalysis();
-            });
-            
-            document.getElementById('capacitance-slider').addEventListener('input', function() {
-                document.getElementById('capacitance-display').textContent = parseFloat(this.value).toFixed(2) + ' μF';
-                updateCircuitDisplay();
-                updateCircuitAnalysis();
-            });
-            
-            // Oscilloscope controls
-            document.getElementById('timebase-slider').addEventListener('input', function() {
-                document.getElementById('timebase-value').textContent = this.value + ' μs/div';
-                document.getElementById('timebase-display').textContent = this.value + 'μs/div';
-            });
-            
-            document.getElementById('ch1-scale').addEventListener('input', function() {
-                document.getElementById('ch1-scale-display').textContent = parseFloat(this.value).toFixed(1) + ' V/div';
-            });
-            
-            document.getElementById('ch2-scale').addEventListener('input', function() {
-                document.getElementById('ch2-scale-display').textContent = parseFloat(this.value).toFixed(1) + ' V/div';
-            });
-        }
-
-        // Initialize everything
-        window.addEventListener('load', function() {
-            initScopeCanvas();
-            setupEventListeners();
-            updateCircuitDisplay();
-            updateCircuitAnalysis();
+        
+        // Initialize oscilloscope when page loads
+        window.addEventListener('load', () => {
+            new ProfessionalOscilloscope();
         });
     </script>
 </body>
