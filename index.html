@@ -1,896 +1,606 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Oscilloscope</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-            color: #fff;
-            overflow: hidden;
-            user-select: none;
-        }
-
-        .oscilloscope {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
-            border: 3px solid #333;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
-        }
-
-        .screen-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
-        }
-
-        .screen-container {
-            position: relative;
-            flex: 1;
-            background: #000;
-            border: 4px solid #333;
-            border-radius: 8px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-        }
-
-        #oscilloscope-screen {
-            width: 100%;
-            height: 100%;
-            background: #001100;
-            border-radius: 4px;
-        }
-
-        .controls-panel {
-            width: 300px;
-            background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
-            padding: 20px;
-            border-left: 3px solid #333;
-            overflow-y: auto;
-        }
-
-        .control-group {
-            margin-bottom: 25px;
-            padding: 15px;
-            background: linear-gradient(145deg, #333, #2a2a2a);
-            border-radius: 8px;
-            border: 1px solid #444;
-        }
-
-        .control-group h3 {
-            color: #00ff00;
-            margin-bottom: 10px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .knob-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .knob {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #666, #333, #111);
-            border: 3px solid #444;
-            position: relative;
-            cursor: pointer;
-            margin-right: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-        }
-
-        .knob::before {
-            content: '';
-            position: absolute;
-            top: 5px;
-            left: 50%;
-            width: 3px;
-            height: 15px;
-            background: #00ff00;
-            transform: translateX(-50%);
-            border-radius: 2px;
-            box-shadow: 0 0 4px #00ff00;
-        }
-
-        .knob-label {
-            font-size: 11px;
-            color: #ccc;
-            flex: 1;
-        }
-
-        .button {
-            background: linear-gradient(145deg, #444, #222);
-            border: 2px solid #555;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 10px;
-            margin: 2px;
-            transition: all 0.1s;
-        }
-
-        .button:hover {
-            background: linear-gradient(145deg, #555, #333);
-            border-color: #666;
-        }
-
-        .button.active {
-            background: linear-gradient(145deg, #006600, #004400);
-            border-color: #00aa00;
-            box-shadow: 0 0 8px rgba(0,255,0,0.3);
-        }
-
-        .channel-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .channel {
-            padding: 10px;
-            border: 1px solid #444;
-            border-radius: 4px;
-            background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
-        }
-
-        .channel.ch1 {
-            border-left: 4px solid #ffff00;
-        }
-
-        .channel.ch2 {
-            border-left: 4px solid #00ffff;
-        }
-
-        .slider-container {
-            display: flex;
-            align-items: center;
-            margin: 8px 0;
-        }
-
-        .slider {
-            flex: 1;
-            margin: 0 10px;
-            appearance: none;
-            height: 4px;
-            background: #333;
-            border-radius: 2px;
-        }
-
-        .slider::-webkit-slider-thumb {
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #00ff00;
-            cursor: pointer;
-            box-shadow: 0 0 4px rgba(0,255,0,0.5);
-        }
-
-        .value-display {
-            min-width: 60px;
-            text-align: center;
-            font-size: 10px;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-        }
-
-        .signal-generator {
-            background: linear-gradient(145deg, #1a3d1a, #0d2d0d);
-            border: 1px solid #00aa00;
-        }
-
-        .readout {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: #000;
-            border: 1px solid #333;
-            border-radius: 4px;
-            margin-top: 10px;
-            font-size: 11px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .readout-item {
-            color: #00ff00;
-        }
-
-        .trigger-controls {
-            background: linear-gradient(145deg, #3d1a1a, #2d0d0d);
-            border: 1px solid #aa0000;
-        }
-
-        .waveform-select {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px;
-            margin-top: 10px;
-        }
-
-        .measurement-display {
-            background: #000;
-            padding: 15px;
-            border-radius: 4px;
-            border: 1px solid #333;
-            margin-top: 10px;
-        }
-
-        .measurement-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 3px 0;
-            font-size: 10px;
-        }
-
-        .measurement-label {
-            color: #888;
-        }
-
-        .measurement-value {
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-        }
-
-        .status-bar {
-            height: 30px;
-            background: linear-gradient(145deg, #333, #222);
-            border-top: 1px solid #444;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            font-size: 11px;
-            color: #888;
-        }
-
-        .run-stop {
-            background: linear-gradient(145deg, #006600, #004400);
-            color: #fff;
-            border: 2px solid #00aa00;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 0 10px rgba(0,255,0,0.3);
-        }
-
-        .run-stop.stopped {
-            background: linear-gradient(145deg, #660000, #440000);
-            border-color: #aa0000;
-            box-shadow: 0 0 10px rgba(255,0,0,0.3);
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Simple CNN Explainer — Interactive</title>
+<style>
+  :root{
+    --bg:#0b1220; --ink:#e5e7eb; --muted:#94a3b8; --card:#0f172a; --accent:#38bdf8; --grid:#1f2937;
+    --good:#22c55e; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#0b1220 60%,#0e1628);
+    color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  header{
+    padding:18px 20px; border-bottom:1px solid #111827; position:sticky; top:0; backdrop-filter: blur(8px);
+    background:rgba(11,18,32,.7);
+  }
+  header h1{margin:0; font-size:18px; font-weight:700; letter-spacing:.2px}
+  .wrap{display:grid; grid-template-columns: 320px 1fr; gap:16px; padding:16px}
+  .card{
+    background:var(--card); border:1px solid #0b1220; border-radius:16px; padding:14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  }
+  .card h2{margin:.2em 0 .6em; font-size:16px}
+  .panel{display:flex; flex-direction:column; gap:14px; max-height:calc(100vh - 96px); overflow:auto;}
+  label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
+  input[type="number"], select{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid #1f2937; background:#0b1220; color:var(--ink);
+  }
+  input[type="file"]{width:100%}
+  button{
+    background:var(--accent); color:#001018; border:none; padding:10px 14px; border-radius:12px; font-weight:700; cursor:pointer;
+  }
+  button.secondary{ background:#111827; color:#cbd5e1; border:1px solid #1f2937 }
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .preview{
+    display:grid; grid-template-columns: minmax(260px, 420px) 1fr; gap:16px;
+  }
+  .figure{display:flex; flex-direction:column; gap:10px}
+  .figure canvas, .figure img{
+    max-width:100%; border-radius:12px; border:1px solid #1f2937; background:#0b1220;
+  }
+  .grid{
+    display:grid; gap:8px;
+  }
+  .grid.cols-1{grid-template-columns: repeat(1, minmax(120px, 1fr));}
+  .grid.cols-2{grid-template-columns: repeat(2, minmax(120px, 1fr));}
+  .grid.cols-4{grid-template-columns: repeat(4, minmax(120px, 1fr));}
+  .tile{position:relative}
+  .tile canvas{width:100%; height:auto; border-radius:10px; border:1px solid #1f2937}
+  .tile .cap{position:absolute; left:8px; top:8px; font-size:11px; color:#cbd5e1; background:rgba(0,0,0,.35); padding:2px 6px; border-radius:8px}
+  .legend{font-size:12px; color:var(--muted)}
+  .hl{outline:2px solid var(--warn); outline-offset:-2px}
+  .status{font-size:12px; color:#a1a1aa}
+  .flex{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .badge{font-size:12px; background:#111827; border:1px solid #1f2937; color:#cbd5e1; border-radius:999px; padding:4px 8px}
+  .note{font-size:12px; color:#94a3b8}
+  .prob{display:flex; gap:8px; flex-wrap:wrap}
+  .bar{height:10px; background:#111827; border-radius:8px; overflow:hidden; width:160px; border:1px solid #1f2937}
+  .fill{height:100%; background:var(--good)}
+  footer{padding:10px 16px; color:#94a3b8; font-size:12px}
+  @media (max-width: 980px){
+    .wrap{grid-template-columns: 1fr}
+    .preview{grid-template-columns: 1fr}
+  }
+</style>
 </head>
 <body>
-    <div class="oscilloscope">
-        <div class="screen-section">
-            <div class="screen-container">
-                <canvas id="oscilloscope-screen"></canvas>
-            </div>
-            <div class="readout">
-                <div class="readout-item">CH1: <span id="ch1-freq">1.00kHz</span></div>
-                <div class="readout-item">CH2: <span id="ch2-freq">2.50kHz</span></div>
-                <div class="readout-item">Time/Div: <span id="time-div">1.0ms</span></div>
-                <div class="readout-item">Trigger: <span id="trigger-status">AUTO</span></div>
-                <div class="readout-item">Rate: <span id="sample-rate">25.0kS/s</span></div>
-            </div>
-            <div class="status-bar">
-                <span>TDS2024C Digital Storage Oscilloscope • 200MHz • 4CH • 2GS/s</span>
-            </div>
-        </div>
+<header>
+  <h1>Simple CNN Explainer — Conv → ReLU → Pool → Conv2 → ReLU → Pool2 → Flatten → FC</h1>
+</header>
 
-        <div class="controls-panel">
-            <div class="control-group">
-                <h3>Acquisition</h3>
-                <button class="run-stop" id="run-stop">RUN</button>
-                <div class="button-row" style="margin-top: 10px;">
-                    <button class="button" id="single">SINGLE</button>
-                    <button class="button" id="auto-set">AUTO SET</button>
-                </div>
-            </div>
+<div class="wrap">
+  <!-- LEFT: Controls -->
+  <aside class="panel card">
+    <h2>Controls</h2>
 
-            <div class="control-group">
-                <h3>Horizontal</h3>
-                <div class="knob-container">
-                    <div class="knob" id="time-scale-knob"></div>
-                    <div class="knob-label">TIME/DIV<br><span id="time-scale-value">1.0ms</span></div>
-                </div>
-                <div class="knob-container">
-                    <div class="knob" id="horizontal-pos-knob"></div>
-                    <div class="knob-label">POSITION<br><span id="horizontal-pos-value">0.0s</span></div>
-                </div>
-            </div>
-
-            <div class="control-group trigger-controls">
-                <h3>Trigger</h3>
-                <div class="knob-container">
-                    <div class="knob" id="trigger-level-knob"></div>
-                    <div class="knob-label">LEVEL<br><span id="trigger-level-value">0.0V</span></div>
-                </div>
-                <div class="button-row">
-                    <button class="button" id="trigger-auto">AUTO</button>
-                    <button class="button active" id="trigger-normal">NORM</button>
-                    <button class="button" id="trigger-single">SINGLE</button>
-                </div>
-                <div class="slider-container">
-                    <span style="font-size: 10px;">SLOPE:</span>
-                    <button class="button" id="trigger-slope">↗</button>
-                </div>
-            </div>
-
-            <div class="control-group channel ch1">
-                <h3>Channel 1</h3>
-                <div class="knob-container">
-                    <div class="knob" id="ch1-scale-knob"></div>
-                    <div class="knob-label">VOLTS/DIV<br><span id="ch1-scale-value">1.0V</span></div>
-                </div>
-                <div class="knob-container">
-                    <div class="knob" id="ch1-pos-knob"></div>
-                    <div class="knob-label">POSITION<br><span id="ch1-pos-value">0.0V</span></div>
-                </div>
-                <div class="button-row">
-                    <button class="button active" id="ch1-enable">ON</button>
-                    <button class="button" id="ch1-coupling">DC</button>
-                    <button class="button" id="ch1-bw">20MHz</button>
-                </div>
-            </div>
-
-            <div class="control-group channel ch2">
-                <h3>Channel 2</h3>
-                <div class="knob-container">
-                    <div class="knob" id="ch2-scale-knob"></div>
-                    <div class="knob-label">VOLTS/DIV<br><span id="ch2-scale-value">1.0V</span></div>
-                </div>
-                <div class="knob-container">
-                    <div class="knob" id="ch2-pos-knob"></div>
-                    <div class="knob-label">POSITION<br><span id="ch2-pos-value">0.0V</span></div>
-                </div>
-                <div class="button-row">
-                    <button class="button active" id="ch2-enable">ON</button>
-                    <button class="button" id="ch2-coupling">DC</button>
-                    <button class="button" id="ch2-bw">20MHz</button>
-                </div>
-            </div>
-
-            <div class="control-group signal-generator">
-                <h3>Signal Generator</h3>
-                <div class="waveform-select">
-                    <button class="button active" id="gen-sine">SINE</button>
-                    <button class="button" id="gen-square">SQUARE</button>
-                    <button class="button" id="gen-triangle">TRIANGLE</button>
-                    <button class="button" id="gen-sawtooth">SAWTOOTH</button>
-                </div>
-                <div class="slider-container">
-                    <span style="font-size: 10px;">FREQ:</span>
-                    <input type="range" class="slider" id="gen-freq" min="10" max="10000" value="1000">
-                    <span class="value-display" id="gen-freq-value">1.0kHz</span>
-                </div>
-                <div class="slider-container">
-                    <span style="font-size: 10px;">AMP:</span>
-                    <input type="range" class="slider" id="gen-amp" min="0.1" max="5" step="0.1" value="2">
-                    <span class="value-display" id="gen-amp-value">2.0V</span>
-                </div>
-            </div>
-
-            <div class="measurement-display">
-                <div class="measurement-row">
-                    <span class="measurement-label">CH1 Frequency:</span>
-                    <span class="measurement-value" id="meas-ch1-freq">1.000kHz</span>
-                </div>
-                <div class="measurement-row">
-                    <span class="measurement-label">CH1 Amplitude:</span>
-                    <span class="measurement-value" id="meas-ch1-amp">2.00V</span>
-                </div>
-                <div class="measurement-row">
-                    <span class="measurement-label">CH1 RMS:</span>
-                    <span class="measurement-value" id="meas-ch1-rms">1.41V</span>
-                </div>
-                <div class="measurement-row">
-                    <span class="measurement-label">CH2 Frequency:</span>
-                    <span class="measurement-value" id="meas-ch2-freq">2.500kHz</span>
-                </div>
-                <div class="measurement-row">
-                    <span class="measurement-label">CH2 Amplitude:</span>
-                    <span class="measurement-value" id="meas-ch2-amp">1.50V</span>
-                </div>
-                <div class="measurement-row">
-                    <span class="measurement-label">Phase Diff:</span>
-                    <span class="measurement-value" id="meas-phase">0.0°</span>
-                </div>
-            </div>
-        </div>
+    <div>
+      <label>Upload image (RGB or grayscale)</label>
+      <input id="file" type="file" accept="image/*"/>
+      <div class="note">Tip: High contrast images work best. For class demo, the built-in sample is used if none uploaded.</div>
     </div>
 
-    <script>
-        class ProfessionalOscilloscope {
-            constructor() {
-                this.canvas = document.getElementById('oscilloscope-screen');
-                this.ctx = this.canvas.getContext('2d');
-                this.setupCanvas();
-                
-                // Oscilloscope parameters
-                this.timeScale = 0.001; // 1ms/div
-                this.ch1Scale = 1.0; // 1V/div
-                this.ch2Scale = 1.0; // 1V/div
-                this.ch1Position = 0;
-                this.ch2Position = 0;
-                this.horizontalPosition = 0;
-                this.triggerLevel = 0;
-                this.triggerSlope = 1; // 1 for rising, -1 for falling
-                this.triggerMode = 'normal';
-                
-                // Signal generation
-                this.genFreq = 1000; // Hz
-                this.genAmp = 2.0; // V
-                this.genWaveform = 'sine';
-                this.ch1Enabled = true;
-                this.ch2Enabled = true;
-                this.running = true;
-                
-                // Data arrays
-                this.sampleRate = 25000; // Samples per second
-                this.bufferSize = 2500; // Number of samples in buffer
-                this.ch1Data = new Float32Array(this.bufferSize);
-                this.ch2Data = new Float32Array(this.bufferSize);
-                this.timeData = new Float32Array(this.bufferSize);
-                
-                // Initialize time data
-                for (let i = 0; i < this.bufferSize; i++) {
-                    this.timeData[i] = i / this.sampleRate;
-                }
-                
-                this.setupEventListeners();
-                this.setupKnobs();
-                this.startAcquisition();
-            }
-            
-            setupCanvas() {
-                const resizeCanvas = () => {
-                    const rect = this.canvas.parentElement.getBoundingClientRect();
-                    this.canvas.width = rect.width;
-                    this.canvas.height = rect.height;
-                };
-                
-                resizeCanvas();
-                window.addEventListener('resize', resizeCanvas);
-            }
-            
-            setupKnobs() {
-                const knobs = {
-                    'time-scale-knob': { 
-                        value: 4, 
-                        min: 0, 
-                        max: 8, 
-                        values: [0.0001, 0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05],
-                        labels: ['100µs', '200µs', '500µs', '1.0ms', '2.0ms', '5.0ms', '10ms', '20ms', '50ms'],
-                        callback: (val) => {
-                            this.timeScale = knobs['time-scale-knob'].values[val];
-                            document.getElementById('time-scale-value').textContent = knobs['time-scale-knob'].labels[val];
-                            document.getElementById('time-div').textContent = knobs['time-scale-knob'].labels[val];
-                        }
-                    },
-                    'ch1-scale-knob': {
-                        value: 4,
-                        min: 0,
-                        max: 8,
-                        values: [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0],
-                        labels: ['10mV', '20mV', '50mV', '100mV', '200mV', '500mV', '1.0V', '2.0V', '5.0V'],
-                        callback: (val) => {
-                            this.ch1Scale = knobs['ch1-scale-knob'].values[val];
-                            document.getElementById('ch1-scale-value').textContent = knobs['ch1-scale-knob'].labels[val];
-                        }
-                    },
-                    'ch2-scale-knob': {
-                        value: 4,
-                        min: 0,
-                        max: 8,
-                        values: [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0],
-                        labels: ['10mV', '20mV', '50mV', '100mV', '200mV', '500mV', '1.0V', '2.0V', '5.0V'],
-                        callback: (val) => {
-                            this.ch2Scale = knobs['ch2-scale-knob'].values[val];
-                            document.getElementById('ch2-scale-value').textContent = knobs['ch2-scale-knob'].labels[val];
-                        }
-                    },
-                    'trigger-level-knob': {
-                        value: 50,
-                        min: 0,
-                        max: 100,
-                        callback: (val) => {
-                            this.triggerLevel = (val - 50) * 0.1; // -5V to +5V
-                            document.getElementById('trigger-level-value').textContent = this.triggerLevel.toFixed(1) + 'V';
-                        }
-                    }
-                };
-                
-                Object.keys(knobs).forEach(knobId => {
-                    const knob = document.getElementById(knobId);
-                    const config = knobs[knobId];
-                    let isDragging = false;
-                    let lastY = 0;
-                    
-                    knob.addEventListener('mousedown', (e) => {
-                        isDragging = true;
-                        lastY = e.clientY;
-                        knob.style.cursor = 'grabbing';
-                        e.preventDefault();
-                    });
-                    
-                    document.addEventListener('mousemove', (e) => {
-                        if (!isDragging) return;
-                        
-                        const deltaY = lastY - e.clientY;
-                        config.value = Math.max(config.min, Math.min(config.max, config.value + deltaY * 0.1));
-                        lastY = e.clientY;
-                        
-                        const rotation = ((config.value - config.min) / (config.max - config.min)) * 270 - 135;
-                        knob.style.transform = `rotate(${rotation}deg)`;
-                        
-                        if (config.callback) {
-                            config.callback(Math.round(config.value));
-                        }
-                    });
-                    
-                    document.addEventListener('mouseup', () => {
-                        isDragging = false;
-                        knob.style.cursor = 'pointer';
-                    });
-                    
-                    // Initialize knob position
-                    const rotation = ((config.value - config.min) / (config.max - config.min)) * 270 - 135;
-                    knob.style.transform = `rotate(${rotation}deg)`;
-                    if (config.callback) {
-                        config.callback(config.values ? config.value : Math.round(config.value));
-                    }
-                });
-            }
-            
-            setupEventListeners() {
-                // Run/Stop control
-                document.getElementById('run-stop').addEventListener('click', () => {
-                    this.running = !this.running;
-                    const btn = document.getElementById('run-stop');
-                    btn.textContent = this.running ? 'RUN' : 'STOP';
-                    btn.className = this.running ? 'run-stop' : 'run-stop stopped';
-                });
-                
-                // Channel enable/disable
-                document.getElementById('ch1-enable').addEventListener('click', (e) => {
-                    this.ch1Enabled = !this.ch1Enabled;
-                    e.target.classList.toggle('active', this.ch1Enabled);
-                    e.target.textContent = this.ch1Enabled ? 'ON' : 'OFF';
-                });
-                
-                document.getElementById('ch2-enable').addEventListener('click', (e) => {
-                    this.ch2Enabled = !this.ch2Enabled;
-                    e.target.classList.toggle('active', this.ch2Enabled);
-                    e.target.textContent = this.ch2Enabled ? 'ON' : 'OFF';
-                });
-                
-                // Signal generator controls
-                document.getElementById('gen-freq').addEventListener('input', (e) => {
-                    this.genFreq = parseFloat(e.target.value);
-                    const freqText = this.genFreq >= 1000 ? 
-                        (this.genFreq/1000).toFixed(1) + 'kHz' : 
-                        this.genFreq.toFixed(0) + 'Hz';
-                    document.getElementById('gen-freq-value').textContent = freqText;
-                });
-                
-                document.getElementById('gen-amp').addEventListener('input', (e) => {
-                    this.genAmp = parseFloat(e.target.value);
-                    document.getElementById('gen-amp-value').textContent = this.genAmp.toFixed(1) + 'V';
-                });
-                
-                // Waveform selection
-                const waveformButtons = ['gen-sine', 'gen-square', 'gen-triangle', 'gen-sawtooth'];
-                waveformButtons.forEach(btnId => {
-                    document.getElementById(btnId).addEventListener('click', (e) => {
-                        waveformButtons.forEach(id => document.getElementById(id).classList.remove('active'));
-                        e.target.classList.add('active');
-                        this.genWaveform = btnId.replace('gen-', '');
-                    });
-                });
-                
-                // Trigger slope
-                document.getElementById('trigger-slope').addEventListener('click', (e) => {
-                    this.triggerSlope *= -1;
-                    e.target.textContent = this.triggerSlope > 0 ? '↗' : '↘';
-                });
-                
-                // Auto set
-                document.getElementById('auto-set').addEventListener('click', () => {
-                    this.autoSet();
-                });
-            }
-            
-            generateWaveform(freq, amp, phase, samples, waveform) {
-                const data = new Float32Array(samples);
-                const omega = 2 * Math.PI * freq;
-                
-                for (let i = 0; i < samples; i++) {
-                    const t = this.timeData[i] + phase;
-                    
-                    switch (waveform) {
-                        case 'sine':
-                            data[i] = amp * Math.sin(omega * t);
-                            break;
-                        case 'square':
-                            data[i] = amp * Math.sign(Math.sin(omega * t));
-                            break;
-                        case 'triangle':
-                            data[i] = amp * (2/Math.PI) * Math.asin(Math.sin(omega * t));
-                            break;
-                        case 'sawtooth':
-                            data[i] = amp * (2 * ((omega * t / (2 * Math.PI)) % 1) - 1);
-                            break;
-                    }
-                    
-                    // Add small amount of noise for realism
-                    data[i] += (Math.random() - 0.5) * 0.02 * amp;
-                }
-                
-                return data;
-            }
-            
-            updateSignals() {
-                if (!this.running) return;
-                
-                const time = performance.now() / 1000;
-                
-                // Generate CH1 signal
-                this.ch1Data = this.generateWaveform(
-                    this.genFreq, 
-                    this.genAmp, 
-                    time, 
-                    this.bufferSize, 
-                    this.genWaveform
-                );
-                
-                // Generate CH2 signal (different frequency for demo)
-                this.ch2Data = this.generateWaveform(
-                    this.genFreq * 2.5, 
-                    this.genAmp * 0.75, 
-                    time + Math.PI/4, 
-                    this.bufferSize, 
-                    'sine'
-                );
-                
-                this.updateMeasurements();
-            }
-            
-            updateMeasurements() {
-                // Calculate frequency from zero crossings
-                const calcFreq = (data) => {
-                    let crossings = 0;
-                    for (let i = 1; i < data.length; i++) {
-                        if ((data[i-1] < 0 && data[i] >= 0) || (data[i-1] >= 0 && data[i] < 0)) {
-                            crossings++;
-                        }
-                    }
-                    return (crossings / 2) / (this.bufferSize / this.sampleRate);
-                };
-                
-                // Calculate RMS
-                const calcRMS = (data) => {
-                    let sum = 0;
-                    for (let i = 0; i < data.length; i++) {
-                        sum += data[i] * data[i];
-                    }
-                    return Math.sqrt(sum / data.length);
-                };
-                
-                // Calculate peak-to-peak amplitude
-                const calcAmplitude = (data) => {
-                    let min = data[0], max = data[0];
-                    for (let i = 1; i < data.length; i++) {
-                        if (data[i] < min) min = data[i];
-                        if (data[i] > max) max = data[i];
-                    }
-                    return max - min;
-                };
-                
-                if (this.ch1Enabled) {
-                    const ch1Freq = calcFreq(this.ch1Data);
-                    const ch1Amp = calcAmplitude(this.ch1Data);
-                    const ch1RMS = calcRMS(this.ch1Data);
-                    
-                    document.getElementById('meas-ch1-freq').textContent = 
-                        ch1Freq >= 1000 ? (ch1Freq/1000).toFixed(3) + 'kHz' : ch1Freq.toFixed(0) + 'Hz';
-                    document.getElementById('meas-ch1-amp').textContent = ch1Amp.toFixed(2) + 'V';
-                    document.getElementById('meas-ch1-rms').textContent = ch1RMS.toFixed(2) + 'V';
-                    document.getElementById('ch1-freq').textContent = 
-                        ch1Freq >= 1000 ? (ch1Freq/1000).toFixed(2) + 'kHz' : ch1Freq.toFixed(0) + 'Hz';
-                }
-                
-                if (this.ch2Enabled) {
-                    const ch2Freq = calcFreq(this.ch2Data);
-                    const ch2Amp = calcAmplitude(this.ch2Data);
-                    
-                    document.getElementById('meas-ch2-freq').textContent = 
-                        ch2Freq >= 1000 ? (ch2Freq/1000).toFixed(3) + 'kHz' : ch2Freq.toFixed(0) + 'Hz';
-                    document.getElementById('meas-ch2-amp').textContent = ch2Amp.toFixed(2) + 'V';
-                    document.getElementById('ch2-freq').textContent = 
-                        ch2Freq >= 1000 ? (ch2Freq/1000).toFixed(2) + 'kHz' : ch2Freq.toFixed(0) + 'Hz';
-                }
-            }
-            
-            drawGrid() {
-                const { width, height } = this.canvas;
-                this.ctx.strokeStyle = '#003300';
-                this.ctx.lineWidth = 1;
-                
-                // Vertical grid lines (time divisions)
-                const divisions = 10;
-                for (let i = 0; i <= divisions; i++) {
-                    const x = (width / divisions) * i;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(x, 0);
-                    this.ctx.lineTo(x, height);
-                    this.ctx.stroke();
-                }
-                
-                // Horizontal grid lines (voltage divisions)
-                for (let i = 0; i <= 8; i++) {
-                    const y = (height / 8) * i;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(0, y);
-                    this.ctx.lineTo(width, y);
-                    this.ctx.stroke();
-                }
-                
-                // Center lines (brighter)
-                this.ctx.strokeStyle = '#006600';
-                this.ctx.lineWidth = 1.5;
-                
-                // Center vertical line
-                this.ctx.beginPath();
-                this.ctx.moveTo(width / 2, 0);
-                this.ctx.lineTo(width / 2, height);
-                this.ctx.stroke();
-                
-                // Center horizontal line
-                this.ctx.beginPath();
-                this.ctx.moveTo(0, height / 2);
-                this.ctx.lineTo(width, height);
-                this.ctx.stroke();
-            }
-            
-            drawWaveform(data, color, scale, position) {
-                if (!data || data.length === 0) return;
-                
-                const { width, height } = this.canvas;
-                const centerY = height / 2;
-                const pixelsPerSample = width / this.bufferSize;
-                const pixelsPerDiv = height / 8;
-                const samplesPerDiv = this.timeScale * this.sampleRate;
-                const startSample = Math.max(0, Math.floor((this.bufferSize / 2) - (5 * samplesPerDiv)));
-                
-                this.ctx.strokeStyle = color;
-                this.ctx.lineWidth = 2;
-                this.ctx.shadowColor = color;
-                this.ctx.shadowBlur = 3;
-                this.ctx.beginPath();
-                
-                let firstPoint = true;
-                for (let i = startSample; i < Math.min(data.length, startSample + (10 * samplesPerDiv)); i++) {
-                    const x = ((i - startSample) / samplesPerDiv) * (width / 10);
-                    const voltage = data[i] + position;
-                    const y = centerY - (voltage / scale) * pixelsPerDiv;
-                    
-                    if (firstPoint) {
-                        this.ctx.moveTo(x, y);
-                        firstPoint = false;
-                    } else {
-                        this.ctx.lineTo(x, y);
-                    }
-                }
-                
-                this.ctx.stroke();
-                this.ctx.shadowBlur = 0;
-            }
-            
-            drawTrigger() {
-                const { width, height } = this.canvas;
-                const centerY = height / 2;
-                const pixelsPerDiv = height / 8;
-                const triggerY = centerY - (this.triggerLevel / this.ch1Scale) * pixelsPerDiv;
-                
-                if (triggerY >= 0 && triggerY <= height) {
-                    this.ctx.strokeStyle = '#ff6600';
-                    this.ctx.lineWidth = 1;
-                    this.ctx.setLineDash([5, 5]);
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(0, triggerY);
-                    this.ctx.lineTo(width, triggerY);
-                    this.ctx.stroke();
-                    this.ctx.setLineDash([]);
-                    
-                    // Trigger arrow
-                    this.ctx.fillStyle = '#ff6600';
-                    this.ctx.fillText('T', 5, triggerY - 5);
-                }
-            }
-            
-            render() {
-                // Clear canvas
-                this.ctx.fillStyle = '#001100';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                // Draw grid
-                this.drawGrid();
-                
-                // Draw trigger level
-                this.drawTrigger();
-                
-                // Draw waveforms
-                if (this.ch1Enabled) {
-                    this.drawWaveform(this.ch1Data, '#ffff00', this.ch1Scale, this.ch1Position);
-                }
-                
-                if (this.ch2Enabled) {
-                    this.drawWaveform(this.ch2Data, '#00ffff', this.ch2Scale, this.ch2Position);
-                }
-            }
-            
-            autoSet() {
-                // Auto-scale based on signal amplitude
-                if (this.ch1Enabled && this.ch1Data) {
-                    let max = Math.max(...this.ch1Data);
-                    let min = Math.min(...this.ch1Data);
-                    let amplitude = max - min;
-                    
-                    // Set scale to show ~6 divisions of the signal
-                    const scales = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0];
-                    for (let i = 0; i < scales.length; i++) {
-                        if (amplitude / scales[i] <= 6) {
-                            this.ch1Scale = scales[i];
-                            document.getElementById('ch1-scale-value').textContent = 
-                                scales[i] >= 1 ? scales[i].toFixed(1) + 'V' : 
-                                (scales[i] * 1000).toFixed(0) + 'mV';
-                            break;
-                        }
-                    }
-                }
-                
-                // Auto-trigger level to signal midpoint
-                if (this.ch1Data) {
-                    let max = Math.max(...this.ch1Data);
-                    let min = Math.min(...this.ch1Data);
-                    this.triggerLevel = (max + min) / 2;
-                    document.getElementById('trigger-level-value').textContent = 
-                        this.triggerLevel.toFixed(1) + 'V';
-                }
-            }
-            
-            startAcquisition() {
-                const acquisitionLoop = () => {
-                    this.updateSignals();
-                    this.render();
-                    requestAnimationFrame(acquisitionLoop);
-                };
-                
-                acquisitionLoop();
-            }
+    <div class="row">
+      <div>
+        <label>Resize to (square)</label>
+        <input id="size" type="number" value="64" min="28" max="256" step="4">
+      </div>
+      <div>
+        <label>Normalize</label>
+        <select id="norm">
+          <option value="0">0…255</option>
+          <option value="1" selected>0…1</option>
+          <option value="2">-1…1</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Conv1: filters</label>
+        <select id="conv1Filters">
+          <option value="edges">4 — Edges (Sobel/Laplace)</option>
+          <option value="gabor">4 — Gabor-ish</option>
+          <option value="custom">4 — Custom demo</option>
+        </select>
+      </div>
+      <div>
+        <label>Conv1: kernel / stride / pad</label>
+        <select id="conv1Cfg">
+          <option value="3,1,0">k3 / s1 / p0</option>
+          <option value="3,1,1" selected>k3 / s1 / p1</option>
+          <option value="5,1,2">k5 / s1 / p2</option>
+          <option value="3,2,1">k3 / s2 / p1</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Conv2: filters</label>
+        <select id="conv2Filters">
+          <option value="edges">4 — Edges (mix)</option>
+          <option value="gabor" selected>4 — Gabor-ish</option>
+          <option value="custom">4 — Custom demo</option>
+        </select>
+      </div>
+      <div>
+        <label>Conv2: kernel / stride / pad</label>
+        <select id="conv2Cfg">
+          <option value="3,1,1" selected>k3 / s1 / p1</option>
+          <option value="3,2,1">k3 / s2 / p1</option>
+          <option value="5,1,2">k5 / s1 / p2</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Pooling</label>
+        <select id="poolType">
+          <option value="max" selected>Max Pool</option>
+          <option value="avg">Avg Pool</option>
+        </select>
+      </div>
+      <div>
+        <label>Pool size / stride</label>
+        <select id="poolCfg">
+          <option value="2,2" selected>2×2 / s2</option>
+          <option value="3,2">3×3 / s2</option>
+          <option value="3,3">3×3 / s3</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex">
+      <button id="run">Run forward</button>
+      <button id="reset" class="secondary">Reset</button>
+      <span id="shape" class="badge">shape: —</span>
+    </div>
+
+    <div>
+      <label>Layer to view</label>
+      <select id="layerSel">
+        <option value="input">Input</option>
+        <option value="conv1">Conv1 (pre-activation)</option>
+        <option value="relu1">ReLU1</option>
+        <option value="pool1">Pool1</option>
+        <option value="conv2">Conv2 (pre-activation)</option>
+        <option value="relu2">ReLU2</option>
+        <option value="pool2">Pool2</option>
+        <option value="flatten">Flatten</option>
+        <option value="fc">Fully Connected (mock)</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Click an output pixel to highlight its receptive field</label>
+      <div class="note">Then look at the left “Input to this layer” panel — the orange rectangle shows the exact spatial region that produced that activation.</div>
+    </div>
+
+    <div class="status" id="status">Status: idle</div>
+  </aside>
+
+  <!-- RIGHT: Visualizations -->
+  <main class="card">
+    <div class="preview">
+      <div class="figure">
+        <h2>Input to this layer</h2>
+        <canvas id="inCanvas" width="256" height="256"></canvas>
+        <div class="legend" id="inLegend"></div>
+      </div>
+      <div class="figure">
+        <h2>Feature maps / output of this layer</h2>
+        <div id="maps" class="grid cols-2"></div>
+        <div class="legend" id="outLegend"></div>
+        <div id="probs" class="prob"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer>
+  Inspired by <a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noreferrer">CNN Explainer</a>. This demo computes everything in pure JS to show the mechanics (convolution, ReLU, pooling, receptive fields).
+</footer>
+
+<script>
+/* ---------- Utilities ---------- */
+const $ = (id) => document.getElementById(id);
+function clamp(x, a, b){ return Math.max(a, Math.min(b, x)); }
+function softmax(arr){
+  const m = Math.max(...arr), ex = arr.map(v=>Math.exp(v-m)), s = ex.reduce((a,b)=>a+b,0);
+  return ex.map(v=>v/s);
+}
+function toCanvas(imgData, w, h, canvas){
+  const ctx = canvas.getContext('2d');
+  const out = ctx.createImageData(w, h);
+  for(let i=0;i<w*h;i++){
+    const v = clamp(Math.round(imgData[i]*255),0,255);
+    out.data[4*i+0]=v; out.data[4*i+1]=v; out.data[4*i+2]=v; out.data[4*i+3]=255;
+  }
+  canvas.width=w; canvas.height=h; ctx.putImageData(out,0,0);
+}
+
+/* ---------- Kernels ---------- */
+function bankEdges(){
+  return [
+    {name:'Sobel X', k:[[ -1,0,1],[-2,0,2],[-1,0,1]]},
+    {name:'Sobel Y', k:[[ -1,-2,-1],[0,0,0],[1,2,1]]},
+    {name:'Laplacian', k:[[0,-1,0],[-1,4,-1],[0,-1,0]]},
+    {name:'Sharpen', k:[[0,-1,0],[-1,5,-1],[0,-1,0]]},
+  ];
+}
+function bankGabor(){
+  const g1 = [[0.5,0,-0.5],[1,0,-1],[0.5,0,-0.5]];
+  const g2 = [[0.5,1,0.5],[0,0,0],[-0.5,-1,-0.5]];
+  const g3 = [[-1,0,1],[0,0,0],[1,0,-1]];
+  const g4 = [[-1,-1,-1],[0,8,0],[-1,-1,-1]];
+  return [{name:'Gabor 0°',k:g1},{name:'Gabor 90°',k:g2},{name:'Edge45',k:g3},{name:'Spot',k:g4}];
+}
+function bankCustom(){
+  return [
+    {name:'BoxBlur', k:[[1,1,1],[1,1,1],[1,1,1]].map(r=>r.map(v=>v/9))},
+    {name:'Emboss', k:[[-2,-1,0],[-1,1,1],[0,1,2]]},
+    {name:'Line H', k:[[1,1,1],[0,0,0],[-1,-1,-1]]},
+    {name:'Line V', k:[[1,0,-1],[1,0,-1],[1,0,-1]]},
+  ];
+}
+function pickBank(sel){
+  if(sel==='edges') return bankEdges();
+  if(sel==='gabor') return bankGabor();
+  return bankCustom();
+}
+
+/* ---------- Core ops (grayscale, NCHW-ish but simple arrays) ---------- */
+function pad2d(img,w,h,p){
+  const W=w+2*p, H=h+2*p, out=new Float32Array(W*H);
+  for(let y=0;y<H;y++){
+    for(let x=0;x<W;x++){
+      const yy=clamp(y-p,0,h-1), xx=clamp(x-p,0,w-1);
+      out[y*W+x]=img[yy*w+xx];
+    }
+  }
+  return {data:out,w:W,h:H};
+}
+function conv2d(img,w,h,k, stride=1, pad=0){
+  const kw=k.length, kh=kw; // square
+  const padded= pad>0? pad2d(img,w,h,pad): {data:img,w,h};
+  const W=padded.w,H=padded.h;
+  const outW = Math.floor((W-kw)/stride)+1;
+  const outH = Math.floor((H-kh)/stride)+1;
+  const out = new Float32Array(outW*outH);
+  for(let oy=0; oy<outH; oy++){
+    for(let ox=0; ox<outW; ox++){
+      let s=0;
+      for(let ky=0; ky<kh; ky++){
+        for(let kx=0; kx<kw; kx++){
+          const iy = oy*stride + ky;
+          const ix = ox*stride + kx;
+          s += padded.data[iy*W+ix]*k[ky][kx];
         }
-        
-        // Initialize oscilloscope when page loads
-        window.addEventListener('load', () => {
-            new ProfessionalOscilloscope();
-        });
-    </script>
+      }
+      out[oy*outW+ox]=s;
+    }
+  }
+  return {data:out,w:outW,h:outH, pad, stride, ksize:kw};
+}
+function relu(t){ return {data: t.data.map(v=>Math.max(0,v)), w:t.w, h:t.h, pad:t.pad, stride:t.stride, ksize:t.ksize}; }
+function pool2d(img,w,h,ps=2,stride=2,mode='max'){
+  const outW = Math.floor((w-ps)/stride)+1, outH = Math.floor((h-ps)/stride)+1;
+  const out = new Float32Array(outW*outH);
+  for(let oy=0; oy<outH; oy++){
+    for(let ox=0; ox<outW; ox++){
+      let best = mode==='avg'?0:-1e9;
+      for(let py=0; py<ps; py++){
+        for(let px=0; px<ps; px++){
+          const iy = oy*stride + py, ix = ox*stride + px;
+          const v = img[iy*w+ix];
+          if(mode==='avg'){ best += v; } else { if(v>best) best=v; }
+        }
+      }
+      out[oy*outW+ox] = mode==='avg'? best/(ps*ps) : best;
+    }
+  }
+  return {data:out,w:outW,h:outH, ps, stride};
+}
+
+/* ---------- Simple pipeline container ---------- */
+const state = {
+  raw: null, gray: null, w:0, h:0,
+  conv1:null, relu1:null, pool1:null,
+  conv2:null, relu2:null, pool2:null,
+  flatten:null, fc:null,
+  // per-layer inputs (for receptive field display)
+  inputs: {}
+};
+
+/* sample image (inline 64×64 0/1 digit-ish) */
+function makeSample(size=64){
+  // generate a synthetic "6" using simple drawing on canvas
+  const c = document.createElement('canvas'); c.width=size; c.height=size;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle='black'; ctx.fillRect(0,0,size,size);
+  ctx.strokeStyle='white'; ctx.lineWidth = Math.max(4, size/16);
+  ctx.beginPath();
+  ctx.arc(size*0.52,size*0.46,size*0.28, Math.PI*0.2, Math.PI*1.4);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(size*0.52,size*0.66,size*0.16, 0, Math.PI*2);
+  ctx.stroke();
+  const id = ctx.getImageData(0,0,size,size).data;
+  const gray = new Float32Array(size*size);
+  for(let i=0;i<size*size;i++){
+    const r=id[4*i], g=id[4*i+1], b=id[4*i+2];
+    gray[i]= (0.299*r+0.587*g+0.114*b)/255;
+  }
+  return {data:gray,w:size,h:size};
+}
+
+function normalize(arr, mode){
+  const out = new Float32Array(arr.length);
+  if(mode===0){ // 0..255 visualization
+    for(let i=0;i<arr.length;i++) out[i]= clamp(arr[i]*255, 0,255)/255;
+  }else if(mode===1){ // 0..1
+    for(let i=0;i<arr.length;i++) out[i]= clamp(arr[i],0,1);
+  }else{ // -1..1
+    for(let i=0;i<arr.length;i++) out[i]= clamp(arr[i]*2-1,-1,1)*0.5 + 0.5; // map to 0..1 for display
+  }
+  return out;
+}
+
+function loadImageToGray(imgEl, size){
+  const c=document.createElement('canvas'); c.width=size; c.height=size;
+  const ctx=c.getContext('2d');
+  ctx.drawImage(imgEl,0,0,size,size);
+  const id=ctx.getImageData(0,0,size,size).data;
+  const gray=new Float32Array(size*size);
+  for(let i=0;i<size*size;i++){
+    const r=id[4*i], g=id[4*i+1], b=id[4*i+2];
+    gray[i]=(0.299*r+0.587*g+0.114*b)/255;
+  }
+  return {data:gray,w:size,h:size};
+}
+
+/* ---------- Rendering ---------- */
+function renderLayer(layer){
+  const inCan = $('inCanvas'), maps = $('maps'), probs = $('probs');
+  maps.innerHTML=''; probs.innerHTML='';
+  let input, outputs, titles=[];
+  const szSel = +$('size').value|0;
+  const normMode = +$('norm').value|0;
+
+  function drawInput(arr,w,h,legend){
+    const normed = normalize(arr, normMode);
+    toCanvas(normed,w,h,inCan);
+    $('inLegend').textContent = legend + ` — shape: ${w}×${h}`;
+  }
+  function addMap(arr,w,h,cap, idx, onClick){
+    const wrap=document.createElement('div'); wrap.className='tile';
+    const c=document.createElement('canvas'); c.width=w; c.height=h;
+    const normed = normalize(arr, normMode);
+    toCanvas(normed,w,h,c);
+    const badge=document.createElement('div'); badge.className='cap'; badge.textContent=cap;
+    wrap.appendChild(c); wrap.appendChild(badge);
+    wrap.addEventListener('click', ()=>onClick && onClick(idx, c));
+    maps.appendChild(wrap);
+  }
+
+  if(layer==='input'){
+    input = state.gray; outputs=[state.gray]; titles=['Gray'];
+    drawInput(input.data,input.w,input.h,'Original');
+    $('outLegend').textContent='Showing grayscale input.';
+    maps.className='grid cols-1';
+    addMap(input.data,input.w,input.h,'Gray',0);
+    $('shape').textContent = `shape: ${input.w}×${input.h}×1`;
+    $('status').textContent='Status: ready';
+    return;
+  }
+
+  if(layer==='conv1' || layer==='relu1' || layer==='pool1'){
+    input = state.inputs['conv1'];
+    drawInput(input.data,input.w,input.h,'Input to Conv1');
+    const bank = pickBank($('conv1Filters').value);
+    const out = (layer==='conv1')? state.conv1 :
+                (layer==='relu1')? state.relu1 : state.pool1;
+    $('outLegend').textContent = (layer==='conv1'?'Pre-activation maps':
+                                  layer==='relu1'?'After ReLU (negative→0)':
+                                  'After pooling (downsampled)');
+    maps.className='grid cols-2';
+    out.forEach((t, i)=>{
+      addMap(t.data,t.w,t.h, bank[i].name, i, (idx, canvas)=>{
+        // highlight receptive field for clicked pixel
+        highlightRF(canvas, input, t, state.meta.conv1, 'Conv1');
+      });
+    });
+    $('shape').textContent = `shape: ${out[0].w}×${out[0].h}×${out.length}`;
+    return;
+  }
+
+  if(layer==='conv2' || layer==='relu2' || layer==='pool2'){
+    input = state.inputs['conv2'];
+    drawInput(input.data,input.w,input.h,'Input to Conv2');
+    const bank = pickBank($('conv2Filters').value);
+    const out = (layer==='conv2')? state.conv2 :
+                (layer==='relu2')? state.relu2 : state.pool2;
+    $('outLegend').textContent = (layer==='conv2'?'Pre-activation maps':
+                                  layer==='relu2'?'After ReLU':
+                                  'After pooling');
+    maps.className='grid cols-2';
+    out.forEach((t, i)=>{
+      addMap(t.data,t.w,t.h, bank[i].name, i, (idx, canvas)=>{
+        highlightRF(canvas, input, t, state.meta.conv2, 'Conv2');
+      });
+    });
+    $('shape').textContent = `shape: ${out[0].w}×${out[0].h}×${out.length}`;
+    return;
+  }
+
+  if(layer==='flatten'){
+    input = state.inputs['flatten'];
+    drawInput(input.data,input.w,input.h,'Input to Flatten (Pool2 output)');
+    const v = state.flatten; // 1D vector
+    $('outLegend').textContent = `Flattened length: ${v.length}`;
+    maps.className='grid cols-1';
+    // Render as tiny bar canvas
+    const w = Math.min(512, Math.ceil(Math.sqrt(v.length))*4);
+    const h = 40;
+    const c = document.createElement('canvas'); c.width=w; c.height=h;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle='#0b1220'; ctx.fillRect(0,0,w,h);
+    const mx = Math.max(...v), mn = Math.min(...v), R = mx-mn || 1;
+    for(let i=0;i<v.length;i++){
+      const x = Math.floor(i%w), y= h - Math.floor((v[i]-mn)/R*h);
+      ctx.fillStyle = '#38bdf8'; ctx.fillRect(x,y,1,h-y);
+    }
+    const wrap=document.createElement('div'); wrap.className='tile';
+    wrap.appendChild(c); maps.appendChild(wrap);
+    $('shape').textContent = `shape: ${v.length}`;
+    return;
+  }
+
+  if(layer==='fc'){
+    // show mock probabilities
+    $('inLegend').textContent = 'Flatten → FC (toy weights) → Softmax';
+    $('outLegend').textContent = 'Toy classes and probabilities (demo only)';
+    maps.innerHTML='';
+    const probsArr = state.fc;
+    const classes = ['Edge-ish', 'Blob-ish', 'Stroke-ish'];
+    probs.innerHTML='';
+    probsArr.forEach((p,i)=>{
+      const row = document.createElement('div');
+      row.className='flex';
+      const name = document.createElement('div'); name.textContent=classes[i]; name.className='badge';
+      const bar = document.createElement('div'); bar.className='bar';
+      const fill = document.createElement('div'); fill.className='fill'; fill.style.width=(p*100).toFixed(1)+'%';
+      bar.appendChild(fill);
+      const pct = document.createElement('div'); pct.textContent=(p*100).toFixed(1)+'%'; pct.className='note';
+      row.appendChild(name); row.appendChild(bar); row.appendChild(pct);
+      $('probs').appendChild(row);
+    });
+    $('shape').textContent = `classes: ${probsArr.length}`;
+    return;
+  }
+}
+
+function highlightRF(canvas, inputTensor, outTensor, meta, label){
+  // Map clicked output pixel -> input region
+  const rect = canvas.getBoundingClientRect();
+  canvas.classList.remove('hl'); // clear any previous
+  const onClick = (e)=>{
+    const x = Math.floor((e.clientX-rect.left)/rect.width * outTensor.w);
+    const y = Math.floor((e.clientY-rect.top)/rect.height * outTensor.h);
+    canvas.classList.add('hl');
+    // compute RF in input
+    const {stride, pad, ksize} = meta;
+    const ix0 = y*stride - pad;
+    const iy0 = x*stride - pad;
+    const x0 = ix0, y0 = iy0, x1 = ix0 + ksize, y1 = iy0 + ksize;
+    // draw overlay on left input canvas
+    const c = $('inCanvas'); const ctx = c.getContext('2d');
+    renderLayer($('layerSel').value); // refresh
+    ctx.strokeStyle = '#f59e0b'; ctx.lineWidth=2;
+    ctx.strokeRect(x0, y0, ksize, ksize);
+    $('status').textContent = `Clicked ${label} output at (${x},${y}) → RF: [${x0},${y0}]..[${x1-1},${y1-1}]`;
+  };
+  canvas.onclick = onClick;
+}
+
+/* ---------- Forward pass ---------- */
+function forward(){
+  $('status').textContent='Running...';
+  const sz = +$('size').value|0;
+  let input = state.gray;
+  // conv1
+  const [k1, s1, p1] = $('conv1Cfg').value.split(',').map(Number);
+  const bank1 = pickBank($('conv1Filters').value), conv1=[], relu1=[], pool1=[];
+  state.inputs['conv1'] = input;
+  bank1.forEach(b=>{
+    const t = conv2d(input.data,input.w,input.h,b.k,s1,p1); conv1.push(t);
+    relu1.push(relu(t));
+    const [ps, pstr] = $('poolCfg').value.split(',').map(Number);
+    const pl = pool2d(relu1[relu1.length-1].data, relu1[relu1.length-1].w, relu1[relu1.length-1].h, ps, pstr, $('poolType').value);
+    pool1.push(pl);
+  });
+  state.conv1=conv1; state.relu1=relu1; state.pool1=pool1;
+  state.meta = state.meta || {};
+  state.meta.conv1 = {stride:s1, pad:p1, ksize:k1};
+
+  // stack pool1 as input to conv2 by channel-wise averaging (simple demo)
+  const in2w = pool1[0].w, in2h = pool1[0].h;
+  const stacked = new Float32Array(in2w*in2h);
+  pool1.forEach(t=>{ for(let i=0;i<stacked.length;i++) stacked[i]+=t.data[i]; });
+  for(let i=0;i<stacked.length;i++) stacked[i]/=pool1.length;
+  state.inputs['conv2'] = {data:stacked,w:in2w,h:in2h};
+
+  // conv2
+  const [k2, s2, p2] = $('conv2Cfg').value.split(',').map(Number);
+  const bank2 = pickBank($('conv2Filters').value), conv2=[], relu2=[], pool2=[];
+  bank2.forEach(b=>{
+    const t = conv2d(stacked,in2w,in2h,b.k,s2,p2); conv2.push(t);
+    relu2.push(relu(t));
+    const [ps, pstr] = $('poolCfg').value.split(',').map(Number);
+    const pl = pool2d(relu2[relu2.length-1].data, relu2[relu2.length-1].w, relu2[relu2.length-1].h, ps, pstr, $('poolType').value);
+    pool2.push(pl);
+  });
+  state.conv2=conv2; state.relu2=relu2; state.pool2=pool2;
+  state.meta.conv2 = {stride:s2, pad:p2, ksize:k2};
+
+  // Flatten + toy FC (not trained; for demo)
+  const last = pool2[0]; // assume all same shape
+  const depth = pool2.length, len = last.w*last.h*depth;
+  const flat = new Float32Array(len);
+  for(let d=0; d<depth; d++){
+    const t = pool2[d];
+    for(let i=0;i<t.data.length;i++){
+      flat[d*t.data.length+i]=t.data[i];
+    }
+  }
+  state.inputs['flatten'] = {data:last.data, w:last.w, h:last.h};
+  state.flatten = flat;
+
+  // 3-class toy FC: random fixed weights seeded by filter names
+  function hashStr(s){ let h=0; for(let i=0;i<s.length;i++) h=(h*31 + s.charCodeAt(i))|0; return h>>>0; }
+  const seed = hashStr($('conv1Filters').value + $('conv2Filters').value) % 9973;
+  function rand(i){ return ((i*9301 + 49297*seed + 233280) % 233280)/233280 - 0.5; }
+  const logits=[0,0,0];
+  for(let i=0;i<flat.length;i++){
+    logits[0]+= flat[i]*rand(i+1);
+    logits[1]+= flat[i]*rand(i+7);
+    logits[2]+= flat[i]*rand(i+13);
+  }
+  const probs = softmax(logits);
+  state.fc = probs;
+
+  $('status').textContent='Done.';
+}
+
+/* ---------- Load / Reset ---------- */
+function resetAll(){
+  const sample = makeSample(+$('size').value|0);
+  state.gray = sample; state.w=sample.w; state.h=sample.h;
+  state.inputs={}; state.conv1=state.relu1=state.pool1=state.conv2=state.relu2=state.pool2=null;
+  state.flatten=null; state.fc=null; state.meta={};
+  renderLayer('input'); $('layerSel').value='input';
+}
+$('reset').onclick = resetAll;
+$('run').onclick = ()=>{ forward(); renderLayer($('layerSel').value); };
+$('layerSel').onchange = ()=> renderLayer($('layerSel').value);
+
+$('file').addEventListener('change', (e)=>{
+  const f=e.target.files[0]; if(!f) return;
+  const img=new Image(); img.onload=()=>{
+    const g = loadImageToGray(img, +$('size').value|0);
+    state.gray=g; state.w=g.w; state.h=g.h; renderLayer('input'); $('layerSel').value='input';
+    $('status').textContent='Loaded custom image.';
+  };
+  img.src=URL.createObjectURL(f);
+});
+
+window.addEventListener('load', resetAll);
+</script>
 </body>
 </html>
