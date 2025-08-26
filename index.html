@@ -1,606 +1,903 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Simple CNN Explainer — Interactive</title>
-<style>
-  :root{
-    --bg:#0b1220; --ink:#e5e7eb; --muted:#94a3b8; --card:#0f172a; --accent:#38bdf8; --grid:#1f2937;
-    --good:#22c55e; --warn:#f59e0b;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; background:linear-gradient(180deg,#0b1220,#0b1220 60%,#0e1628);
-    color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  }
-  header{
-    padding:18px 20px; border-bottom:1px solid #111827; position:sticky; top:0; backdrop-filter: blur(8px);
-    background:rgba(11,18,32,.7);
-  }
-  header h1{margin:0; font-size:18px; font-weight:700; letter-spacing:.2px}
-  .wrap{display:grid; grid-template-columns: 320px 1fr; gap:16px; padding:16px}
-  .card{
-    background:var(--card); border:1px solid #0b1220; border-radius:16px; padding:14px;
-    box-shadow: 0 6px 18px rgba(0,0,0,.25);
-  }
-  .card h2{margin:.2em 0 .6em; font-size:16px}
-  .panel{display:flex; flex-direction:column; gap:14px; max-height:calc(100vh - 96px); overflow:auto;}
-  label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
-  input[type="number"], select{
-    width:100%; padding:10px 12px; border-radius:10px; border:1px solid #1f2937; background:#0b1220; color:var(--ink);
-  }
-  input[type="file"]{width:100%}
-  button{
-    background:var(--accent); color:#001018; border:none; padding:10px 14px; border-radius:12px; font-weight:700; cursor:pointer;
-  }
-  button.secondary{ background:#111827; color:#cbd5e1; border:1px solid #1f2937 }
-  .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-  .preview{
-    display:grid; grid-template-columns: minmax(260px, 420px) 1fr; gap:16px;
-  }
-  .figure{display:flex; flex-direction:column; gap:10px}
-  .figure canvas, .figure img{
-    max-width:100%; border-radius:12px; border:1px solid #1f2937; background:#0b1220;
-  }
-  .grid{
-    display:grid; gap:8px;
-  }
-  .grid.cols-1{grid-template-columns: repeat(1, minmax(120px, 1fr));}
-  .grid.cols-2{grid-template-columns: repeat(2, minmax(120px, 1fr));}
-  .grid.cols-4{grid-template-columns: repeat(4, minmax(120px, 1fr));}
-  .tile{position:relative}
-  .tile canvas{width:100%; height:auto; border-radius:10px; border:1px solid #1f2937}
-  .tile .cap{position:absolute; left:8px; top:8px; font-size:11px; color:#cbd5e1; background:rgba(0,0,0,.35); padding:2px 6px; border-radius:8px}
-  .legend{font-size:12px; color:var(--muted)}
-  .hl{outline:2px solid var(--warn); outline-offset:-2px}
-  .status{font-size:12px; color:#a1a1aa}
-  .flex{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-  .badge{font-size:12px; background:#111827; border:1px solid #1f2937; color:#cbd5e1; border-radius:999px; padding:4px 8px}
-  .note{font-size:12px; color:#94a3b8}
-  .prob{display:flex; gap:8px; flex-wrap:wrap}
-  .bar{height:10px; background:#111827; border-radius:8px; overflow:hidden; width:160px; border:1px solid #1f2937}
-  .fill{height:100%; background:var(--good)}
-  footer{padding:10px 16px; color:#94a3b8; font-size:12px}
-  @media (max-width: 980px){
-    .wrap{grid-template-columns: 1fr}
-    .preview{grid-template-columns: 1fr}
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Portfolio Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/index.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-group {
+            display: flex;
+            gap: 20px;
+            align-items: end;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .input-group input, .input-group select {
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .summary-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .metric {
+            margin: 10px 0;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .positive {
+            color: #27ae60;
+        }
+
+        .negative {
+            color: #e74c3c;
+        }
+
+        .neutral {
+            color: #3498db;
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #c33;
+        }
+
+        .success {
+            background: #efe;
+            color: #383;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #383;
+        }
+
+        .api-key-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .api-key-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .api-instructions {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<header>
-  <h1>Simple CNN Explainer — Conv → ReLU → Pool → Conv2 → ReLU → Pool2 → Flatten → FC</h1>
-</header>
+    <div class="container">
+        <header class="header">
+            <h1>📈 Investment Portfolio Tracker</h1>
+            <p>Track and analyze your U1 and U2 portfolios with real-time data</p>
+        </header>
 
-<div class="wrap">
-  <!-- LEFT: Controls -->
-  <aside class="panel card">
-    <h2>Controls</h2>
+        <div class="api-key-section">
+            <h3>🔑 API Configuration</h3>
+            <div class="api-instructions">
+                <strong>Get your free Alpha Vantage API key:</strong><br>
+                1. Visit <a href="https://www.alphavantage.co/support/#api-key" target="_blank">Alpha Vantage</a><br>
+                2. Sign up for a free account<br>
+                3. Copy your API key and paste it below<br>
+                <small>Free tier: 5 API calls per minute, 500 calls per day</small>
+            </div>
+            <div class="input-group">
+                <label for="apiKey">Alpha Vantage API Key:</label>
+                <input type="text" id="apiKey" placeholder="Enter your API key here..." />
+            </div>
+        </div>
 
-    <div>
-      <label>Upload image (RGB or grayscale)</label>
-      <input id="file" type="file" accept="image/*"/>
-      <div class="note">Tip: High contrast images work best. For class demo, the built-in sample is used if none uploaded.</div>
+        <div class="controls">
+            <div class="control-group">
+                <div class="input-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" />
+                </div>
+                <div class="input-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" />
+                </div>
+                <div class="input-group">
+                    <label for="portfolio">Portfolio:</label>
+                    <select id="portfolio">
+                        <option value="both">Both Portfolios</option>
+                        <option value="u1">U1 Portfolio</option>
+                        <option value="u2">U2 Portfolio</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="updateDashboard()">
+                    📊 Update Dashboard
+                </button>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    💾 Export Data
+                </button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Fetching stock data... Please wait</p>
+        </div>
+
+        <div class="summary-grid" id="summarySection" style="display: none;">
+            <div class="summary-card" id="u1Summary">
+                <h3>U1 Portfolio</h3>
+                <div class="metric">
+                    <div class="metric-label">Total Investment</div>
+                    <div class="metric-value neutral" id="u1Investment">₹0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Current Value</div>
+                    <div class="metric-value neutral" id="u1Current">₹0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Gain/Loss</div>
+                    <div class="metric-value" id="u1GainLoss">₹0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Return %</div>
+                    <div class="metric-value" id="u1Return">0%</div>
+                </div>
+            </div>
+
+            <div class="summary-card" id="u2Summary">
+                <h3>U2 Portfolio</h3>
+                <div class="metric">
+                    <div class="metric-label">Total Investment</div>
+                    <div class="metric-value neutral" id="u2Investment">₹0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Current Value</div>
+                    <div class="metric-value neutral" id="u2Current">₹0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Gain/Loss</div>
+                    <div class="metric-value" id="u2GainLoss">₹0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Return %</div>
+                    <div class="metric-value" id="u2Return">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard" id="dashboard" style="display: none;">
+            <div class="card">
+                <h3>📊 Portfolio Performance</h3>
+                <canvas id="performanceChart"></canvas>
+            </div>
+            
+            <div class="card">
+                <h3>🥧 Portfolio Allocation</h3>
+                <canvas id="allocationChart"></canvas>
+            </div>
+        </div>
+
+        <div class="table-container" id="detailsSection" style="display: none;">
+            <h3>📋 Detailed Portfolio Analysis</h3>
+            <table id="portfolioTable">
+                <thead>
+                    <tr>
+                        <th>Portfolio</th>
+                        <th>Stock</th>
+                        <th>Shares</th>
+                        <th>Buy Price</th>
+                        <th>Current Price</th>
+                        <th>Investment</th>
+                        <th>Current Value</th>
+                        <th>Gain/Loss</th>
+                        <th>Return %</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="row">
-      <div>
-        <label>Resize to (square)</label>
-        <input id="size" type="number" value="64" min="28" max="256" step="4">
-      </div>
-      <div>
-        <label>Normalize</label>
-        <select id="norm">
-          <option value="0">0…255</option>
-          <option value="1" selected>0…1</option>
-          <option value="2">-1…1</option>
-        </select>
-      </div>
-    </div>
+    <script>
+        // Portfolio data
+        const portfolios = {
+            u1: {
+                'ALOKINDS': 300,
+                'BHEL': 200,
+                'BANKBARODA': 100,
+                'MAHABANK': 100,
+                'TCS': 100, // BOM:500270
+                'GRASIM': 25,
+                'GMRINFRA': 220, // Combined GMRAIRPORT + GMRP&UI
+                'GTLINFRA': 350,
+                'HDFCBANK': 72,
+                'IDEA': 1000,
+                'ITC': 100,
+                'INDIANHUME': 10, // ITCHOTELS equivalent
+                'JIOFIN': 300,
+                'JPPOWER': 1500,
+                'SBIN': 800,
+                'SUZLON': 400,
+                'TRIDENT': 300,
+                'UNIONBANK': 786,
+                'RELIANCE': 27,
+                'ETERNALMAT': 50 // ETERNAL equivalent
+            },
+            u2: {
+                'ABCAPITAL': 105,
+                'AMBUJACEM': 100,
+                'CANBK': 500,
+                'CDSL': 25,
+                'GRASIM': 75,
+                'GTLINFRA': 650,
+                'IDEA': 500,
+                'ICICIBANK': 70,
+                'IDFCFIRSTB': 100,
+                'JIOFIN': 100,
+                'PNB': 400,
+                'ABFRL': 300,
+                'RELINFRA': 100,
+                'GOLDBEES': 50, // SILVERBEES equivalent
+                'TATAMOTORS': 100,
+                'TATAPOWER': 300,
+                'TATATEL': 100, // TTML equivalent
+                'BANKBARODA': 200
+            }
+        };
 
-    <div class="row">
-      <div>
-        <label>Conv1: filters</label>
-        <select id="conv1Filters">
-          <option value="edges">4 — Edges (Sobel/Laplace)</option>
-          <option value="gabor">4 — Gabor-ish</option>
-          <option value="custom">4 — Custom demo</option>
-        </select>
-      </div>
-      <div>
-        <label>Conv1: kernel / stride / pad</label>
-        <select id="conv1Cfg">
-          <option value="3,1,0">k3 / s1 / p0</option>
-          <option value="3,1,1" selected>k3 / s1 / p1</option>
-          <option value="5,1,2">k5 / s1 / p2</option>
-          <option value="3,2,1">k3 / s2 / p1</option>
-        </select>
-      </div>
-    </div>
+        // Stock data cache
+        let stockData = {};
+        let charts = {};
 
-    <div class="row">
-      <div>
-        <label>Conv2: filters</label>
-        <select id="conv2Filters">
-          <option value="edges">4 — Edges (mix)</option>
-          <option value="gabor" selected>4 — Gabor-ish</option>
-          <option value="custom">4 — Custom demo</option>
-        </select>
-      </div>
-      <div>
-        <label>Conv2: kernel / stride / pad</label>
-        <select id="conv2Cfg">
-          <option value="3,1,1" selected>k3 / s1 / p1</option>
-          <option value="3,2,1">k3 / s2 / p1</option>
-          <option value="5,1,2">k5 / s1 / p2</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Pooling</label>
-        <select id="poolType">
-          <option value="max" selected>Max Pool</option>
-          <option value="avg">Avg Pool</option>
-        </select>
-      </div>
-      <div>
-        <label>Pool size / stride</label>
-        <select id="poolCfg">
-          <option value="2,2" selected>2×2 / s2</option>
-          <option value="3,2">3×3 / s2</option>
-          <option value="3,3">3×3 / s3</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="flex">
-      <button id="run">Run forward</button>
-      <button id="reset" class="secondary">Reset</button>
-      <span id="shape" class="badge">shape: —</span>
-    </div>
-
-    <div>
-      <label>Layer to view</label>
-      <select id="layerSel">
-        <option value="input">Input</option>
-        <option value="conv1">Conv1 (pre-activation)</option>
-        <option value="relu1">ReLU1</option>
-        <option value="pool1">Pool1</option>
-        <option value="conv2">Conv2 (pre-activation)</option>
-        <option value="relu2">ReLU2</option>
-        <option value="pool2">Pool2</option>
-        <option value="flatten">Flatten</option>
-        <option value="fc">Fully Connected (mock)</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Click an output pixel to highlight its receptive field</label>
-      <div class="note">Then look at the left “Input to this layer” panel — the orange rectangle shows the exact spatial region that produced that activation.</div>
-    </div>
-
-    <div class="status" id="status">Status: idle</div>
-  </aside>
-
-  <!-- RIGHT: Visualizations -->
-  <main class="card">
-    <div class="preview">
-      <div class="figure">
-        <h2>Input to this layer</h2>
-        <canvas id="inCanvas" width="256" height="256"></canvas>
-        <div class="legend" id="inLegend"></div>
-      </div>
-      <div class="figure">
-        <h2>Feature maps / output of this layer</h2>
-        <div id="maps" class="grid cols-2"></div>
-        <div class="legend" id="outLegend"></div>
-        <div id="probs" class="prob"></div>
-      </div>
-    </div>
-  </main>
-</div>
-
-<footer>
-  Inspired by <a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noreferrer">CNN Explainer</a>. This demo computes everything in pure JS to show the mechanics (convolution, ReLU, pooling, receptive fields).
-</footer>
-
-<script>
-/* ---------- Utilities ---------- */
-const $ = (id) => document.getElementById(id);
-function clamp(x, a, b){ return Math.max(a, Math.min(b, x)); }
-function softmax(arr){
-  const m = Math.max(...arr), ex = arr.map(v=>Math.exp(v-m)), s = ex.reduce((a,b)=>a+b,0);
-  return ex.map(v=>v/s);
-}
-function toCanvas(imgData, w, h, canvas){
-  const ctx = canvas.getContext('2d');
-  const out = ctx.createImageData(w, h);
-  for(let i=0;i<w*h;i++){
-    const v = clamp(Math.round(imgData[i]*255),0,255);
-    out.data[4*i+0]=v; out.data[4*i+1]=v; out.data[4*i+2]=v; out.data[4*i+3]=255;
-  }
-  canvas.width=w; canvas.height=h; ctx.putImageData(out,0,0);
-}
-
-/* ---------- Kernels ---------- */
-function bankEdges(){
-  return [
-    {name:'Sobel X', k:[[ -1,0,1],[-2,0,2],[-1,0,1]]},
-    {name:'Sobel Y', k:[[ -1,-2,-1],[0,0,0],[1,2,1]]},
-    {name:'Laplacian', k:[[0,-1,0],[-1,4,-1],[0,-1,0]]},
-    {name:'Sharpen', k:[[0,-1,0],[-1,5,-1],[0,-1,0]]},
-  ];
-}
-function bankGabor(){
-  const g1 = [[0.5,0,-0.5],[1,0,-1],[0.5,0,-0.5]];
-  const g2 = [[0.5,1,0.5],[0,0,0],[-0.5,-1,-0.5]];
-  const g3 = [[-1,0,1],[0,0,0],[1,0,-1]];
-  const g4 = [[-1,-1,-1],[0,8,0],[-1,-1,-1]];
-  return [{name:'Gabor 0°',k:g1},{name:'Gabor 90°',k:g2},{name:'Edge45',k:g3},{name:'Spot',k:g4}];
-}
-function bankCustom(){
-  return [
-    {name:'BoxBlur', k:[[1,1,1],[1,1,1],[1,1,1]].map(r=>r.map(v=>v/9))},
-    {name:'Emboss', k:[[-2,-1,0],[-1,1,1],[0,1,2]]},
-    {name:'Line H', k:[[1,1,1],[0,0,0],[-1,-1,-1]]},
-    {name:'Line V', k:[[1,0,-1],[1,0,-1],[1,0,-1]]},
-  ];
-}
-function pickBank(sel){
-  if(sel==='edges') return bankEdges();
-  if(sel==='gabor') return bankGabor();
-  return bankCustom();
-}
-
-/* ---------- Core ops (grayscale, NCHW-ish but simple arrays) ---------- */
-function pad2d(img,w,h,p){
-  const W=w+2*p, H=h+2*p, out=new Float32Array(W*H);
-  for(let y=0;y<H;y++){
-    for(let x=0;x<W;x++){
-      const yy=clamp(y-p,0,h-1), xx=clamp(x-p,0,w-1);
-      out[y*W+x]=img[yy*w+xx];
-    }
-  }
-  return {data:out,w:W,h:H};
-}
-function conv2d(img,w,h,k, stride=1, pad=0){
-  const kw=k.length, kh=kw; // square
-  const padded= pad>0? pad2d(img,w,h,pad): {data:img,w,h};
-  const W=padded.w,H=padded.h;
-  const outW = Math.floor((W-kw)/stride)+1;
-  const outH = Math.floor((H-kh)/stride)+1;
-  const out = new Float32Array(outW*outH);
-  for(let oy=0; oy<outH; oy++){
-    for(let ox=0; ox<outW; ox++){
-      let s=0;
-      for(let ky=0; ky<kh; ky++){
-        for(let kx=0; kx<kw; kx++){
-          const iy = oy*stride + ky;
-          const ix = ox*stride + kx;
-          s += padded.data[iy*W+ix]*k[ky][kx];
+        // Initialize dates
+        function initializeDates() {
+            const today = new Date();
+            const oneYearAgo = new Date(today);
+            oneYearAgo.setFullYear(today.getFullYear() - 1);
+            
+            document.getElementById('endDate').valueAsDate = today;
+            document.getElementById('startDate').valueAsDate = oneYearAgo;
         }
-      }
-      out[oy*outW+ox]=s;
-    }
-  }
-  return {data:out,w:outW,h:outH, pad, stride, ksize:kw};
-}
-function relu(t){ return {data: t.data.map(v=>Math.max(0,v)), w:t.w, h:t.h, pad:t.pad, stride:t.stride, ksize:t.ksize}; }
-function pool2d(img,w,h,ps=2,stride=2,mode='max'){
-  const outW = Math.floor((w-ps)/stride)+1, outH = Math.floor((h-ps)/stride)+1;
-  const out = new Float32Array(outW*outH);
-  for(let oy=0; oy<outH; oy++){
-    for(let ox=0; ox<outW; ox++){
-      let best = mode==='avg'?0:-1e9;
-      for(let py=0; py<ps; py++){
-        for(let px=0; px<ps; px++){
-          const iy = oy*stride + py, ix = ox*stride + px;
-          const v = img[iy*w+ix];
-          if(mode==='avg'){ best += v; } else { if(v>best) best=v; }
+
+        // Show message
+        function showMessage(message, type = 'error') {
+            const existing = document.querySelector('.message');
+            if (existing) existing.remove();
+            
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = message;
+            document.querySelector('.controls').appendChild(div);
+            
+            setTimeout(() => div.remove(), 5000);
         }
-      }
-      out[oy*outW+ox] = mode==='avg'? best/(ps*ps) : best;
-    }
-  }
-  return {data:out,w:outW,h:outH, ps, stride};
-}
 
-/* ---------- Simple pipeline container ---------- */
-const state = {
-  raw: null, gray: null, w:0, h:0,
-  conv1:null, relu1:null, pool1:null,
-  conv2:null, relu2:null, pool2:null,
-  flatten:null, fc:null,
-  // per-layer inputs (for receptive field display)
-  inputs: {}
-};
+        // Fetch stock data
+        async function fetchStockData(symbol, apiKey) {
+            const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}.BSE&apikey=${apiKey}&outputsize=full`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data['Error Message']) {
+                    console.warn(`Error for ${symbol}:`, data['Error Message']);
+                    return null;
+                }
+                
+                if (data['Note']) {
+                    throw new Error('API call frequency limit reached. Please try again later.');
+                }
+                
+                const timeSeries = data['Time Series (Daily)'];
+                if (!timeSeries) {
+                    console.warn(`No data for ${symbol}`);
+                    return null;
+                }
+                
+                return timeSeries;
+            } catch (error) {
+                console.error(`Error fetching data for ${symbol}:`, error);
+                return null;
+            }
+        }
 
-/* sample image (inline 64×64 0/1 digit-ish) */
-function makeSample(size=64){
-  // generate a synthetic "6" using simple drawing on canvas
-  const c = document.createElement('canvas'); c.width=size; c.height=size;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle='black'; ctx.fillRect(0,0,size,size);
-  ctx.strokeStyle='white'; ctx.lineWidth = Math.max(4, size/16);
-  ctx.beginPath();
-  ctx.arc(size*0.52,size*0.46,size*0.28, Math.PI*0.2, Math.PI*1.4);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(size*0.52,size*0.66,size*0.16, 0, Math.PI*2);
-  ctx.stroke();
-  const id = ctx.getImageData(0,0,size,size).data;
-  const gray = new Float32Array(size*size);
-  for(let i=0;i<size*size;i++){
-    const r=id[4*i], g=id[4*i+1], b=id[4*i+2];
-    gray[i]= (0.299*r+0.587*g+0.114*b)/255;
-  }
-  return {data:gray,w:size,h:size};
-}
+        // Get price for date
+        function getPriceForDate(timeSeries, targetDate) {
+            if (!timeSeries) return null;
+            
+            const dateStr = targetDate.toISOString().split('T')[0];
+            
+            // Try exact date first
+            if (timeSeries[dateStr]) {
+                return parseFloat(timeSeries[dateStr]['4. close']);
+            }
+            
+            // Find closest date
+            const dates = Object.keys(timeSeries).sort((a, b) => new Date(b) - new Date(a));
+            for (const date of dates) {
+                if (new Date(date) <= targetDate) {
+                    return parseFloat(timeSeries[date]['4. close']);
+                }
+            }
+            
+            return null;
+        }
 
-function normalize(arr, mode){
-  const out = new Float32Array(arr.length);
-  if(mode===0){ // 0..255 visualization
-    for(let i=0;i<arr.length;i++) out[i]= clamp(arr[i]*255, 0,255)/255;
-  }else if(mode===1){ // 0..1
-    for(let i=0;i<arr.length;i++) out[i]= clamp(arr[i],0,1);
-  }else{ // -1..1
-    for(let i=0;i<arr.length;i++) out[i]= clamp(arr[i]*2-1,-1,1)*0.5 + 0.5; // map to 0..1 for display
-  }
-  return out;
-}
+        // Calculate portfolio performance
+        function calculatePerformance(portfolioName, startDate, endDate) {
+            const portfolio = portfolios[portfolioName];
+            const results = [];
+            
+            let totalInvestment = 0;
+            let totalCurrentValue = 0;
+            
+            for (const [symbol, shares] of Object.entries(portfolio)) {
+                const data = stockData[symbol];
+                if (!data) continue;
+                
+                const startPrice = getPriceForDate(data, startDate);
+                const endPrice = getPriceForDate(data, endDate);
+                
+                if (!startPrice || !endPrice) continue;
+                
+                const investment = startPrice * shares;
+                const currentValue = endPrice * shares;
+                const gainLoss = currentValue - investment;
+                const returnPct = (gainLoss / investment) * 100;
+                
+                results.push({
+                    portfolio: portfolioName.toUpperCase(),
+                    symbol,
+                    shares,
+                    startPrice,
+                    endPrice,
+                    investment,
+                    currentValue,
+                    gainLoss,
+                    returnPct
+                });
+                
+                totalInvestment += investment;
+                totalCurrentValue += currentValue;
+            }
+            
+            const totalGainLoss = totalCurrentValue - totalInvestment;
+            const totalReturnPct = totalInvestment > 0 ? (totalGainLoss / totalInvestment) * 100 : 0;
+            
+            return {
+                details: results,
+                summary: {
+                    totalInvestment,
+                    totalCurrentValue,
+                    totalGainLoss,
+                    totalReturnPct
+                }
+            };
+        }
 
-function loadImageToGray(imgEl, size){
-  const c=document.createElement('canvas'); c.width=size; c.height=size;
-  const ctx=c.getContext('2d');
-  ctx.drawImage(imgEl,0,0,size,size);
-  const id=ctx.getImageData(0,0,size,size).data;
-  const gray=new Float32Array(size*size);
-  for(let i=0;i<size*size;i++){
-    const r=id[4*i], g=id[4*i+1], b=id[4*i+2];
-    gray[i]=(0.299*r+0.587*g+0.114*b)/255;
-  }
-  return {data:gray,w:size,h:size};
-}
+        // Update summary cards
+        function updateSummary(u1Results, u2Results) {
+            const formatCurrency = (value) => `₹${Math.abs(value).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            const formatPercent = (value) => `${value.toFixed(2)}%`;
+            
+            // U1 Summary
+            document.getElementById('u1Investment').textContent = formatCurrency(u1Results.summary.totalInvestment);
+            document.getElementById('u1Current').textContent = formatCurrency(u1Results.summary.totalCurrentValue);
+            
+            const u1GainLoss = document.getElementById('u1GainLoss');
+            const u1Return = document.getElementById('u1Return');
+            u1GainLoss.textContent = (u1Results.summary.totalGainLoss >= 0 ? '+' : '-') + formatCurrency(u1Results.summary.totalGainLoss);
+            u1Return.textContent = (u1Results.summary.totalReturnPct >= 0 ? '+' : '') + formatPercent(u1Results.summary.totalReturnPct);
+            
+            u1GainLoss.className = `metric-value ${u1Results.summary.totalGainLoss >= 0 ? 'positive' : 'negative'}`;
+            u1Return.className = `metric-value ${u1Results.summary.totalReturnPct >= 0 ? 'positive' : 'negative'}`;
+            
+            // U2 Summary
+            document.getElementById('u2Investment').textContent = formatCurrency(u2Results.summary.totalInvestment);
+            document.getElementById('u2Current').textContent = formatCurrency(u2Results.summary.totalCurrentValue);
+            
+            const u2GainLoss = document.getElementById('u2GainLoss');
+            const u2Return = document.getElementById('u2Return');
+            u2GainLoss.textContent = (u2Results.summary.totalGainLoss >= 0 ? '+' : '-') + formatCurrency(u2Results.summary.totalGainLoss);
+            u2Return.textContent = (u2Results.summary.totalReturnPct >= 0 ? '+' : '') + formatPercent(u2Results.summary.totalReturnPct);
+            
+            u2GainLoss.className = `metric-value ${u2Results.summary.totalGainLoss >= 0 ? 'positive' : 'negative'}`;
+            u2Return.className = `metric-value ${u2Results.summary.totalReturnPct >= 0 ? 'positive' : 'negative'}`;
+        }
 
-/* ---------- Rendering ---------- */
-function renderLayer(layer){
-  const inCan = $('inCanvas'), maps = $('maps'), probs = $('probs');
-  maps.innerHTML=''; probs.innerHTML='';
-  let input, outputs, titles=[];
-  const szSel = +$('size').value|0;
-  const normMode = +$('norm').value|0;
+        // Update table
+        function updateTable(u1Results, u2Results, selectedPortfolio) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            const formatCurrency = (value) => `₹${Math.abs(value).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            const formatPercent = (value) => `${value.toFixed(2)}%`;
+            
+            let allResults = [];
+            if (selectedPortfolio === 'both' || selectedPortfolio === 'u1') {
+                allResults = allResults.concat(u1Results.details);
+            }
+            if (selectedPortfolio === 'both' || selectedPortfolio === 'u2') {
+                allResults = allResults.concat(u2Results.details);
+            }
+            
+            allResults.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.portfolio}</td>
+                    <td><strong>${row.symbol}</strong></td>
+                    <td>${row.shares.toLocaleString()}</td>
+                    <td>₹${row.startPrice.toFixed(2)}</td>
+                    <td>₹${row.endPrice.toFixed(2)}</td>
+                    <td>${formatCurrency(row.investment)}</td>
+                    <td>${formatCurrency(row.currentValue)}</td>
+                    <td class="${row.gainLoss >= 0 ? 'positive' : 'negative'}">
+                        ${row.gainLoss >= 0 ? '+' : '-'}${formatCurrency(row.gainLoss)}
+                    </td>
+                    <td class="${row.returnPct >= 0 ? 'positive' : 'negative'}">
+                        ${row.returnPct >= 0 ? '+' : ''}${formatPercent(row.returnPct)}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
-  function drawInput(arr,w,h,legend){
-    const normed = normalize(arr, normMode);
-    toCanvas(normed,w,h,inCan);
-    $('inLegend').textContent = legend + ` — shape: ${w}×${h}`;
-  }
-  function addMap(arr,w,h,cap, idx, onClick){
-    const wrap=document.createElement('div'); wrap.className='tile';
-    const c=document.createElement('canvas'); c.width=w; c.height=h;
-    const normed = normalize(arr, normMode);
-    toCanvas(normed,w,h,c);
-    const badge=document.createElement('div'); badge.className='cap'; badge.textContent=cap;
-    wrap.appendChild(c); wrap.appendChild(badge);
-    wrap.addEventListener('click', ()=>onClick && onClick(idx, c));
-    maps.appendChild(wrap);
-  }
+        // Create charts
+        function createCharts(u1Results, u2Results) {
+            // Destroy existing charts
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            charts.performance = new Chart(performanceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['U1 Portfolio', 'U2 Portfolio'],
+                    datasets: [{
+                        label: 'Total Investment',
+                        data: [u1Results.summary.totalInvestment, u2Results.summary.totalInvestment],
+                        backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2
+                    }, {
+                        label: 'Current Value',
+                        data: [u1Results.summary.totalCurrentValue, u2Results.summary.totalCurrentValue],
+                        backgroundColor: 'rgba(118, 75, 162, 0.7)',
+                        borderColor: 'rgba(118, 75, 162, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString('en-IN');
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ₹' + context.parsed.y.toLocaleString('en-IN');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Allocation Chart
+            const allocationCtx = document.getElementById('allocationChart').getContext('2d');
+            const u1Total = u1Results.summary.totalCurrentValue;
+            const u2Total = u2Results.summary.totalCurrentValue;
+            const grandTotal = u1Total + u2Total;
+            
+            charts.allocation = new Chart(allocationCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['U1 Portfolio', 'U2 Portfolio'],
+                    datasets: [{
+                        data: [u1Total, u2Total],
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.8)',
+                            'rgba(118, 75, 162, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(118, 75, 162, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const percentage = ((context.parsed / grandTotal) * 100).toFixed(1);
+                                    return context.label + ': ₹' + context.parsed.toLocaleString('en-IN') + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
-  if(layer==='input'){
-    input = state.gray; outputs=[state.gray]; titles=['Gray'];
-    drawInput(input.data,input.w,input.h,'Original');
-    $('outLegend').textContent='Showing grayscale input.';
-    maps.className='grid cols-1';
-    addMap(input.data,input.w,input.h,'Gray',0);
-    $('shape').textContent = `shape: ${input.w}×${input.h}×1`;
-    $('status').textContent='Status: ready';
-    return;
-  }
+        // Main update function
+        async function updateDashboard() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            if (!apiKey) {
+                showMessage('Please enter your Alpha Vantage API key first!', 'error');
+                return;
+            }
+            
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            const selectedPortfolio = document.getElementById('portfolio').value;
+            
+            if (!startDate || !endDate) {
+                showMessage('Please select both start and end dates', 'error');
+                return;
+            }
+            
+            if (startDate >= endDate) {
+                showMessage('Start date must be before end date', 'error');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('summarySection').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('detailsSection').style.display = 'none';
+            
+            try {
+                // Get unique symbols
+                const allSymbols = new Set([
+                    ...Object.keys(portfolios.u1),
+                    ...Object.keys(portfolios.u2)
+                ]);
+                
+                // Fetch data with delay between requests to respect API limits
+                let fetchedCount = 0;
+                const totalSymbols = allSymbols.size;
+                
+                for (const symbol of allSymbols) {
+                    if (fetchedCount > 0) {
+                        // Wait 12 seconds between requests for free tier (5 calls per minute)
+                        await new Promise(resolve => setTimeout(resolve, 12000));
+                    }
+                    
+                    console.log(`Fetching data for ${symbol} (${fetchedCount + 1}/${totalSymbols})`);
+                    const data = await fetchStockData(symbol, apiKey);
+                    if (data) {
+                        stockData[symbol] = data;
+                    }
+                    fetchedCount++;
+                }
+                
+                // Calculate performance
+                const u1Results = calculatePerformance('u1', startDate, endDate);
+                const u2Results = calculatePerformance('u2', startDate, endDate);
+                
+                // Update UI
+                updateSummary(u1Results, u2Results);
+                updateTable(u1Results, u2Results, selectedPortfolio);
+                createCharts(u1Results, u2Results);
+                
+                // Show sections
+                document.getElementById('summarySection').style.display = 'grid';
+                document.getElementById('dashboard').style.display = 'grid';
+                document.getElementById('detailsSection').style.display = 'block';
+                
+                showMessage('Dashboard updated successfully!', 'success');
+                
+            } catch (error) {
+                showMessage(`Error updating dashboard: ${error.message}`, 'error');
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+            }
+        }
 
-  if(layer==='conv1' || layer==='relu1' || layer==='pool1'){
-    input = state.inputs['conv1'];
-    drawInput(input.data,input.w,input.h,'Input to Conv1');
-    const bank = pickBank($('conv1Filters').value);
-    const out = (layer==='conv1')? state.conv1 :
-                (layer==='relu1')? state.relu1 : state.pool1;
-    $('outLegend').textContent = (layer==='conv1'?'Pre-activation maps':
-                                  layer==='relu1'?'After ReLU (negative→0)':
-                                  'After pooling (downsampled)');
-    maps.className='grid cols-2';
-    out.forEach((t, i)=>{
-      addMap(t.data,t.w,t.h, bank[i].name, i, (idx, canvas)=>{
-        // highlight receptive field for clicked pixel
-        highlightRF(canvas, input, t, state.meta.conv1, 'Conv1');
-      });
-    });
-    $('shape').textContent = `shape: ${out[0].w}×${out[0].h}×${out.length}`;
-    return;
-  }
+        // Export data
+        function exportData() {
+            const data = {
+                portfolios: portfolios,
+                stockData: stockData,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `portfolio_data_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showMessage('Data exported successfully!', 'success');
+        }
 
-  if(layer==='conv2' || layer==='relu2' || layer==='pool2'){
-    input = state.inputs['conv2'];
-    drawInput(input.data,input.w,input.h,'Input to Conv2');
-    const bank = pickBank($('conv2Filters').value);
-    const out = (layer==='conv2')? state.conv2 :
-                (layer==='relu2')? state.relu2 : state.pool2;
-    $('outLegend').textContent = (layer==='conv2'?'Pre-activation maps':
-                                  layer==='relu2'?'After ReLU':
-                                  'After pooling');
-    maps.className='grid cols-2';
-    out.forEach((t, i)=>{
-      addMap(t.data,t.w,t.h, bank[i].name, i, (idx, canvas)=>{
-        highlightRF(canvas, input, t, state.meta.conv2, 'Conv2');
-      });
-    });
-    $('shape').textContent = `shape: ${out[0].w}×${out[0].h}×${out.length}`;
-    return;
-  }
-
-  if(layer==='flatten'){
-    input = state.inputs['flatten'];
-    drawInput(input.data,input.w,input.h,'Input to Flatten (Pool2 output)');
-    const v = state.flatten; // 1D vector
-    $('outLegend').textContent = `Flattened length: ${v.length}`;
-    maps.className='grid cols-1';
-    // Render as tiny bar canvas
-    const w = Math.min(512, Math.ceil(Math.sqrt(v.length))*4);
-    const h = 40;
-    const c = document.createElement('canvas'); c.width=w; c.height=h;
-    const ctx = c.getContext('2d');
-    ctx.fillStyle='#0b1220'; ctx.fillRect(0,0,w,h);
-    const mx = Math.max(...v), mn = Math.min(...v), R = mx-mn || 1;
-    for(let i=0;i<v.length;i++){
-      const x = Math.floor(i%w), y= h - Math.floor((v[i]-mn)/R*h);
-      ctx.fillStyle = '#38bdf8'; ctx.fillRect(x,y,1,h-y);
-    }
-    const wrap=document.createElement('div'); wrap.className='tile';
-    wrap.appendChild(c); maps.appendChild(wrap);
-    $('shape').textContent = `shape: ${v.length}`;
-    return;
-  }
-
-  if(layer==='fc'){
-    // show mock probabilities
-    $('inLegend').textContent = 'Flatten → FC (toy weights) → Softmax';
-    $('outLegend').textContent = 'Toy classes and probabilities (demo only)';
-    maps.innerHTML='';
-    const probsArr = state.fc;
-    const classes = ['Edge-ish', 'Blob-ish', 'Stroke-ish'];
-    probs.innerHTML='';
-    probsArr.forEach((p,i)=>{
-      const row = document.createElement('div');
-      row.className='flex';
-      const name = document.createElement('div'); name.textContent=classes[i]; name.className='badge';
-      const bar = document.createElement('div'); bar.className='bar';
-      const fill = document.createElement('div'); fill.className='fill'; fill.style.width=(p*100).toFixed(1)+'%';
-      bar.appendChild(fill);
-      const pct = document.createElement('div'); pct.textContent=(p*100).toFixed(1)+'%'; pct.className='note';
-      row.appendChild(name); row.appendChild(bar); row.appendChild(pct);
-      $('probs').appendChild(row);
-    });
-    $('shape').textContent = `classes: ${probsArr.length}`;
-    return;
-  }
-}
-
-function highlightRF(canvas, inputTensor, outTensor, meta, label){
-  // Map clicked output pixel -> input region
-  const rect = canvas.getBoundingClientRect();
-  canvas.classList.remove('hl'); // clear any previous
-  const onClick = (e)=>{
-    const x = Math.floor((e.clientX-rect.left)/rect.width * outTensor.w);
-    const y = Math.floor((e.clientY-rect.top)/rect.height * outTensor.h);
-    canvas.classList.add('hl');
-    // compute RF in input
-    const {stride, pad, ksize} = meta;
-    const ix0 = y*stride - pad;
-    const iy0 = x*stride - pad;
-    const x0 = ix0, y0 = iy0, x1 = ix0 + ksize, y1 = iy0 + ksize;
-    // draw overlay on left input canvas
-    const c = $('inCanvas'); const ctx = c.getContext('2d');
-    renderLayer($('layerSel').value); // refresh
-    ctx.strokeStyle = '#f59e0b'; ctx.lineWidth=2;
-    ctx.strokeRect(x0, y0, ksize, ksize);
-    $('status').textContent = `Clicked ${label} output at (${x},${y}) → RF: [${x0},${y0}]..[${x1-1},${y1-1}]`;
-  };
-  canvas.onclick = onClick;
-}
-
-/* ---------- Forward pass ---------- */
-function forward(){
-  $('status').textContent='Running...';
-  const sz = +$('size').value|0;
-  let input = state.gray;
-  // conv1
-  const [k1, s1, p1] = $('conv1Cfg').value.split(',').map(Number);
-  const bank1 = pickBank($('conv1Filters').value), conv1=[], relu1=[], pool1=[];
-  state.inputs['conv1'] = input;
-  bank1.forEach(b=>{
-    const t = conv2d(input.data,input.w,input.h,b.k,s1,p1); conv1.push(t);
-    relu1.push(relu(t));
-    const [ps, pstr] = $('poolCfg').value.split(',').map(Number);
-    const pl = pool2d(relu1[relu1.length-1].data, relu1[relu1.length-1].w, relu1[relu1.length-1].h, ps, pstr, $('poolType').value);
-    pool1.push(pl);
-  });
-  state.conv1=conv1; state.relu1=relu1; state.pool1=pool1;
-  state.meta = state.meta || {};
-  state.meta.conv1 = {stride:s1, pad:p1, ksize:k1};
-
-  // stack pool1 as input to conv2 by channel-wise averaging (simple demo)
-  const in2w = pool1[0].w, in2h = pool1[0].h;
-  const stacked = new Float32Array(in2w*in2h);
-  pool1.forEach(t=>{ for(let i=0;i<stacked.length;i++) stacked[i]+=t.data[i]; });
-  for(let i=0;i<stacked.length;i++) stacked[i]/=pool1.length;
-  state.inputs['conv2'] = {data:stacked,w:in2w,h:in2h};
-
-  // conv2
-  const [k2, s2, p2] = $('conv2Cfg').value.split(',').map(Number);
-  const bank2 = pickBank($('conv2Filters').value), conv2=[], relu2=[], pool2=[];
-  bank2.forEach(b=>{
-    const t = conv2d(stacked,in2w,in2h,b.k,s2,p2); conv2.push(t);
-    relu2.push(relu(t));
-    const [ps, pstr] = $('poolCfg').value.split(',').map(Number);
-    const pl = pool2d(relu2[relu2.length-1].data, relu2[relu2.length-1].w, relu2[relu2.length-1].h, ps, pstr, $('poolType').value);
-    pool2.push(pl);
-  });
-  state.conv2=conv2; state.relu2=relu2; state.pool2=pool2;
-  state.meta.conv2 = {stride:s2, pad:p2, ksize:k2};
-
-  // Flatten + toy FC (not trained; for demo)
-  const last = pool2[0]; // assume all same shape
-  const depth = pool2.length, len = last.w*last.h*depth;
-  const flat = new Float32Array(len);
-  for(let d=0; d<depth; d++){
-    const t = pool2[d];
-    for(let i=0;i<t.data.length;i++){
-      flat[d*t.data.length+i]=t.data[i];
-    }
-  }
-  state.inputs['flatten'] = {data:last.data, w:last.w, h:last.h};
-  state.flatten = flat;
-
-  // 3-class toy FC: random fixed weights seeded by filter names
-  function hashStr(s){ let h=0; for(let i=0;i<s.length;i++) h=(h*31 + s.charCodeAt(i))|0; return h>>>0; }
-  const seed = hashStr($('conv1Filters').value + $('conv2Filters').value) % 9973;
-  function rand(i){ return ((i*9301 + 49297*seed + 233280) % 233280)/233280 - 0.5; }
-  const logits=[0,0,0];
-  for(let i=0;i<flat.length;i++){
-    logits[0]+= flat[i]*rand(i+1);
-    logits[1]+= flat[i]*rand(i+7);
-    logits[2]+= flat[i]*rand(i+13);
-  }
-  const probs = softmax(logits);
-  state.fc = probs;
-
-  $('status').textContent='Done.';
-}
-
-/* ---------- Load / Reset ---------- */
-function resetAll(){
-  const sample = makeSample(+$('size').value|0);
-  state.gray = sample; state.w=sample.w; state.h=sample.h;
-  state.inputs={}; state.conv1=state.relu1=state.pool1=state.conv2=state.relu2=state.pool2=null;
-  state.flatten=null; state.fc=null; state.meta={};
-  renderLayer('input'); $('layerSel').value='input';
-}
-$('reset').onclick = resetAll;
-$('run').onclick = ()=>{ forward(); renderLayer($('layerSel').value); };
-$('layerSel').onchange = ()=> renderLayer($('layerSel').value);
-
-$('file').addEventListener('change', (e)=>{
-  const f=e.target.files[0]; if(!f) return;
-  const img=new Image(); img.onload=()=>{
-    const g = loadImageToGray(img, +$('size').value|0);
-    state.gray=g; state.w=g.w; state.h=g.h; renderLayer('input'); $('layerSel').value='input';
-    $('status').textContent='Loaded custom image.';
-  };
-  img.src=URL.createObjectURL(f);
-});
-
-window.addEventListener('load', resetAll);
-</script>
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDates();
+            
+            // Load saved API key
+            const savedApiKey = localStorage.getItem('alphaVantageApiKey');
+            if (savedApiKey) {
+                document.getElementById('apiKey').value = savedApiKey;
+            }
+            
+            // Save API key on change
+            document.getElementById('apiKey').addEventListener('change', function(e) {
+                localStorage.setItem('alphaVantageApiKey', e.target.value);
+            });
+        });
+    </script>
 </body>
 </html>
