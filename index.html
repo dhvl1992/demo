@@ -862,29 +862,267 @@ print(f"Device: {classifier.model.device}")
             </div>
         </div>
 
-        <!-- 40. Summary & Next Steps -->
-        <div id="slide40" class="slide title-content">
-            <h2>Key Takeaways & Next Steps</h2>
+        <!-- 40. Section Header - Building from Scratch -->
+        <div id="slide40" class="slide section-header">
+            <h1>Building Neural Networks from Scratch</h1>
+            <p class="section-subtitle">Understanding PyTorch Implementation Details</p>
+        </div>
+
+        <!-- 41. PyTorch Model Structure -->
+        <div id="slide41" class="slide two-content">
+            <h2>PyTorch Model Architecture Pattern</h2>
+            <div class="content-column">
+                <h3>Model Class Structure</h3>
+                <div class="code-box">
+class SentimentNet(nn.Module):<br>
+&nbsp;&nbsp;def __init__(self, vocab_size, embed_dim):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;super().__init__()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;self.embedding = nn.Embedding(vocab_size, embed_dim)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;self.fc1 = nn.Linear(embed_dim, 32)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;self.fc2 = nn.Linear(32, 1)<br><br>
+&nbsp;&nbsp;def forward(self, x):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x = self.embedding(x)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x = torch.relu(self.fc1(x))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x = self.fc2(x)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return x
+                </div>
+            </div>
+            <div class="content-column">
+                <h3>Key Components</h3>
+                <ul class="content-list">
+                    <li><strong>__init__ method:</strong> Initialize all layers (no activation functions here)</li>
+                    <li><strong>forward method:</strong> Define data flow through layers</li>
+                    <li><strong>Embedding layer:</strong> Converts token IDs to meaning vectors</li>
+                    <li><strong>Linear layers:</strong> Process embeddings for final classification</li>
+                </ul>
+                <div class="highlight-box">
+                    <strong>PyTorch Pattern:</strong> Layers are defined in __init__, data flow in forward()
+                </div>
+            </div>
+        </div>
+
+        <!-- 42. Activation Functions in PyTorch -->
+        <div id="slide42" class="slide comparison">
+            <h2>PyTorch Activation Functions: Two Approaches</h2>
+            <div class="comparison-grid">
+                <div class="comparison-item">
+                    <h3>Class-based (nn.ReLU)</h3>
+                    <div class="code-box">
+# In __init__:<br>
+self.relu = nn.ReLU()<br><br>
+# In forward:<br>
+x = self.relu(x)
+                    </div>
+                    <p>Creates a separate layer object that can be reused multiple times.</p>
+                    <div class="accent-box">Best when using same activation multiple times</div>
+                </div>
+                <div class="comparison-item">
+                    <h3>Functional (F.relu)</h3>
+                    <div class="code-box">
+import torch.nn.functional as F<br><br>
+# In forward:<br>
+x = F.relu(x)
+                    </div>
+                    <p>Direct function call without creating layer objects.</p>
+                    <div class="highlight-box">Simpler for one-time usage</div>
+                </div>
+            </div>
+            <div class="vs-divider">OR</div>
+        </div>
+
+        <!-- 43. Custom Tokenizer Implementation -->
+        <div id="slide43" class="slide title-content">
+            <h2>Building a Tokenizer from Scratch</h2>
             <div class="content-area">
-                <p>We've covered the complete journey from AI research to practical implementation:</p>
+                <p>Understanding how tokenization works by implementing word-to-ID mapping:</p>
+                
+                <div class="code-box">
+from collections import Counter<br><br>
+def build_tokenizer(texts):<br>
+&nbsp;&nbsp;# Count word frequencies<br>
+&nbsp;&nbsp;word_counts = Counter()<br>
+&nbsp;&nbsp;for text in texts:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;words = text.split()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;word_counts.update(words)<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;# Assign IDs based on frequency<br>
+&nbsp;&nbsp;vocab = {word: idx for idx, (word, count) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in enumerate(word_counts.most_common())}<br>
+&nbsp;&nbsp;return vocab
+                </div>
                 
                 <ul class="content-list">
-                    <li><strong>Research Understanding:</strong> LLaMA paper shows how data quality beats model size</li>
-                    <li><strong>Tools Mastery:</strong> NotebookLM for research, HuggingFace for development</li>
-                    <li><strong>Framework Knowledge:</strong> PyTorch as industry standard</li>
-                    <li><strong>Practical Skills:</strong> Built working sentiment analysis system</li>
-                    <li><strong>Component Understanding:</strong> Tokenization, embeddings, model architecture</li>
+                    <li><strong>Frequency-based IDs:</strong> Most common words get smallest token IDs</li>
+                    <li><strong>Compression logic:</strong> Frequent words use fewer bits in encoding</li>
+                    <li><strong>Word-to-ID mapping:</strong> Each unique word gets a numerical identifier</li>
+                    <li><strong>ID-to-meaning:</strong> Neural network learns meaning from usage patterns</li>
+                </ul>
+                
+                <div class="accent-box">
+                    <strong>Alternative:</strong> Use HuggingFace's pre-built tokenizers, or build custom ones for specialized domains
+                </div>
+            </div>
+        </div>
+
+        <!-- 44. Dataset Loading from HuggingFace -->
+        <div id="slide44" class="slide content-caption">
+            <h2>Loading Training Data</h2>
+            <div class="main-content-area">
+                <strong>Method 1 (Common):</strong><br>
+                from datasets import load_dataset<br><br>
+                <strong>Method 2 (Preferred for clarity):</strong><br>
+                import datasets as hg_datasets<br>
+                dataset = hg_datasets.load_dataset("path/to/dataset")
+            </div>
+            <div class="caption-area">
+                <strong>Finding Dataset Paths:</strong> Go to HuggingFace datasets page, find your dataset, and use the "Use this dataset" button to get the exact path. The second import method makes it clear that load_dataset comes from the HuggingFace datasets library, which helps with code readability and debugging.
+            </div>
+        </div>
+
+        <!-- 45. Training Loop Mathematics -->
+        <div id="slide45" class="slide title-content">
+            <h2>Understanding the Training Process</h2>
+            <div class="content-area">
+                <p>Breaking down what happens during neural network training:</p>
+                
+                <div class="code-box">
+for data in dataset:<br>
+&nbsp;&nbsp;# Forward pass<br>
+&nbsp;&nbsp;output = model(data.input)<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;# Calculate error<br>
+&nbsp;&nbsp;loss = criterion(output, data.target)<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;# Calculate gradients<br>
+&nbsp;&nbsp;loss.backward()  # d(error)/d(weights)<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;# Update parameters<br>
+&nbsp;&nbsp;optimizer.step() # weights -= lr * gradients<br>
+&nbsp;&nbsp;optimizer.zero_grad()
+                </div>
+                
+                <ul class="content-list">
+                    <li><strong>Forward Pass:</strong> Data flows through network to generate predictions</li>
+                    <li><strong>Loss Calculation:</strong> Measure difference between prediction and actual</li>
+                    <li><strong>Backward Pass:</strong> Calculate how each weight contributed to the error</li>
+                    <li><strong>Parameter Update:</strong> Adjust weights to reduce error</li>
                 </ul>
                 
                 <div class="highlight-box">
-                    <strong>Next Learning Goals:</strong><br>
-                    • Write neural networks from scratch in PyTorch<br>
-                    • Fine-tune small models for custom tasks<br>
-                    • Build end-to-end AI applications
+                    <strong>Mathematical Core:</strong> loss.backward() computes ∂Loss/∂Weight for every parameter
+                </div>
+            </div>
+        </div>
+
+        <!-- 46. Gradient Descent Implementation -->
+        <div id="slide46" class="slide content-caption">
+            <h2>What optimizer.step() Actually Does</h2>
+            <div class="main-content-area">
+                <strong>Behind the scenes:</strong><br>
+                for param in model.parameters():<br>
+                &nbsp;&nbsp;param.data -= learning_rate * param.grad<br><br>
+                <strong>This is exactly:</strong><br>
+                New_Weight = Old_Weight - (Learning_Rate × Gradient)
+            </div>
+            <div class="caption-area">
+                <strong>Gradient Descent Logic:</strong> If gradient is positive, the weight is making loss worse, so we subtract to move in opposite direction. If gradient is negative, the weight is helping, so subtracting a negative value increases the weight. This mathematical principle drives all neural network learning.
+            </div>
+        </div>
+
+        <!-- 47. Training Results and Monitoring -->
+        <div id="slide47" class="slide picture-caption">
+            <h2>Tracking Training Progress</h2>
+            <div class="picture-area">
+                <strong>Training Command:</strong><br>
+                python train_model.py<br><br>
+                <strong>Results:</strong><br>
+                Epoch 1: Loss = 0.693<br>
+                Epoch 2: Loss = 0.541<br>
+                Epoch 3: Loss = 0.412<br>
+                Epoch 4: Loss = 0.298<br>
+                Epoch 5: Loss = 0.201<br><br>
+                <strong>Final Accuracy: 91.45%</strong>
+            </div>
+            <div class="caption-sidebar">
+                <h3>Training Insights</h3>
+                <ul class="content-list">
+                    <li>Loss decreases over time (good sign!)</li>
+                    <li>Stochastic nature: some fluctuation is normal</li>
+                    <li>5 epochs produced good results</li>
+                    <li>Weights & Biases tracking provides graphs</li>
+                </ul>
+                <div class="accent-box">
+                    <strong>Don't panic:</strong> Loss going up and down during training is completely normal in neural networks
+                </div>
+            </div>
+        </div>
+
+        <!-- 48. Foundation Models Concept -->
+        <div id="slide48" class="slide title-content">
+            <h2>Why LLMs are Called Foundation Models</h2>
+            <div class="content-area">
+                <p>Large Language Models serve as the foundation for multiple AI applications:</p>
+                
+                <ul class="content-list">
+                    <li><strong>Same Process, Different Tasks:</strong> Word → Token → Embedding → Task-specific layers</li>
+                    <li><strong>Sentiment Analysis:</strong> Embedding → Classification layers → Positive/Negative</li>
+                    <li><strong>Text Generation:</strong> Embedding → Generation layers → Next word prediction</li>
+                    <li><strong>Q&A Systems:</strong> Embedding → Attention layers → Answer extraction</li>
+                    <li><strong>Summarization:</strong> Embedding → Encoder-decoder → Summary generation</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <strong>GPT = General Purpose Technology:</strong> One model architecture can handle multiple tasks through different fine-tuning approaches
                 </div>
                 
                 <div class="accent-box">
-                    <strong>Remember:</strong> Start with understanding one model family (LLaMA) deeply, then expand your knowledge. Practical implementation experience is more valuable than theoretical knowledge alone.
+                    The embedding stage is the "foundation" - it converts text into meaningful numerical representations that can then be processed for any downstream task.
+                </div>
+            </div>
+        </div>
+
+        <!-- 49. Complete Architecture Pipeline -->
+        <div id="slide49" class="slide content-caption">
+            <h2>The Complete NLP Pipeline</h2>
+            <div class="main-content-area">
+                <strong>Text Input:</strong> "I love this product"<br>
+                ↓ <em>Tokenizer</em><br>
+                <strong>Token IDs:</strong> [101, 1045, 2293, 2023, 4031, 102]<br>
+                ↓ <em>Embedding Layer</em><br>
+                <strong>Meaning Vectors:</strong> 768-dimensional representations<br>
+                ↓ <em>Processing Layers</em><br>
+                <strong>Task Output:</strong> "Positive sentiment (0.89 confidence)"
+            </div>
+            <div class="caption-area">
+                <strong>Universal Pattern:</strong> This same pipeline works for all NLP tasks. Whether you're doing sentiment analysis, translation, or question answering, the flow remains: Text → Tokens → Embeddings → Task-specific processing → Output. This is why mastering this pipeline is crucial for AI development.
+            </div>
+        </div>
+
+        <!-- 50. Summary & Next Steps -->
+        <div id="slide50" class="slide title-content">
+            <h2>Complete Learning Journey: Research to Implementation</h2>
+            <div class="content-area">
+                <p>We've covered the full spectrum from AI research to hands-on implementation:</p>
+                
+                <ul class="content-list">
+                    <li><strong>Research Understanding:</strong> LLaMA paper insights on training scale and efficiency</li>
+                    <li><strong>Tools Mastery:</strong> NotebookLM, HuggingFace ecosystem, PyTorch framework</li>
+                    <li><strong>Architecture Knowledge:</strong> Tokenization, embeddings, model components</li>
+                    <li><strong>Practical Implementation:</strong> Built sentiment analysis from scratch and with pre-trained models</li>
+                    <li><strong>Training Process:</strong> Gradient descent, loss optimization, parameter updates</li>
+                    <li><strong>Foundation Models:</strong> Understanding why LLMs work for multiple tasks</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <strong>Achieved Learning Goals:</strong><br>
+                    ✓ Run sentiment analysis with LLMs<br>
+                    ✓ Implement neural networks in PyTorch<br>
+                    ✓ Understand complete NLP pipeline<br>
+                    ✓ Master essential AI development tools
+                </div>
+                
+                <div class="accent-box">
+                    <strong>Next Steps:</strong> Fine-tune models for custom tasks, explore advanced architectures, build end-to-end AI applications. The foundation is now solid for advanced AI development.
                 </div>
             </div>
         </div>
