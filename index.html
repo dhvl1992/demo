@@ -3,901 +3,936 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investment Portfolio Tracker</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/index.min.js"></script>
+    <title>AI/ML Lecture: From LLaMA Research to Practical Implementation</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            color: #2c3e50;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .controls {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .control-group {
-            display: flex;
-            gap: 20px;
-            align-items: end;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .input-group label {
-            font-weight: 600;
-            color: #555;
-            font-size: 0.9rem;
-        }
-
-        .input-group input, .input-group select {
-            padding: 12px 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        .input-group input:focus, .input-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(45deg, #11998e, #38ef7d);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h3 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-            text-align: center;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .summary-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .summary-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .summary-card h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.4rem;
-        }
-
-        .metric {
-            margin: 10px 0;
-        }
-
-        .metric-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .metric-value {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .positive {
-            color: #27ae60;
-        }
-
-        .negative {
-            color: #e74c3c;
-        }
-
-        .neutral {
-            color: #3498db;
-        }
-
-        .table-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-        }
-
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .loading.show {
-            display: block;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error {
-            background: #fee;
-            color: #c33;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid #c33;
-        }
-
-        .success {
-            background: #efe;
-            color: #383;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid #383;
-        }
-
-        .api-key-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .api-key-section h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
-
-        .api-instructions {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid #667eea;
-        }
-
-        @media (max-width: 768px) {
-            .control-group {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Georgia,serif;background:#FEF7ED;color:#1E293B;line-height:1.6;overflow-x:hidden}
+        #particles-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1}
+        nav{position:fixed;top:0;width:100%;background:rgba(254,247,237,.95);backdrop-filter:blur(10px);z-index:1000;padding:1rem 2rem;transition:all .3s;border-bottom:2px solid #EA580C}
+        nav.scrolled{background:rgba(254,247,237,.98);box-shadow:0 2px 20px rgba(234,88,12,.1)}
+        nav ul{list-style:none;display:flex;justify-content:center;flex-wrap:wrap;gap:2rem}
+        nav a{color:#1E293B;text-decoration:none;font-weight:600;transition:all .3s;padding:.5rem 1rem;border-radius:25px;font-size:0.8em}
+        nav a:hover{background:rgba(234,88,12,.1);color:#EA580C;transform:translateY(-2px)}
+        .progress-bar{position:fixed;top:80px;left:0;height:4px;background:linear-gradient(90deg,#EA580C,#059669);z-index:999;transform-origin:left;transform:scaleX(0);transition:transform .1s}
+        .container{max-width:1200px;margin:0 auto;padding:20px}
+        .slide{background:#FEF7ED;margin-bottom:30px;padding:40px;border-radius:15px;border-left:5px solid #EA580C;box-shadow:0 8px 25px rgba(0,0,0,.1);transition:all .8s;min-height:500px;transform:translateY(50px);opacity:0}
+        .slide.visible{transform:translateY(0);opacity:1}
+        .slide:hover{transform:translateY(-5px)}
+        
+        /* All Slide Types */
+        .title-slide{background:#1E293B;color:#FEF7ED;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center}
+        .title-slide h1{font-size:3.5em;margin-bottom:30px;text-shadow:2px 2px 4px rgba(0,0,0,.3)}
+        .title-slide .subtitle{font-size:1.6em;opacity:.9;font-style:italic;margin-bottom:20px}
+        .title-slide .author{font-size:1.2em;opacity:.8}
+        
+        .title-content h2,.two-content h2,.comparison h2,.content-caption h2,.picture-caption h2{font-size:2.2em;color:#1E293B;margin-bottom:30px;padding-bottom:10px;border-bottom:3px solid #EA580C}
+        .content-area{font-size:1.1em;line-height:1.8}
+        .content-list{list-style:none}
+        .content-list li{position:relative;padding-left:30px;margin-bottom:15px}
+        .content-list li::before{content:"→";position:absolute;left:0;color:#EA580C;font-weight:bold;font-size:1.2em}
+        
+        .section-header{background:linear-gradient(135deg,#059669,#EA580C);color:#FEF7ED;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center}
+        .section-header h1{font-size:3em;margin-bottom:20px;text-shadow:2px 2px 4px rgba(0,0,0,.3)}
+        .section-header .section-subtitle{font-size:1.4em;opacity:.9}
+        
+        .two-content{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+        .two-content h2{grid-column:1/-1}
+        .content-column{padding:20px;background:rgba(5,150,105,.05);border-radius:10px}
+        .content-column h3{font-size:1.6em;color:#059669;margin-bottom:15px}
+        
+        .comparison{position:relative}
+        .comparison h2{text-align:center}
+        .comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px}
+        .comparison-item{text-align:center;padding:30px;border-radius:15px;background:rgba(234,88,12,.1)}
+        .comparison-item h3{font-size:1.8em;color:#EA580C;margin-bottom:20px}
+        .vs-divider{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#EA580C;color:#FEF7ED;padding:10px 20px;border-radius:50px;font-weight:bold;font-size:1.2em}
+        
+        .title-only{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+        .title-only h1{font-size:3em;color:#1E293B;margin-bottom:20px}
+        .title-only .subtitle{font-size:1.4em;color:#059669;font-style:italic}
+        
+        .content-caption{display:grid;grid-template-rows:auto 1fr auto;gap:30px}
+        .main-content-area{background:linear-gradient(45deg,#059669,#EA580C);border:2px dashed #1E293B;border-radius:15px;padding:60px 40px;text-align:center;color:#FEF7ED;font-weight:bold;font-size:1.1em}
+        .caption-area{background:rgba(5,150,105,.1);padding:20px;border-radius:10px;border-left:4px solid #059669}
+        
+        .picture-caption{display:grid;grid-template-columns:2fr 1fr;gap:40px;align-items:start}
+        .picture-caption h2{grid-column:1/-1}
+        .picture-area{background:linear-gradient(45deg,#059669,#EA580C);border:2px dashed #1E293B;border-radius:15px;padding:100px 20px;text-align:center;color:#FEF7ED;font-weight:bold;min-height:300px;display:flex;align-items:center;justify-content:center;font-size:1.2em}
+        .caption-sidebar{background:rgba(234,88,12,.1);padding:30px;border-radius:15px;border-left:4px solid #EA580C}
+        .caption-sidebar h3{color:#EA580C;margin-bottom:15px;font-size:1.4em}
+        
+        /* Timeline */
+        .timeline{padding:20px 0}
+        .timeline h2{font-size:2.2em;color:#1E293B;margin-bottom:40px;padding-bottom:10px;border-bottom:3px solid #EA580C;text-align:center}
+        .timeline-container{position:relative;padding:20px 0}
+        .timeline-line{position:absolute;left:50%;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#EA580C,#059669);transform:translateX(-50%)}
+        .timeline-item{position:relative;margin:40px 0;display:flex;align-items:center}
+        .timeline-item:nth-child(odd){flex-direction:row}
+        .timeline-item:nth-child(even){flex-direction:row-reverse}
+        .timeline-content{background:rgba(234,88,12,.05);padding:25px;border-radius:15px;width:45%;border-left:4px solid #EA580C;box-shadow:0 4px 15px rgba(0,0,0,.1)}
+        .timeline-date{position:absolute;left:50%;transform:translateX(-50%);background:#EA580C;color:#FEF7ED;padding:8px 16px;border-radius:20px;font-weight:bold;z-index:2}
+        .timeline-content h4{color:#1E293B;font-size:1.4em;margin-bottom:10px}
+        
+        /* Statistics */
+        .stats-slide h2{font-size:2.2em;color:#1E293B;margin-bottom:40px;padding-bottom:10px;border-bottom:3px solid #EA580C;text-align:center}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;margin:30px 0}
+        .stat-card{background:linear-gradient(135deg,#EA580C,#059669);color:#FEF7ED;padding:40px 30px;border-radius:20px;text-align:center;box-shadow:0 10px 30px rgba(234,88,12,.2);transition:transform .3s}
+        .stat-card:hover{transform:translateY(-10px)}
+        .stat-number{font-size:3.5em;font-weight:bold;line-height:1;margin-bottom:10px;text-shadow:2px 2px 4px rgba(0,0,0,.3)}
+        .stat-label{font-size:1.2em;opacity:.9;font-weight:600}
+        .stat-description{font-size:.9em;opacity:.8;margin-top:15px;line-height:1.4}
+        
+        /* Utility Classes */
+        .highlight-box{background:#059669;color:#FEF7ED;padding:20px;border-radius:10px;margin:20px 0;font-weight:bold}
+        .accent-box{background:#EA580C;color:#FEF7ED;padding:20px;border-radius:10px;margin:20px 0;font-style:italic}
+        .emphasis{background:#EA580C;color:#FEF7ED;padding:4px 8px;border-radius:5px;font-weight:bold;display:inline-block}
+        .code-box{background:#1E293B;color:#FEF7ED;padding:15px;border-radius:8px;margin:15px 0;font-family:monospace;font-size:0.9em;overflow-x:auto}
+        .back-to-top{position:fixed;bottom:30px;right:30px;background:linear-gradient(45deg,#EA580C,#059669);color:#FEF7ED;border:none;border-radius:50%;width:60px;height:60px;font-size:1.5rem;cursor:pointer;opacity:0;transition:all .3s;z-index:1000}
+        .back-to-top.visible{opacity:1}
+        .back-to-top:hover{transform:translateY(-3px);box-shadow:0 10px 25px rgba(234,88,12,.3)}
+        .float{animation:float 3s ease-in-out infinite}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        @media (max-width:768px){
+            nav{padding:0.5rem 1rem}
+            nav ul{gap:1rem}
+            nav a{font-size:0.7em;padding:0.3rem 0.6rem}
+            .container{padding:10px}
+            .slide{padding:20px;min-height:400px}
+            .title-slide h1{font-size:2.5em}
+            .two-content,.comparison-grid,.picture-caption{grid-template-columns:1fr;gap:20px}
+            .vs-divider{display:none}
+            .timeline-line{display:none}
+            .timeline-content{width:100%;margin:20px 0}
+            .timeline-item{flex-direction:column!important}
+            .timeline-date{position:static;transform:none;margin:10px 0}
+            .stats-grid{grid-template-columns:1fr;gap:20px}
+            .stat-number{font-size:3em}
         }
     </style>
 </head>
 <body>
+    <canvas id="particles-canvas"></canvas>
+    <div class="progress-bar" id="progress-bar"></div>
+    
+    <nav id="navbar">
+        <ul>
+            <li><a href="#slide1">Title</a></li>
+            <li><a href="#slide2">Overview</a></li>
+            <li><a href="#slide3">Tools</a></li>
+            <li><a href="#slide4">LLMs</a></li>
+            <li><a href="#slide5">LLaMA</a></li>
+            <li><a href="#slide6">Research</a></li>
+            <li><a href="#slide7">Training</a></li>
+            <li><a href="#slide8">Implementation</a></li>
+            <li><a href="#slide9">PyTorch</a></li>
+            <li><a href="#slide10">HuggingFace</a></li>
+            <li><a href="#slide11">Tokenization</a></li>
+            <li><a href="#slide12">Components</a></li>
+            <li><a href="#slide13">Sentiment</a></li>
+            <li><a href="#slide14">Libraries</a></li>
+            <li><a href="#slide15">Summary</a></li>
+        </ul>
+    </nav>
+
     <div class="container">
-        <header class="header">
-            <h1>📈 Investment Portfolio Tracker</h1>
-            <p>Track and analyze your U1 and U2 portfolios with real-time data</p>
-        </header>
-
-        <div class="api-key-section">
-            <h3>🔑 API Configuration</h3>
-            <div class="api-instructions">
-                <strong>Get your free Alpha Vantage API key:</strong><br>
-                1. Visit <a href="https://www.alphavantage.co/support/#api-key" target="_blank">Alpha Vantage</a><br>
-                2. Sign up for a free account<br>
-                3. Copy your API key and paste it below<br>
-                <small>Free tier: 5 API calls per minute, 500 calls per day</small>
-            </div>
-            <div class="input-group">
-                <label for="apiKey">Alpha Vantage API Key:</label>
-                <input type="text" id="apiKey" placeholder="Enter your API key here..." />
-            </div>
+        <!-- 1. Title Slide -->
+        <div id="slide1" class="slide title-slide">
+            <h1 class="float">AI/ML Fundamentals</h1>
+            <p class="subtitle">From LLaMA Research Paper to Practical Implementation</p>
+            <p class="author">Lecture 3 & 4 • Teaching My Wife AI Series • 2024</p>
         </div>
 
-        <div class="controls">
-            <div class="control-group">
-                <div class="input-group">
-                    <label for="startDate">Start Date:</label>
-                    <input type="date" id="startDate" />
-                </div>
-                <div class="input-group">
-                    <label for="endDate">End Date:</label>
-                    <input type="date" id="endDate" />
-                </div>
-                <div class="input-group">
-                    <label for="portfolio">Portfolio:</label>
-                    <select id="portfolio">
-                        <option value="both">Both Portfolios</option>
-                        <option value="u1">U1 Portfolio</option>
-                        <option value="u2">U2 Portfolio</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary" onclick="updateDashboard()">
-                    📊 Update Dashboard
-                </button>
-                <button class="btn btn-secondary" onclick="exportData()">
-                    💾 Export Data
-                </button>
-            </div>
-        </div>
-
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Fetching stock data... Please wait</p>
-        </div>
-
-        <div class="summary-grid" id="summarySection" style="display: none;">
-            <div class="summary-card" id="u1Summary">
-                <h3>U1 Portfolio</h3>
-                <div class="metric">
-                    <div class="metric-label">Total Investment</div>
-                    <div class="metric-value neutral" id="u1Investment">₹0</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Current Value</div>
-                    <div class="metric-value neutral" id="u1Current">₹0</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Gain/Loss</div>
-                    <div class="metric-value" id="u1GainLoss">₹0</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Return %</div>
-                    <div class="metric-value" id="u1Return">0%</div>
-                </div>
-            </div>
-
-            <div class="summary-card" id="u2Summary">
-                <h3>U2 Portfolio</h3>
-                <div class="metric">
-                    <div class="metric-label">Total Investment</div>
-                    <div class="metric-value neutral" id="u2Investment">₹0</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Current Value</div>
-                    <div class="metric-value neutral" id="u2Current">₹0</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Gain/Loss</div>
-                    <div class="metric-value" id="u2GainLoss">₹0</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Return %</div>
-                    <div class="metric-value" id="u2Return">0%</div>
+        <!-- 2. Learning Objectives -->
+        <div id="slide2" class="slide title-content">
+            <h2>Learning Objectives</h2>
+            <div class="content-area">
+                <p>This comprehensive lecture covers the journey from understanding foundational AI research to building practical applications.</p>
+                <ul class="content-list">
+                    <li>Understand the LLaMA research paper and its significance in open-source AI</li>
+                    <li>Learn about Large Language Models (LLMs) architecture and training</li>
+                    <li>Explore essential AI tools like NotebookLM and HuggingFace ecosystem</li>
+                    <li>Transition from Keras to PyTorch for industry-standard development</li>
+                    <li>Implement sentiment analysis using pre-trained models</li>
+                    <li>Master tokenization, embeddings, and model components</li>
+                </ul>
+                <div class="highlight-box">
+                    Our goal: Bridge the gap between AI research and practical implementation
                 </div>
             </div>
         </div>
 
-        <div class="dashboard" id="dashboard" style="display: none;">
-            <div class="card">
-                <h3>📊 Portfolio Performance</h3>
-                <canvas id="performanceChart"></canvas>
-            </div>
-            
-            <div class="card">
-                <h3>🥧 Portfolio Allocation</h3>
-                <canvas id="allocationChart"></canvas>
+        <!-- 3. Section Header - Tools -->
+        <div id="slide3" class="slide section-header">
+            <h1>Essential AI Tools</h1>
+            <p class="section-subtitle">Building Your AI Development Toolkit</p>
+        </div>
+
+        <!-- 4. NotebookLM Introduction -->
+        <div id="slide4" class="slide title-content">
+            <h2>NotebookLM: Your AI Research Assistant</h2>
+            <div class="content-area">
+                <p>NotebookLM transforms how we consume and understand research papers by making them interactive and accessible.</p>
+                <ul class="content-list">
+                    <li><strong>Upload & Analyze:</strong> Drop any research paper (PDF) and get instant comprehension tools</li>
+                    <li><strong>Deep Dive Conversations:</strong> Generate audio podcasts from research content in 16+ languages</li>
+                    <li><strong>Interactive Q&A:</strong> Ask specific questions about the paper and get contextualized answers</li>
+                    <li><strong>Accessibility:</strong> Breaks down complex academic language into understandable concepts</li>
+                </ul>
+                <div class="accent-box">
+                    <strong>Example:</strong> We used NotebookLM to analyze the LLaMA research paper, generating Bengali and Marathi podcasts for better understanding across languages.
+                </div>
+                <p>NotebookLM exemplifies how specific LLMs can be more powerful than general-purpose models for targeted tasks.</p>
             </div>
         </div>
 
-        <div class="table-container" id="detailsSection" style="display: none;">
-            <h3>📋 Detailed Portfolio Analysis</h3>
-            <table id="portfolioTable">
-                <thead>
-                    <tr>
-                        <th>Portfolio</th>
-                        <th>Stock</th>
-                        <th>Shares</th>
-                        <th>Buy Price</th>
-                        <th>Current Price</th>
-                        <th>Investment</th>
-                        <th>Current Value</th>
-                        <th>Gain/Loss</th>
-                        <th>Return %</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                </tbody>
-            </table>
+        <!-- 5. Section Header - Understanding LLMs -->
+        <div id="slide5" class="slide section-header">
+            <h1>Large Language Models</h1>
+            <p class="section-subtitle">The Foundation of Modern AI</p>
+        </div>
+
+        <!-- 6. What Makes a Model "Large" -->
+        <div id="slide6" class="slide content-caption">
+            <h2>From Small to Large: The Scale Revolution</h2>
+            <div class="main-content-area">
+                Small Model (1,000 parameters)<br>
+                ↓ Add 3 zeros ↓<br>
+                Medium Model (1,000,000 parameters)<br>
+                ↓ Add 3 more zeros ↓<br>
+                <strong>Large Language Model (1,000,000,000+ parameters)</strong>
+            </div>
+            <div class="caption-area">
+                <strong>Key Insight:</strong> The "magic" happens at scale. When models become large enough, they exhibit emergent capabilities - they can suddenly perform tasks they weren't explicitly trained for. This is why companies like Facebook invest billions in training large models like LLaMA with 7-70 billion parameters.
+            </div>
+        </div>
+
+        <!-- 7. Open Source vs Closed Models -->
+        <div id="slide7" class="slide comparison">
+            <h2>Open Source vs Proprietary Models</h2>
+            <div class="comparison-grid">
+                <div class="comparison-item">
+                    <h3>Proprietary Models</h3>
+                    <p><strong>Examples:</strong> GPT-4, Claude, Gemini</p>
+                    <ul class="content-list">
+                        <li>Access via API only</li>
+                        <li>Pay per usage</li>
+                        <li>Limited customization</li>
+                        <li>Latest features first</li>
+                    </ul>
+                    <div class="accent-box">Best for: Production applications with high performance needs</div>
+                </div>
+                <div class="comparison-item">
+                    <h3>Open Source Models</h3>
+                    <p><strong>Examples:</strong> LLaMA, Mistral, Gemma, Phi</p>
+                    <ul class="content-list">
+                        <li>Download and modify freely</li>
+                        <li>Run locally or on your servers</li>
+                        <li>Full customization possible</li>
+                        <li>Community-driven improvements</li>
+                    </ul>
+                    <div class="highlight-box">Best for: Learning, experimentation, and custom applications</div>
+                </div>
+            </div>
+            <div class="vs-divider">VS</div>
+        </div>
+
+        <!-- 8. Essential Open Source Models -->
+        <div id="slide8" class="slide title-content">
+            <h2>Essential Open Source Models to Know</h2>
+            <div class="content-area">
+                <p>Just like knowing Google is essential for internet navigation, these models are your entry points into the AI ecosystem:</p>
+                <ul class="content-list">
+                    <li><strong>LLaMA (Meta/Facebook):</strong> The foundational model that started the open-source revolution</li>
+                    <li><strong>Mistral:</strong> European AI company focused on efficient, high-quality models</li>
+                    <li><strong>Gemma (Google):</strong> Smaller, efficient models for research and development</li>
+                    <li><strong>Phi (Microsoft):</strong> Small but capable models optimized for reasoning</li>
+                    <li><strong>DeepSeek:</strong> Chinese AI lab producing competitive models</li>
+                    <li><strong>Qwen:</strong> Alibaba's multilingual model family</li>
+                </ul>
+                <div class="accent-box">
+                    <strong>Learning Tip:</strong> Master one model family (recommend starting with LLaMA) before exploring others. Understanding one deeply gives you the foundation to understand all others.
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. Section Header - LLaMA Research Paper -->
+        <div id="slide9" class="slide section-header">
+            <h1>LLaMA Research Deep Dive</h1>
+            <p class="section-subtitle">Understanding the Paper That Changed Everything</p>
+        </div>
+
+        <!-- 10. LLaMA Key Innovation -->
+        <div id="slide10" class="slide title-content">
+            <h2>LLaMA's Revolutionary Approach</h2>
+            <div class="content-area">
+                <p>LLaMA challenged conventional wisdom about how to build powerful language models.</p>
+                
+                <div class="highlight-box">
+                    <strong>Traditional Thinking:</strong> A 10B parameter model should be trained on 200B tokens
+                </div>
+                
+                <div class="accent-box">
+                    <strong>LLaMA's Innovation:</strong> Train a smaller model (7B parameters) on much more data (1.4T tokens) for longer
+                </div>
+                
+                <ul class="content-list">
+                    <li><strong>Result:</strong> Small model achieved performance equivalent to much larger models</li>
+                    <li><strong>Implication:</strong> More efficient and accessible AI for everyone</li>
+                    <li><strong>Impact:</strong> Proved that data quality and training duration matter more than just model size</li>
+                </ul>
+                
+                <p>This approach made state-of-the-art AI accessible to individuals and smaller organizations, not just tech giants.</p>
+            </div>
+        </div>
+
+        <!-- 11. Training Data Scale -->
+        <div id="slide11" class="slide stats-slide">
+            <h2>Understanding LLaMA's Training Scale</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">1.4T</div>
+                    <div class="stat-label">Tokens</div>
+                    <div class="stat-description">Total training data - equivalent to 10 million books</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">4TB</div>
+                    <div class="stat-label">Storage</div>
+                    <div class="stat-description">Raw text data requiring massive storage infrastructure</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">2M</div>
+                    <div class="stat-label">Pages</div>
+                    <div class="stat-description">Equivalent pages of text content processed</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">127</div>
+                    <div class="stat-label">Years</div>
+                    <div class="stat-description">Training time on single GPU (reduced to 21 days with 2048 GPUs)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12. Training Infrastructure Cost -->
+        <div id="slide12" class="slide content-caption">
+            <h2>The Economics of Training Large Models</h2>
+            <div class="main-content-area">
+                <strong>Training Speed Analysis:</strong><br>
+                • Single GPU: 380 tokens/second<br>
+                • Total time needed: 127 years<br>
+                • Facebook's solution: 2048 A100 GPUs<br>
+                • <span class="emphasis">Final training time: 21 days</span>
+            </div>
+            <div class="caption-area">
+                <strong>Why This Matters:</strong> This calculation shows why foundation models are "a rich man's job." The massive compute requirements (billions of dollars) mean only well-funded organizations can train these models from scratch. This is exactly why open-source models like LLaMA are so valuable - they democratize access to state-of-the-art AI capabilities.
+            </div>
+        </div>
+
+        <!-- 13. Training Data Sources -->
+        <div id="slide13" class="slide title-content">
+            <h2>LLaMA's Training Data Composition</h2>
+            <div class="content-area">
+                <p>LLaMA was trained on diverse, high-quality text data from multiple sources:</p>
+                <ul class="content-list">
+                    <li><strong>Web Content:</strong> Crawled websites and online articles</li>
+                    <li><strong>Books:</strong> Digital libraries and published literature</li>
+                    <li><strong>Academic Papers:</strong> Research publications and scientific literature</li>
+                    <li><strong>Code Repositories:</strong> Programming code from various languages</li>
+                    <li><strong>Reference Materials:</strong> Wikipedia and other encyclopedic sources</li>
+                </ul>
+                
+                <div class="accent-box">
+                    <strong>Legal Challenge:</strong> Many copyrighted books were included in training data, leading to lawsuits. Modern AI companies now avoid disclosing exact data sources to prevent legal issues.
+                </div>
+                
+                <p>The diversity of training data is crucial - it's what enables LLMs to understand context, generate coherent responses, and perform various tasks without specific training for each one.</p>
+            </div>
+        </div>
+
+        <!-- 14. Model Architecture & Evaluation -->
+        <div id="slide14" class="slide two-content">
+            <h2>Architecture & Performance Evaluation</h2>
+            <div class="content-column">
+                <h3>Model Architecture</h3>
+                <p>LLaMA uses a scaled-up version of the transformer architecture:</p>
+                <ul class="content-list">
+                    <li>7B parameter model fits in 7-14GB GPU RAM</li>
+                    <li>Optimized attention mechanisms</li>
+                    <li>Efficient training procedures</li>
+                    <li>Stable performance across scales</li>
+                </ul>
+                <div class="highlight-box">
+                    Key insight: Bigger models learn faster and achieve lower loss on the same data
+                </div>
+            </div>
+            <div class="content-column">
+                <h3>Benchmark Performance</h3>
+                <p>LLaMA's performance is measured using standard benchmarks:</p>
+                <ul class="content-list">
+                    <li><strong>MMLU:</strong> Multitask Language Understanding</li>
+                    <li><strong>SuperGLUE:</strong> Reading comprehension tasks</li>
+                    <li><strong>HumanEval:</strong> Code generation capability</li>
+                    <li>Domain-specific tests (math, science, humanities)</li>
+                </ul>
+                <div class="accent-box">
+                    LLaMA 7B achieved performance comparable to much larger models like PaLM (540B parameters)
+                </div>
+            </div>
+        </div>
+
+        <!-- 15. Section Header - Implementation -->
+        <div id="slide15" class="slide section-header">
+            <h1>From Research to Implementation</h1>
+            <p class="section-subtitle">Building Practical AI Applications</p>
+        </div>
+
+        <!-- 16. Understanding Pre-training vs Fine-tuning -->
+        <div id="slide16" class="slide comparison">
+            <h2>Pre-training vs Fine-tuning</h2>
+            <div class="comparison-grid">
+                <div class="comparison-item">
+                    <h3>Pre-training</h3>
+                    <p><strong>Learning Phase:</strong> Like standard education (K-12)</p>
+                    <ul class="content-list">
+                        <li>Massive data: 1.4 trillion tokens</li>
+                        <li>Task: Predict next word</li>
+                        <li>Result: General language understanding</li>
+                        <li>Cost: 98% of total training expense</li>
+                    </ul>
+                    <div class="highlight-box">Learns general patterns from diverse text</div>
+                </div>
+                <div class="comparison-item">
+                    <h3>Fine-tuning</h3>
+                    <p><strong>Specialization Phase:</strong> Like college/professional training</p>
+                    <ul class="content-list">
+                        <li>Smaller data: Thousands of examples</li>
+                        <li>Task: Follow specific instructions</li>
+                        <li>Result: Specialized behavior</li>
+                        <li>Cost: 2% of total training expense</li>
+                    </ul>
+                    <div class="accent-box">Teaches specific tasks and behaviors</div>
+                </div>
+            </div>
+            <div class="vs-divider">THEN</div>
+        </div>
+
+        <!-- 17. Pre-training Demonstration -->
+        <div id="slide17" class="slide content-caption">
+            <h2>How Pre-training Works</h2>
+            <div class="main-content-area">
+                <strong>Input:</strong> "What is love?"<br><br>
+                <strong>Pre-trained Model Output:</strong><br>
+                "baby don't hurt me, don't hurt me no more... Valentine's day... feeling of adoration, appreciation, affection... romantic relationships..."
+            </div>
+            <div class="caption-area">
+                <strong>Understanding:</strong> The pre-trained model generates text by predicting the next most likely word based on patterns it learned from training data. It has no instruction-following capability yet - it simply continues text in ways that match its training distribution. This is why fine-tuning is essential for creating useful AI assistants.
+            </div>
+        </div>
+
+        <!-- 18. Fine-tuning Demonstration -->
+        <div id="slide18" class="slide content-caption">
+            <h2>After Instruction Fine-tuning</h2>
+            <div class="main-content-area">
+                <strong>Input:</strong> "What is love?"<br><br>
+                <strong>Fine-tuned Model Output:</strong><br>
+                "Love is a complex emotion characterized by deep affection and care.<br><br>
+                <strong>Types of love:</strong> Romantic, familial, platonic<br>
+                <strong>Characteristics:</strong> Empathy, commitment, trust..."
+            </div>
+            <div class="caption-area">
+                <strong>Transformation:</strong> Fine-tuning teaches the model to follow instructions and provide helpful, structured responses. The training data includes examples like "Explain X" followed by clear, educational explanations. This relatively small dataset (compared to pre-training) dramatically changes the model's behavior.
+            </div>
+        </div>
+
+        <!-- 19. Section Header - PyTorch Transition -->
+        <div id="slide19" class="slide section-header">
+            <h1>PyTorch: Industry Standard</h1>
+            <p class="section-subtitle">Moving Beyond Keras for Professional Development</p>
+        </div>
+
+        <!-- 20. Why PyTorch? -->
+        <div id="slide20" class="slide title-content">
+            <h2>Why Transition from Keras to PyTorch?</h2>
+            <div class="content-area">
+                <p>PyTorch has become the de facto standard for AI research and production applications.</p>
+                <ul class="content-list">
+                    <li><strong>Industry Adoption:</strong> Most modern AI research and production code uses PyTorch</li>
+                    <li><strong>Stability:</strong> Predictable behavior with fewer unexpected surprises compared to Keras</li>
+                    <li><strong>Ecosystem:</strong> Meta (Facebook) maintains both PyTorch and LLaMA - seamless integration</li>
+                    <li><strong>Documentation:</strong> Extensive tutorials and community support available everywhere</li>
+                    <li><strong>Professional Relevance:</strong> Job market heavily favors PyTorch experience</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <strong>Meta's AI Stack:</strong> PyTorch (framework) + LLaMA (model) + extensive open-source tools = comprehensive AI development platform
+                </div>
+                
+                <p>Learning PyTorch means learning the same tools used by leading AI researchers and engineers worldwide.</p>
+            </div>
+        </div>
+
+        <!-- 21. PyTorch vs Keras Syntax -->
+        <div id="slide21" class="slide two-content">
+            <h2>Syntax Differences: PyTorch vs Keras</h2>
+            <div class="content-column">
+                <h3>Keras Approach</h3>
+                <div class="code-box">
+import keras<br>
+model = keras.Sequential([<br>
+&nbsp;&nbsp;keras.layers.Dense(768, <br>
+&nbsp;&nbsp;&nbsp;&nbsp;activation='relu'),<br>
+&nbsp;&nbsp;keras.layers.Dense(2)<br>
+])
+                </div>
+                <p>Keras bundles layers and activation functions together in a single layer definition.</p>
+            </div>
+            <div class="content-column">
+                <h3>PyTorch Approach</h3>
+                <div class="code-box">
+import torch.nn as nn<br>
+model = nn.Sequential(<br>
+&nbsp;&nbsp;nn.Linear(768, 768),<br>
+&nbsp;&nbsp;nn.ReLU(),<br>
+&nbsp;&nbsp;nn.Linear(768, 2)<br>
+)
+                </div>
+                <p>PyTorch separates layers and activation functions, giving you more explicit control over the architecture.</p>
+            </div>
+        </div>
+
+        <!-- 22. Section Header - HuggingFace Ecosystem -->
+        <div id="slide22" class="slide section-header">
+            <h1>HuggingFace Ecosystem</h1>
+            <p class="section-subtitle">The Standard Platform for NLP and Beyond</p>
+        </div>
+
+        <!-- 23. HuggingFace Components -->
+        <div id="slide23" class="slide stats-slide">
+            <h2>HuggingFace by the Numbers</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">1M+</div>
+                    <div class="stat-label">Models</div>
+                    <div class="stat-description">Pre-trained models ready for immediate use</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">39K+</div>
+                    <div class="stat-label">Datasets</div>
+                    <div class="stat-description">Curated datasets for training and evaluation</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">93K+</div>
+                    <div class="stat-label">Text Models</div>
+                    <div class="stat-description">Models specifically for text classification tasks</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Open Source</div>
+                    <div class="stat-description">Free access to state-of-the-art AI models</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 24. HuggingFace Platform Structure -->
+        <div id="slide24" class="slide title-content">
+            <h2>HuggingFace Platform Organization</h2>
+            <div class="content-area">
+                <p>HuggingFace is organized around four main components that make AI development accessible:</p>
+                <ul class="content-list">
+                    <li><strong>Models Hub:</strong> Pre-trained models for every conceivable task</li>
+                    <li><strong>Datasets:</strong> Curated training and evaluation datasets</li>
+                    <li><strong>Tasks:</strong> Organized by problem type (classification, generation, etc.)</li>
+                    <li><strong>Papers:</strong> Latest research with associated models and code</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <strong>Key Advantage:</strong> Lower barrier to entry compared to other platforms. User-friendly interface makes complex AI accessible to beginners.
+                </div>
+                
+                <div class="accent-box">
+                    <strong>Example:</strong> Instead of implementing text classification from scratch, you can find pre-trained models, datasets, and evaluation metrics all in one place.
+                </div>
+            </div>
+        </div>
+
+        <!-- 25. Transformers Library -->
+        <div id="slide25" class="slide title-content">
+            <h2>The Transformers Library: Your AI Swiss Army Knife</h2>
+            <div class="content-area">
+                <p>The HuggingFace Transformers library is like a well-stocked grocery store - everything you need is pre-prepared and ready to use.</p>
+                
+                <div class="code-box">
+from transformers import pipeline<br><br>
+# One line to create a sentiment analyzer<br>
+classifier = pipeline("sentiment-analysis")<br><br>
+# Ready to use immediately<br>
+result = classifier("I love learning AI!")</div>
+                
+                <ul class="content-list">
+                    <li><strong>Pipeline API:</strong> High-level interface for common tasks</li>
+                    <li><strong>Model Classes:</strong> Direct access to model architecture</li>
+                    <li><strong>Tokenizers:</strong> Text preprocessing utilities</li>
+                    <li><strong>Training Tools:</strong> Fine-tuning and evaluation utilities</li>
+                </ul>
+                
+                <div class="accent-box">
+                    The library handles all the complex implementation details, letting you focus on your application logic rather than low-level model mechanics.
+                </div>
+            </div>
+        </div>
+
+        <!-- 26. Section Header - Tokenization -->
+        <div id="slide26" class="slide section-header">
+            <h1>Understanding Tokenization</h1>
+            <p class="section-subtitle">How AI Models Process Text</p>
+        </div>
+
+        <!-- 27. What is Tokenization? -->
+        <div id="slide27" class="slide content-caption">
+            <h2>From Words to Numbers: The Tokenization Process</h2>
+            <div class="main-content-area">
+                <strong>Input Text:</strong> "I hate this so much"<br><br>
+                <strong>After Tokenization:</strong><br>
+                [101, 1045, 5223, 2023, 2061, 2172, 102]<br><br>
+                <strong>Each number represents:</strong><br>
+                101→[CLS], 1045→"I", 5223→"hate", 2023→"this", 2061→"so", 2172→"much", 102→[SEP]
+            </div>
+            <div class="caption-area">
+                <strong>Why Tokenization?</strong> Neural networks can only process numbers, not text. Tokenization converts human-readable text into numerical representations that models can understand. Each word in the vocabulary gets a unique numerical ID, and the model learns to associate meaning with these numbers through training.
+            </div>
+        </div>
+
+        <!-- 28. Tokenization Deep Dive -->
+        <div id="slide28" class="slide two-content">
+            <h2>Tokenization Components & Process</h2>
+            <div class="content-column">
+                <h3>Vocabulary Mapping</h3>
+                <ul class="content-list">
+                    <li><strong>Vocabulary:</strong> Complete list of known words/subwords</li>
+                    <li><strong>Token IDs:</strong> Unique numbers for each vocabulary item</li>
+                    <li><strong>Special Tokens:</strong> [CLS], [SEP], [PAD] for sentence structure</li>
+                    <li><strong>Unknown Tokens:</strong> [UNK] for out-of-vocabulary words</li>
+                </ul>
+                <div class="highlight-box">
+                    Each model has its own vocabulary - you can't mix tokenizers between models!
+                </div>
+            </div>
+            <div class="content-column">
+                <h3>Key Operations</h3>
+                <div class="code-box">
+# Encode: Text → Numbers<br>
+tokens = tokenizer.encode("Hello world")<br>
+# Returns: [101, 7592, 2088, 102]<br><br>
+# Decode: Numbers → Text<br>
+text = tokenizer.decode(tokens)<br>
+# Returns: "Hello world"
+                </div>
+                <p><strong>Input IDs:</strong> The standard term for tokenized text in transformer models (historical naming from BERT)</p>
+            </div>
+        </div>
+
+        <!-- 29. Section Header - Model Components -->
+        <div id="slide29" class="slide section-header">
+            <h1>Model Architecture Components</h1>
+            <p class="section-subtitle">Understanding How LLMs Process Information</p>
+        </div>
+
+        <!-- 30. Pipeline Components -->
+        <div id="slide30" class="slide picture-caption">
+            <h2>The Complete Pipeline Flow</h2>
+            <div class="picture-area">
+                Text Input<br>
+                ↓<br>
+                <strong>Tokenizer</strong><br>
+                ↓<br>
+                <strong>Model (DistilBERT)</strong><br>
+                ↓<br>
+                Classification Output
+            </div>
+            <div class="caption-sidebar">
+                <h3>Pipeline Components</h3>
+                <ul class="content-list">
+                    <li><strong>Task:</strong> Defines what the pipeline does</li>
+                    <li><strong>Tokenizer:</strong> Converts text to numbers</li>
+                    <li><strong>Model:</strong> Processes numbers to generate predictions</li>
+                    <li><strong>Device:</strong> Where computation happens (CPU/GPU)</li>
+                </ul>
+                <div class="accent-box">
+                    Each component is accessible and customizable - you're not locked into black-box behavior
+                </div>
+            </div>
+        </div>
+
+        <!-- 31. Model Architecture Breakdown -->
+        <div id="slide31" class="slide title-content">
+            <h2>Inside the Model: DistilBERT Architecture</h2>
+            <div class="content-area">
+                <p>Let's examine a typical sentiment analysis model architecture:</p>
+                
+                <div class="code-box">
+DistilBertForSequenceClassification(<br>
+&nbsp;&nbsp;(distilbert): DistilBertModel(...)<br>
+&nbsp;&nbsp;(pre_classifier): Linear(in_features=768, out_features=768)<br>
+&nbsp;&nbsp;(classifier): Linear(in_features=768, out_features=2)<br>
+&nbsp;&nbsp;(dropout): Dropout(p=0.2)<br>
+)
+                </div>
+                
+                <ul class="content-list">
+                    <li><strong>DistilBERT Base:</strong> Converts tokens to meaning vectors (embeddings)</li>
+                    <li><strong>Pre-classifier:</strong> Processes the embeddings further</li>
+                    <li><strong>Classifier:</strong> Final layer that outputs sentiment scores (2 classes: positive/negative)</li>
+                    <li><strong>Dropout:</strong> Regularization to prevent overfitting</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    Key insight: The model transforms each word into a 768-dimensional meaning vector that captures semantic relationships
+                </div>
+            </div>
+        </div>
+
+        <!-- 32. Embeddings: The Magic of Meaning -->
+        <div id="slide32" class="slide content-caption">
+            <h2>From Numbers to Meaning: How Embeddings Work</h2>
+            <div class="main-content-area">
+                <strong>Token ID:</strong> 5223 (word: "hate")<br>
+                ↓<br>
+                <strong>Embedding Vector:</strong> [0.2, -0.8, 0.1, ..., -0.3]<br>
+                <em>(768 dimensions capturing word meaning)</em><br>
+                ↓<br>
+                <strong>Model Output:</strong> Sentiment classification
+            </div>
+            <div class="caption-area">
+                <strong>How Meaning is Learned:</strong> The model doesn't manually encode meaning - it learns through brute force training on massive text data. By predicting next words across billions of examples, it discovers that words like "love" and "adore" should have similar embedding vectors, while "love" and "hate" should be different. The 768 dimensions capture different aspects of meaning that we can't directly interpret but the model uses effectively.
+            </div>
+        </div>
+
+        <!-- 33. Section Header - Sentiment Analysis Implementation -->
+        <div id="slide33" class="slide section-header">
+            <h1>Practical Implementation</h1>
+            <p class="section-subtitle">Building a Sentiment Analysis System</p>
+        </div>
+
+        <!-- 34. Sentiment Analysis Code Walkthrough -->
+        <div id="slide34" class="slide title-content">
+            <h2>Building Your First AI Application</h2>
+            <div class="content-area">
+                <p>Let's build a sentiment classifier using pre-trained models:</p>
+                
+                <div class="code-box">
+from transformers import pipeline<br><br>
+# Create classifier (downloads model automatically)<br>
+classifier = pipeline("sentiment-analysis")<br><br>
+# Test sentences<br>
+texts = [<br>
+&nbsp;&nbsp;"Deep learning is very important and I am very excited to learn it",<br>
+&nbsp;&nbsp;"I hate it so much"<br>
+]<br><br>
+# Get predictions<br>
+results = classifier(texts)<br>
+print(results)
+                </div>
+                
+                <ul class="content-list">
+                    <li><strong>One-line setup:</strong> The pipeline handles model loading, tokenization, and inference</li>
+                    <li><strong>Automatic downloads:</strong> Model and tokenizer downloaded on first use (~256MB)</li>
+                    <li><strong>Batch processing:</strong> Can analyze multiple texts simultaneously</li>
+                    <li><strong>Confidence scores:</strong> Each prediction includes probability scores</li>
+                </ul>
+                
+                <div class="accent-box">
+                    This demonstrates the power of pre-trained models - state-of-the-art AI capabilities in just a few lines of code!
+                </div>
+            </div>
+        </div>
+
+        <!-- 35. Understanding Model Components -->
+        <div id="slide35" class="slide title-content">
+            <h2>Accessing Model Components</h2>
+            <div class="content-area">
+                <p>The pipeline is a complex object with accessible components:</p>
+                
+                <div class="code-box">
+# Inspect the pipeline<br>
+print(f"Task: {classifier.task}")<br>
+print(f"Model: {classifier.model}")<br>
+print(f"Tokenizer: {classifier.tokenizer}")<br>
+print(f"Device: {classifier.model.device}")
+                </div>
+                
+                <ul class="content-list">
+                    <li><strong>Task:</strong> "sentiment-analysis" - defines the pipeline's purpose</li>
+                    <li><strong>Model:</strong> Complete PyTorch model with all layers visible</li>
+                    <li><strong>Tokenizer:</strong> Text preprocessing component with vocabulary</li>
+                    <li><strong>Device:</strong> Shows whether running on CPU or GPU</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <strong>Learning Approach:</strong> Don't get overwhelmed by complexity. Focus on the main components first, then gradually explore deeper layers as you become comfortable.
+                </div>
+                
+                <p>Each component can be accessed and modified, giving you full control over the AI system's behavior.</p>
+            </div>
+        </div>
+
+        <!-- 36. Section Header - Essential Libraries -->
+        <div id="slide36" class="slide section-header">
+            <h1>Essential AI Libraries</h1>
+            <p class="section-subtitle">Building Your Development Stack</p>
+        </div>
+
+        <!-- 37. Core Libraries -->
+        <div id="slide37" class="slide title-content">
+            <h2>Must-Know Libraries for Deep Learning</h2>
+            <div class="content-area">
+                <p>These libraries form the foundation of modern AI development:</p>
+                <ul class="content-list">
+                    <li><strong>PyTorch:</strong> Core deep learning framework for model building and training</li>
+                    <li><strong>Transformers (HuggingFace):</strong> Pre-trained models and NLP utilities</li>
+                    <li><strong>Weights & Biases (wandb):</strong> Experiment tracking and model monitoring</li>
+                    <li><strong>Datasets (HuggingFace):</strong> Easy access to training and evaluation datasets</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <strong>Learning Strategy:</strong> Master these core libraries first before exploring specialized tools. These four will cover 90% of your AI development needs.
+                </div>
+                
+                <div class="accent-box">
+                    <strong>Industry Reality:</strong> Just like knowing certain programming languages is expected in software development, knowing these libraries is essential for AI careers.
+                </div>
+                
+                <p>Focus on understanding one library deeply rather than trying to learn many superficially.</p>
+            </div>
+        </div>
+
+        <!-- 38. Advanced Libraries -->
+        <div id="slide38" class="slide two-content">
+            <h2>Specialized Tools for Advanced Development</h2>
+            <div class="content-column">
+                <h3>Data Processing</h3>
+                <ul class="content-list">
+                    <li><strong>Red Pajama:</strong> Deduplicated version of LLaMA training data</li>
+                    <li><strong>Slim Pajama:</strong> Further compressed training datasets</li>
+                    <li><strong>Tiny LLaMA:</strong> 1B parameter model trained on 3T tokens</li>
+                </ul>
+                <div class="accent-box">
+                    Focus on understanding the concepts rather than memorizing obscure names
+                </div>
+            </div>
+            <div class="content-column">
+                <h3>Model Evaluation</h3>
+                <ul class="content-list">
+                    <li><strong>TorchInfo:</strong> Model architecture visualization</li>
+                    <li><strong>Evaluation Metrics:</strong> MMLU, SuperGLUE, HumanEval</li>
+                    <li><strong>Benchmark Suites:</strong> Standardized performance testing</li>
+                </ul>
+                <div class="highlight-box">
+                    Good naming: TorchInfo clearly indicates its purpose
+                </div>
+            </div>
+        </div>
+
+        <!-- 39. How to Evaluate AI Claims -->
+        <div id="slide39" class="slide title-content">
+            <h2>Distinguishing Real Skills from AI Buzzwords</h2>
+            <div class="content-area">
+                <p>In the AI field, it's easy to sound impressive by throwing around technical terms. Here's how to separate genuine expertise from marketing speak:</p>
+                
+                <div class="accent-box">
+                    <strong>The Ultimate Test:</strong> Can they write working code?
+                </div>
+                
+                <ul class="content-list">
+                    <li><strong>Red Flag:</strong> Lots of technical jargon without concrete examples</li>
+                    <li><strong>Green Flag:</strong> Can demonstrate actual implementations</li>
+                    <li><strong>Red Flag:</strong> Claims about "revolutionary" methods without code</li>
+                    <li><strong>Green Flag:</strong> Shows you the working system and explains how it works</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <strong>Sanskrit Principle:</strong> Just like Sanskrit can make simple concepts sound profound, AI terminology can make basic ideas sound revolutionary. Always ask: "Show me the working code."
+                </div>
+                
+                <p>Real AI expertise is demonstrated through working systems, not impressive vocabulary.</p>
+            </div>
+        </div>
+
+        <!-- 40. Summary & Next Steps -->
+        <div id="slide40" class="slide title-content">
+            <h2>Key Takeaways & Next Steps</h2>
+            <div class="content-area">
+                <p>We've covered the complete journey from AI research to practical implementation:</p>
+                
+                <ul class="content-list">
+                    <li><strong>Research Understanding:</strong> LLaMA paper shows how data quality beats model size</li>
+                    <li><strong>Tools Mastery:</strong> NotebookLM for research, HuggingFace for development</li>
+                    <li><strong>Framework Knowledge:</strong> PyTorch as industry standard</li>
+                    <li><strong>Practical Skills:</strong> Built working sentiment analysis system</li>
+                    <li><strong>Component Understanding:</strong> Tokenization, embeddings, model architecture</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <strong>Next Learning Goals:</strong><br>
+                    • Write neural networks from scratch in PyTorch<br>
+                    • Fine-tune small models for custom tasks<br>
+                    • Build end-to-end AI applications
+                </div>
+                
+                <div class="accent-box">
+                    <strong>Remember:</strong> Start with understanding one model family (LLaMA) deeply, then expand your knowledge. Practical implementation experience is more valuable than theoretical knowledge alone.
+                </div>
+            </div>
+        </div>
+
+        <!-- 41. Discussion -->
+        <div id="slide41" class="slide title-only">
+            <h1>Questions & Discussion</h1>
+            <p class="subtitle">Let's explore your questions about AI implementation</p>
         </div>
     </div>
 
+    <button class="back-to-top" id="backToTop">↑</button>
+
     <script>
-        // Portfolio data
-        const portfolios = {
-            u1: {
-                'ALOKINDS': 300,
-                'BHEL': 200,
-                'BANKBARODA': 100,
-                'MAHABANK': 100,
-                'TCS': 100, // BOM:500270
-                'GRASIM': 25,
-                'GMRINFRA': 220, // Combined GMRAIRPORT + GMRP&UI
-                'GTLINFRA': 350,
-                'HDFCBANK': 72,
-                'IDEA': 1000,
-                'ITC': 100,
-                'INDIANHUME': 10, // ITCHOTELS equivalent
-                'JIOFIN': 300,
-                'JPPOWER': 1500,
-                'SBIN': 800,
-                'SUZLON': 400,
-                'TRIDENT': 300,
-                'UNIONBANK': 786,
-                'RELIANCE': 27,
-                'ETERNALMAT': 50 // ETERNAL equivalent
-            },
-            u2: {
-                'ABCAPITAL': 105,
-                'AMBUJACEM': 100,
-                'CANBK': 500,
-                'CDSL': 25,
-                'GRASIM': 75,
-                'GTLINFRA': 650,
-                'IDEA': 500,
-                'ICICIBANK': 70,
-                'IDFCFIRSTB': 100,
-                'JIOFIN': 100,
-                'PNB': 400,
-                'ABFRL': 300,
-                'RELINFRA': 100,
-                'GOLDBEES': 50, // SILVERBEES equivalent
-                'TATAMOTORS': 100,
-                'TATAPOWER': 300,
-                'TATATEL': 100, // TTML equivalent
-                'BANKBARODA': 200
+        class P{
+            constructor(c){
+                this.c=c;this.x=Math.random()*c.width;this.y=Math.random()*c.height;
+                this.vx=(Math.random()-.5)*.5;this.vy=(Math.random()-.5)*.5;
+                this.s=Math.random()*2+1;this.o=Math.random()*.6+.2;
             }
-        };
-
-        // Stock data cache
-        let stockData = {};
-        let charts = {};
-
-        // Initialize dates
-        function initializeDates() {
-            const today = new Date();
-            const oneYearAgo = new Date(today);
-            oneYearAgo.setFullYear(today.getFullYear() - 1);
-            
-            document.getElementById('endDate').valueAsDate = today;
-            document.getElementById('startDate').valueAsDate = oneYearAgo;
-        }
-
-        // Show message
-        function showMessage(message, type = 'error') {
-            const existing = document.querySelector('.message');
-            if (existing) existing.remove();
-            
-            const div = document.createElement('div');
-            div.className = `message ${type}`;
-            div.textContent = message;
-            document.querySelector('.controls').appendChild(div);
-            
-            setTimeout(() => div.remove(), 5000);
-        }
-
-        // Fetch stock data
-        async function fetchStockData(symbol, apiKey) {
-            const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}.BSE&apikey=${apiKey}&outputsize=full`;
-            
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data['Error Message']) {
-                    console.warn(`Error for ${symbol}:`, data['Error Message']);
-                    return null;
-                }
-                
-                if (data['Note']) {
-                    throw new Error('API call frequency limit reached. Please try again later.');
-                }
-                
-                const timeSeries = data['Time Series (Daily)'];
-                if (!timeSeries) {
-                    console.warn(`No data for ${symbol}`);
-                    return null;
-                }
-                
-                return timeSeries;
-            } catch (error) {
-                console.error(`Error fetching data for ${symbol}:`, error);
-                return null;
-            }
-        }
-
-        // Get price for date
-        function getPriceForDate(timeSeries, targetDate) {
-            if (!timeSeries) return null;
-            
-            const dateStr = targetDate.toISOString().split('T')[0];
-            
-            // Try exact date first
-            if (timeSeries[dateStr]) {
-                return parseFloat(timeSeries[dateStr]['4. close']);
-            }
-            
-            // Find closest date
-            const dates = Object.keys(timeSeries).sort((a, b) => new Date(b) - new Date(a));
-            for (const date of dates) {
-                if (new Date(date) <= targetDate) {
-                    return parseFloat(timeSeries[date]['4. close']);
+            u(m){
+                this.x+=this.vx;this.y+=this.vy;
+                if(this.x<0||this.x>this.c.width)this.vx*=-1;
+                if(this.y<0||this.y>this.c.height)this.vy*=-1;
+                if(m.x&&m.y){
+                    const d=Math.hypot(this.x-m.x,this.y-m.y);
+                    if(d<60){const f=(60-d)/60,a=Math.atan2(this.y-m.y,this.x-m.x);
+                    this.vx+=Math.cos(a)*f*.3;this.vy+=Math.sin(a)*f*.3;}
                 }
             }
-            
-            return null;
+            d(ctx){ctx.save();ctx.globalAlpha=this.o;ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,6.28);ctx.fillStyle='rgba(234,88,12,.5)';ctx.fill();ctx.restore();}
         }
-
-        // Calculate portfolio performance
-        function calculatePerformance(portfolioName, startDate, endDate) {
-            const portfolio = portfolios[portfolioName];
-            const results = [];
-            
-            let totalInvestment = 0;
-            let totalCurrentValue = 0;
-            
-            for (const [symbol, shares] of Object.entries(portfolio)) {
-                const data = stockData[symbol];
-                if (!data) continue;
-                
-                const startPrice = getPriceForDate(data, startDate);
-                const endPrice = getPriceForDate(data, endDate);
-                
-                if (!startPrice || !endPrice) continue;
-                
-                const investment = startPrice * shares;
-                const currentValue = endPrice * shares;
-                const gainLoss = currentValue - investment;
-                const returnPct = (gainLoss / investment) * 100;
-                
-                results.push({
-                    portfolio: portfolioName.toUpperCase(),
-                    symbol,
-                    shares,
-                    startPrice,
-                    endPrice,
-                    investment,
-                    currentValue,
-                    gainLoss,
-                    returnPct
-                });
-                
-                totalInvestment += investment;
-                totalCurrentValue += currentValue;
-            }
-            
-            const totalGainLoss = totalCurrentValue - totalInvestment;
-            const totalReturnPct = totalInvestment > 0 ? (totalGainLoss / totalInvestment) * 100 : 0;
-            
-            return {
-                details: results,
-                summary: {
-                    totalInvestment,
-                    totalCurrentValue,
-                    totalGainLoss,
-                    totalReturnPct
-                }
-            };
+        class PS{
+            constructor(){this.cv=document.getElementById('particles-canvas');this.ctx=this.cv.getContext('2d');this.ps=[];this.m={x:0,y:0};this.init();}
+            init(){this.r();this.cp();window.addEventListener('resize',()=>{this.r();this.cp();});window.addEventListener('mousemove',e=>{this.m.x=e.clientX;this.m.y=e.clientY;});this.a();}
+            r(){this.cv.width=innerWidth;this.cv.height=innerHeight;this.pc=Math.floor((innerWidth*innerHeight)/12000);}
+            cp(){this.ps=[];for(let i=0;i<this.pc;i++)this.ps.push(new P(this.cv));}
+            a(){this.ctx.clearRect(0,0,this.cv.width,this.cv.height);this.ps.forEach(p=>{p.u(this.m);p.d(this.ctx);});this.dc();requestAnimationFrame(()=>this.a());}
+            dc(){this.ps.forEach((p,i)=>{for(let j=i+1;j<this.ps.length;j++){const o=this.ps[j],d=Math.hypot(p.x-o.x,p.y-o.y);if(d<100){this.ctx.beginPath();this.ctx.strokeStyle=`rgba(30,41,59,${(1-d/100)*.15})`;this.ctx.lineWidth=.5;this.ctx.moveTo(p.x,p.y);this.ctx.lineTo(o.x,o.y);this.ctx.stroke();}}});}
         }
-
-        // Update summary cards
-        function updateSummary(u1Results, u2Results) {
-            const formatCurrency = (value) => `₹${Math.abs(value).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-            const formatPercent = (value) => `${value.toFixed(2)}%`;
-            
-            // U1 Summary
-            document.getElementById('u1Investment').textContent = formatCurrency(u1Results.summary.totalInvestment);
-            document.getElementById('u1Current').textContent = formatCurrency(u1Results.summary.totalCurrentValue);
-            
-            const u1GainLoss = document.getElementById('u1GainLoss');
-            const u1Return = document.getElementById('u1Return');
-            u1GainLoss.textContent = (u1Results.summary.totalGainLoss >= 0 ? '+' : '-') + formatCurrency(u1Results.summary.totalGainLoss);
-            u1Return.textContent = (u1Results.summary.totalReturnPct >= 0 ? '+' : '') + formatPercent(u1Results.summary.totalReturnPct);
-            
-            u1GainLoss.className = `metric-value ${u1Results.summary.totalGainLoss >= 0 ? 'positive' : 'negative'}`;
-            u1Return.className = `metric-value ${u1Results.summary.totalReturnPct >= 0 ? 'positive' : 'negative'}`;
-            
-            // U2 Summary
-            document.getElementById('u2Investment').textContent = formatCurrency(u2Results.summary.totalInvestment);
-            document.getElementById('u2Current').textContent = formatCurrency(u2Results.summary.totalCurrentValue);
-            
-            const u2GainLoss = document.getElementById('u2GainLoss');
-            const u2Return = document.getElementById('u2Return');
-            u2GainLoss.textContent = (u2Results.summary.totalGainLoss >= 0 ? '+' : '-') + formatCurrency(u2Results.summary.totalGainLoss);
-            u2Return.textContent = (u2Results.summary.totalReturnPct >= 0 ? '+' : '') + formatPercent(u2Results.summary.totalReturnPct);
-            
-            u2GainLoss.className = `metric-value ${u2Results.summary.totalGainLoss >= 0 ? 'positive' : 'negative'}`;
-            u2Return.className = `metric-value ${u2Results.summary.totalReturnPct >= 0 ? 'positive' : 'negative'}`;
-        }
-
-        // Update table
-        function updateTable(u1Results, u2Results, selectedPortfolio) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-            
-            const formatCurrency = (value) => `₹${Math.abs(value).toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
-            const formatPercent = (value) => `${value.toFixed(2)}%`;
-            
-            let allResults = [];
-            if (selectedPortfolio === 'both' || selectedPortfolio === 'u1') {
-                allResults = allResults.concat(u1Results.details);
-            }
-            if (selectedPortfolio === 'both' || selectedPortfolio === 'u2') {
-                allResults = allResults.concat(u2Results.details);
-            }
-            
-            allResults.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row.portfolio}</td>
-                    <td><strong>${row.symbol}</strong></td>
-                    <td>${row.shares.toLocaleString()}</td>
-                    <td>₹${row.startPrice.toFixed(2)}</td>
-                    <td>₹${row.endPrice.toFixed(2)}</td>
-                    <td>${formatCurrency(row.investment)}</td>
-                    <td>${formatCurrency(row.currentValue)}</td>
-                    <td class="${row.gainLoss >= 0 ? 'positive' : 'negative'}">
-                        ${row.gainLoss >= 0 ? '+' : '-'}${formatCurrency(row.gainLoss)}
-                    </td>
-                    <td class="${row.returnPct >= 0 ? 'positive' : 'negative'}">
-                        ${row.returnPct >= 0 ? '+' : ''}${formatPercent(row.returnPct)}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // Create charts
-        function createCharts(u1Results, u2Results) {
-            // Destroy existing charts
-            Object.values(charts).forEach(chart => {
-                if (chart) chart.destroy();
-            });
-            
-            // Performance Chart
-            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-            charts.performance = new Chart(performanceCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['U1 Portfolio', 'U2 Portfolio'],
-                    datasets: [{
-                        label: 'Total Investment',
-                        data: [u1Results.summary.totalInvestment, u2Results.summary.totalInvestment],
-                        backgroundColor: 'rgba(102, 126, 234, 0.7)',
-                        borderColor: 'rgba(102, 126, 234, 1)',
-                        borderWidth: 2
-                    }, {
-                        label: 'Current Value',
-                        data: [u1Results.summary.totalCurrentValue, u2Results.summary.totalCurrentValue],
-                        backgroundColor: 'rgba(118, 75, 162, 0.7)',
-                        borderColor: 'rgba(118, 75, 162, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return '₹' + value.toLocaleString('en-IN');
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ₹' + context.parsed.y.toLocaleString('en-IN');
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // Allocation Chart
-            const allocationCtx = document.getElementById('allocationChart').getContext('2d');
-            const u1Total = u1Results.summary.totalCurrentValue;
-            const u2Total = u2Results.summary.totalCurrentValue;
-            const grandTotal = u1Total + u2Total;
-            
-            charts.allocation = new Chart(allocationCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['U1 Portfolio', 'U2 Portfolio'],
-                    datasets: [{
-                        data: [u1Total, u2Total],
-                        backgroundColor: [
-                            'rgba(102, 126, 234, 0.8)',
-                            'rgba(118, 75, 162, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(102, 126, 234, 1)',
-                            'rgba(118, 75, 162, 1)'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const percentage = ((context.parsed / grandTotal) * 100).toFixed(1);
-                                    return context.label + ': ₹' + context.parsed.toLocaleString('en-IN') + ' (' + percentage + '%)';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Main update function
-        async function updateDashboard() {
-            const apiKey = document.getElementById('apiKey').value.trim();
-            if (!apiKey) {
-                showMessage('Please enter your Alpha Vantage API key first!', 'error');
-                return;
-            }
-            
-            const startDate = new Date(document.getElementById('startDate').value);
-            const endDate = new Date(document.getElementById('endDate').value);
-            const selectedPortfolio = document.getElementById('portfolio').value;
-            
-            if (!startDate || !endDate) {
-                showMessage('Please select both start and end dates', 'error');
-                return;
-            }
-            
-            if (startDate >= endDate) {
-                showMessage('Start date must be before end date', 'error');
-                return;
-            }
-            
-            // Show loading
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('summarySection').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('detailsSection').style.display = 'none';
-            
-            try {
-                // Get unique symbols
-                const allSymbols = new Set([
-                    ...Object.keys(portfolios.u1),
-                    ...Object.keys(portfolios.u2)
-                ]);
-                
-                // Fetch data with delay between requests to respect API limits
-                let fetchedCount = 0;
-                const totalSymbols = allSymbols.size;
-                
-                for (const symbol of allSymbols) {
-                    if (fetchedCount > 0) {
-                        // Wait 12 seconds between requests for free tier (5 calls per minute)
-                        await new Promise(resolve => setTimeout(resolve, 12000));
-                    }
-                    
-                    console.log(`Fetching data for ${symbol} (${fetchedCount + 1}/${totalSymbols})`);
-                    const data = await fetchStockData(symbol, apiKey);
-                    if (data) {
-                        stockData[symbol] = data;
-                    }
-                    fetchedCount++;
-                }
-                
-                // Calculate performance
-                const u1Results = calculatePerformance('u1', startDate, endDate);
-                const u2Results = calculatePerformance('u2', startDate, endDate);
-                
-                // Update UI
-                updateSummary(u1Results, u2Results);
-                updateTable(u1Results, u2Results, selectedPortfolio);
-                createCharts(u1Results, u2Results);
-                
-                // Show sections
-                document.getElementById('summarySection').style.display = 'grid';
-                document.getElementById('dashboard').style.display = 'grid';
-                document.getElementById('detailsSection').style.display = 'block';
-                
-                showMessage('Dashboard updated successfully!', 'success');
-                
-            } catch (error) {
-                showMessage(`Error updating dashboard: ${error.message}`, 'error');
-            } finally {
-                document.getElementById('loading').classList.remove('show');
-            }
-        }
-
-        // Export data
-        function exportData() {
-            const data = {
-                portfolios: portfolios,
-                stockData: stockData,
-                exportDate: new Date().toISOString()
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `portfolio_data_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showMessage('Data exported successfully!', 'success');
-        }
-
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeDates();
-            
-            // Load saved API key
-            const savedApiKey = localStorage.getItem('alphaVantageApiKey');
-            if (savedApiKey) {
-                document.getElementById('apiKey').value = savedApiKey;
-            }
-            
-            // Save API key on change
-            document.getElementById('apiKey').addEventListener('change', function(e) {
-                localStorage.setItem('alphaVantageApiKey', e.target.value);
-            });
-        });
+        new PS();
+        const o=new IntersectionObserver(e=>e.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:.1});
+        document.querySelectorAll('.slide').forEach(s=>o.observe(s));
+        const u=()=>{const s=scrollY,d=document.documentElement.scrollHeight-innerHeight,p=s/d;document.getElementById('progress-bar').style.transform=`scaleX(${p})`;document.getElementById('navbar').classList.toggle('scrolled',s>100);document.getElementById('backToTop').classList.toggle('visible',s>300);};
+        addEventListener('scroll',u,{passive:!0});
+        document.getElementById('backToTop').onclick=()=>scrollTo({top:0,behavior:'smooth'});
+        document.querySelectorAll('nav a[href^="#"]').forEach(a=>a.onclick=e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));t&&scrollTo({top:t.offsetTop-80,behavior:'smooth'});});
+        u();
     </script>
 </body>
 </html>
