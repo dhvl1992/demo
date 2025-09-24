@@ -13,10 +13,11 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #000000 0%, #141414 50%, #1a0000 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            color: #ffffff;
         }
 
         .container {
@@ -36,19 +37,22 @@
         .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(229, 9, 20, 0.5);
+            color: #E50914;
         }
 
         .header p {
             font-size: 1.1em;
             opacity: 0.9;
+            color: #ffffff;
         }
 
         .input-section {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid #333333;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             margin-bottom: 30px;
             animation: slideUp 0.8s ease;
         }
@@ -67,7 +71,7 @@
         .input-group label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: #ffffff;
             font-weight: 600;
         }
 
@@ -75,17 +79,23 @@
             width: 100%;
             height: 200px;
             padding: 15px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #333333;
             border-radius: 10px;
             font-size: 14px;
             resize: vertical;
             transition: all 0.3s ease;
+            background: #000000;
+            color: #ffffff;
+        }
+
+        textarea::placeholder {
+            color: #888888;
         }
 
         textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #E50914;
+            box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.2);
         }
 
         .slider-group {
@@ -97,7 +107,7 @@
         input[type="range"] {
             flex: 1;
             height: 6px;
-            background: #e0e0e0;
+            background: #333333;
             border-radius: 3px;
             outline: none;
             -webkit-appearance: none;
@@ -108,7 +118,7 @@
             appearance: none;
             width: 20px;
             height: 20px;
-            background: #667eea;
+            background: #E50914;
             cursor: pointer;
             border-radius: 50%;
             transition: all 0.3s ease;
@@ -116,19 +126,19 @@
 
         input[type="range"]::-webkit-slider-thumb:hover {
             transform: scale(1.2);
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 10px rgba(229, 9, 20, 0.7);
         }
 
         .slider-value {
             min-width: 40px;
             text-align: center;
             font-weight: bold;
-            color: #667eea;
+            color: #E50914;
         }
 
         button {
             padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #E50914, #B8070F);
             color: white;
             border: none;
             border-radius: 10px;
@@ -136,12 +146,13 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
         }
 
         button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
+            background: linear-gradient(135deg, #B8070F, #E50914);
         }
 
         button:disabled {
@@ -153,12 +164,12 @@
             display: none;
             text-align: center;
             padding: 20px;
-            color: #666;
+            color: #ffffff;
         }
 
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 3px solid #333333;
+            border-top: 3px solid #E50914;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -167,10 +178,11 @@
         }
 
         #graph-container {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid #333333;
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             min-height: 600px;
             display: none;
             animation: fadeIn 0.8s ease;
@@ -181,6 +193,7 @@
             height: 600px;
             border-radius: 10px;
             overflow: hidden;
+            background: #000000;
         }
 
         .stats {
@@ -188,7 +201,8 @@
             gap: 20px;
             margin-top: 20px;
             padding: 20px;
-            background: #f8f9fa;
+            background: #000000;
+            border: 1px solid #333333;
             border-radius: 10px;
         }
 
@@ -200,11 +214,11 @@
         .stat-value {
             font-size: 2em;
             font-weight: bold;
-            color: #667eea;
+            color: #E50914;
         }
 
         .stat-label {
-            color: #666;
+            color: #ffffff;
             margin-top: 5px;
         }
 
@@ -231,7 +245,7 @@
 
         .example-text {
             font-size: 12px;
-            color: #666;
+            color: #888888;
             margin-top: 5px;
         }
     </style>
@@ -243,7 +257,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌌 3D Conversation Visualizer</h1>
+            <h1>🎬 3D Conversation Visualizer</h1>
             <p>Transform your chat history into an interactive 3D network of connected thoughts</p>
         </div>
 
@@ -276,7 +290,7 @@ Assistant: It works by..."></textarea>
                         <button id="visualize-btn" onclick="processConversations()">
                             Visualize Conversations
                         </button>
-                        <button style="background: linear-gradient(135deg, #764ba2, #667eea); font-size: 14px; padding: 8px 20px;" onclick="loadSampleData()">
+                        <button style="background: linear-gradient(135deg, #B8070F, #E50914); font-size: 14px; padding: 8px 20px;" onclick="loadSampleData()">
                             Load Sample Data
                         </button>
                     </div>
@@ -478,10 +492,22 @@ Assistant: It works by..."></textarea>
             return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
         }
 
-        // Generate graph data
+        // Generate graph data with Netflix-themed colors
         function generateGraphData(conversations, embeddings, threshold) {
             const nodes = [];
             const links = [];
+            
+            // Netflix color palette
+            const netflixColors = [
+                '#E50914', // Netflix red
+                '#B8070F', // Dark red
+                '#FF4B4B', // Light red
+                '#FFFFFF', // White
+                '#CCCCCC', // Light gray
+                '#888888', // Medium gray
+                '#444444', // Dark gray
+                '#FF6B6B', // Coral red
+            ];
             
             // Create nodes
             conversations.forEach((conv, i) => {
@@ -494,7 +520,7 @@ Assistant: It works by..."></textarea>
                     name: label,
                     fullText: conv,
                     val: 1 + Math.random() * 3, // Node size variation
-                    color: `hsl(${Math.random() * 360}, 70%, 50%)`
+                    color: netflixColors[i % netflixColors.length]
                 });
             });
             
@@ -614,8 +640,8 @@ Assistant: It works by..."></textarea>
                 
                 Graph = ForceGraph3D()(elem)
                     .graphData(graphData)
-                    .nodeLabel(node => `<div style="max-width: 300px; padding: 8px; background: rgba(0,0,0,0.8); color: white; border-radius: 4px;">
-                        <strong>${node.name}</strong><br/>
+                    .nodeLabel(node => `<div style="max-width: 300px; padding: 8px; background: rgba(0,0,0,0.9); color: white; border-radius: 4px; border: 1px solid #E50914;">
+                        <strong style="color: #E50914;">${node.name}</strong><br/>
                         <small style="opacity: 0.8">${node.fullText.substring(0, 150)}...</small>
                     </div>`)
                     .nodeAutoColorBy('id')
@@ -623,15 +649,15 @@ Assistant: It works by..."></textarea>
                         const sprite = new SpriteText(node.name);
                         sprite.color = node.color;
                         sprite.textHeight = 4;
-                        sprite.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                        sprite.backgroundColor = 'rgba(0, 0, 0, 0.8)';
                         sprite.padding = 2;
                         sprite.borderRadius = 4;
                         return sprite;
                     })
                     .linkWidth(link => link.value * 2)
-                    .linkOpacity(0.5)
-                    .linkColor(() => 'rgba(102, 126, 234, 0.3)')
-                    .backgroundColor('rgba(0, 0, 0, 0.02)')
+                    .linkOpacity(0.6)
+                    .linkColor(() => 'rgba(229, 9, 20, 0.4)')
+                    .backgroundColor('rgba(0, 0, 0, 0.95)')
                     .onNodeClick(node => {
                         // Focus on node
                         const distance = 120;
