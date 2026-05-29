@@ -1,185 +1,706 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="gu">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Paperleaf - Wabi-Sabi Notes</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>d અને f વિભાગના તત્ત્વો – સરળ નોંધ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Hind:wght@400;600;700&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --card2: #1e2235;
+    --accent1: #f7c948;
+    --accent2: #ff6b6b;
+    --accent3: #4ecdc4;
+    --accent4: #a29bfe;
+    --text: #e8eaf0;
+    --muted: #8890a8;
+    --border: #2a2f4a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Hind', 'Baloo 2', sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    padding-bottom: 60px;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #1a1d2e 0%, #0d1b3e 50%, #1a0d2e 100%);
+    padding: 48px 24px 40px;
+    text-align: center;
+    border-bottom: 2px solid var(--accent1);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(247,201,72,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 30%, rgba(78,205,196,0.08) 0%, transparent 60%);
+  }
+  .hero-tag {
+    display: inline-block;
+    background: var(--accent1);
+    color: #000;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    font-family: 'Hind', sans-serif;
+  }
+  .hero h1 {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(26px, 5vw, 46px);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.3;
+    position: relative;
+  }
+  .hero h1 span { color: var(--accent1); }
+  .hero p {
+    color: var(--muted);
+    margin-top: 12px;
+    font-size: 15px;
+    position: relative;
+  }
+
+  .container { max-width: 820px; margin: 0 auto; padding: 0 20px; }
+
+  .sec-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 40px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sec-title .num {
+    background: var(--accent1);
+    color: #000;
+    font-size: 13px;
+    font-weight: 800;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 14px;
+  }
+  .card.highlight { border-left: 4px solid var(--accent1); }
+  .card.red       { border-left: 4px solid var(--accent2); }
+  .card.teal      { border-left: 4px solid var(--accent3); }
+  .card.purple    { border-left: 4px solid var(--accent4); }
+
+  .card-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--accent1);
+  }
+  .card.red .card-title    { color: var(--accent2); }
+  .card.teal .card-title   { color: var(--accent3); }
+  .card.purple .card-title { color: var(--accent4); }
+
+  .analogy {
+    background: linear-gradient(135deg, #1e2a1a, #1a2a1e);
+    border: 1px solid #2a4a30;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 10px 0;
+    color: #a8e6b0;
+    font-style: italic;
+  }
+  .analogy::before { content: '💡 આ રીતે સમજો: '; font-style: normal; font-weight: 700; }
+
+  .formula {
+    background: #0d1b3e;
+    border: 1px solid #1a3a6e;
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin: 10px 0;
+    font-family: 'Baloo 2', monospace;
+    font-size: 15px;
+    color: #7ec8e3;
+    text-align: center;
+  }
+
+  .memory {
+    background: linear-gradient(135deg, #2a1a2e, #1e1a2e);
+    border: 1px solid #4a2a5a;
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin: 10px 0;
+    color: #d4a8f0;
+  }
+  .memory::before { content: '🧠 યાદ રાખવાની ટ્રિક: '; font-weight: 700; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width: 560px){ .grid2 { grid-template-columns: 1fr; } }
+
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 14px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .styled-table th {
+    background: #252a45;
+    color: var(--accent1);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .styled-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .styled-table tr:last-child td { border-bottom: none; }
+  .styled-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .accordion { margin-bottom: 12px; }
+  .acc-header {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    font-family: 'Baloo 2', cursive;
+    font-size: 16px;
+    transition: background 0.2s;
+    user-select: none;
+  }
+  .acc-header:hover { background: #232741; }
+  .acc-icon { font-size: 18px; transition: transform 0.3s; flex-shrink: 0; margin-left: 10px; }
+  .acc-body {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 16px 20px;
+  }
+  .acc-body.open { display: block; }
+  .acc-header.active { border-radius: 12px 12px 0 0; background: #232741; }
+  .acc-header.active .acc-icon { transform: rotate(45deg); }
+
+  .quiz-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  .quiz-q { font-weight: 700; margin-bottom: 12px; font-size: 16px; }
+  .quiz-option {
+    background: #252a45;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 6px 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+  }
+  .quiz-option:hover { border-color: var(--accent1); background: #2a3060; }
+  .quiz-option.correct { background: #1a3a1e; border-color: #4eca6a; color: #a8f0b8; }
+  .quiz-option.wrong   { background: #3a1a1a; border-color: var(--accent2); color: #f0a8a8; }
+  .quiz-feedback { margin-top: 10px; font-size: 14px; display: none; padding: 10px 14px; border-radius: 8px; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.good { background: #1a3a1e; color: #a8f0b8; }
+  .quiz-feedback.bad  { background: #3a1a1a; color: #f0a8a8; }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 32px 0;
+  }
+
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    background: rgba(15,17,23,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    z-index: 100;
+    justify-content: center;
+  }
+  .nav-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: 'Hind', sans-serif;
+  }
+  .nav-btn:hover { background: var(--accent1); color: #000; border-color: var(--accent1); }
+
+  strong { color: var(--accent1); }
+  em { color: var(--accent3); font-style: normal; font-weight: 600; }
+  p { margin-bottom: 8px; }
+  ul { padding-left: 20px; }
+  li { margin-bottom: 5px; }
+</style>
 </head>
 <body>
-  <div id="root"></div>
 
-  <script type="text/babel">
-    const { useState } = React;
+<div class="hero">
+  <div class="hero-tag">ગુજરાત બોર્ડ · રસાયણ વિજ્ઞાન · એકમ 4</div>
+  <h1>d અને f વિભાગના તત્ત્વો<br><span>સૌથી સરળ નોંધ</span></h1>
+  <p>જો આ વાંચી શકો છો, તો આ અધ્યાય સમજી શકો છો. ખાતરી.</p>
+</div>
 
-    function WabiSabiNotes() {
-      const [email, setEmail] = useState('');
-      const [showThankYou, setShowThankYou] = useState(false);
+<nav class="sticky-nav">
+  <a class="nav-btn" href="#big-picture">મૂળ સમજ</a>
+  <a class="nav-btn" href="#d-block">d-વિભાગ</a>
+  <a class="nav-btn" href="#properties">ગુણધર્મો</a>
+  <a class="nav-btn" href="#compounds">K₂Cr₂O₇ & KMnO₄</a>
+  <a class="nav-btn" href="#f-block">f-વિભાગ</a>
+  <a class="nav-btn" href="#compare">Ln vs An</a>
+  <a class="nav-btn" href="#quiz">પ્રશ્નોત્તરી</a>
+</nav>
 
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        setShowThankYou(true);
-        setTimeout(() => setShowThankYou(false), 3000);
-        setEmail('');
-      };
+<div class="container">
 
-      return (
-        <div className="min-h-screen bg-stone-100 overflow-hidden relative">
-          {/* Organic background texture */}
-          <div className="absolute inset-0 opacity-30">
-            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-              <filter id="noise">
-                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" />
-                <feColorMatrix values="0 0 0 0 0.6 0 0 0 0 0.5 0 0 0 0 0.4 0 0 0 0.05 0" />
-              </filter>
-              <rect width="100%" height="100%" filter="url(#noise)" />
-            </svg>
-          </div>
+  <!-- ── મૂળ સમજ ── -->
+  <div id="big-picture">
+    <div class="sec-title"><div class="num">0</div> પહેલાં મૂળ ચિત્ર સમજો</div>
 
-          {/* Asymmetric organic shapes */}
-          <div className="absolute top-20 right-10 w-96 h-96 bg-amber-100 rounded-full opacity-20 blur-3xl" 
-               style={{ transform: 'rotate(-15deg) scale(1.2, 0.8)' }} />
-          <div className="absolute bottom-32 left-20 w-80 h-80 bg-stone-300 rounded-full opacity-15 blur-3xl" 
-               style={{ transform: 'rotate(25deg) scale(0.9, 1.3)' }} />
+    <div class="card highlight">
+      <div class="card-title">આવર્ત કોષ્ટકમાં d અને f વિભાગ ક્યાં છે?</div>
+      <p>આવર્ત કોષ્ટકને એક <strong>મકાન</strong> ગણો:</p>
+      <ul>
+        <li><strong>s-વિભાગ</strong> = ડાબી પાંખ (સમૂહ 1–2)</li>
+        <li><strong>p-વિભાગ</strong> = જમણી પાંખ (સમૂહ 13–18)</li>
+        <li><strong>d-વિભાગ</strong> = વચ્ચેનો મોટો ભાગ (સમૂહ 3–12) → <em>સંક્રાંતિ ધાતુઓ</em></li>
+        <li><strong>f-વિભાગ</strong> = નીચે અલગ રાખેલી બે હાર → <em>આંતરસંક્રાંતિ ધાતુઓ</em></li>
+      </ul>
+    </div>
 
-          {/* Main content - asymmetric layout */}
-          <div className="relative z-10 px-8 py-16 max-w-7xl mx-auto">
-            
-            {/* Header - off-center */}
-            <header className="mb-32 ml-12">
-              <div className="inline-block" style={{ transform: 'rotate(-1deg)' }}>
-                <h1 className="text-stone-800 text-2xl tracking-wider font-light mb-2">
-                  紙片 paperleaf
-                </h1>
-                <div className="h-px w-24 bg-stone-400 opacity-60" style={{ transform: 'skew(-5deg)' }} />
-              </div>
-            </header>
+    <div class="analogy">આવર્ત કોષ્ટક એ એક શહેર છે. s અને p વિભાગ — શહેરની બહારની વસ્તી. d-વિભાગ — વ્યસ્ત શહેર-કેન્દ્ર. f-વિભાગ — ભૂગર્ભ મેટ્રો — હંમેશ ત્યાં જ છે, ફક્ત અલગ રાખ્યો છે.</div>
 
-            {/* Hero section - broken grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-              
-              {/* Left content - elevated, tilted */}
-              <div className="lg:mt-20 ml-4" style={{ transform: 'rotate(-0.5deg)' }}>
-                <h2 className="text-5xl lg:text-6xl font-light text-stone-800 leading-tight mb-8">
-                  thoughts,
-                  <br />
-                  <span className="ml-8 inline-block" style={{ transform: 'rotate(1deg)' }}>imperfectly</span>
-                  <br />
-                  preserved
-                </h2>
-                
-                <div className="w-16 h-1 bg-stone-400 mb-8 opacity-40" 
-                     style={{ transform: 'rotate(-3deg)' }} />
-                
-                <p className="text-stone-600 text-lg leading-relaxed mb-12 max-w-md font-light">
-                  A space where notes age gracefully. No rigid templates, no perfect organization. 
-                  Just your thoughts, evolving with time.
-                </p>
+    <div class="grid2">
+      <div class="card teal">
+        <div class="card-title">d-વિભાગ = 4 શ્રેણી</div>
+        <ul>
+          <li>3d: Sc → Zn</li>
+          <li>4d: Y → Cd</li>
+          <li>5d: La + Hf → Hg</li>
+          <li>6d: Ac + Rf → Cn</li>
+        </ul>
+      </div>
+      <div class="card purple">
+        <div class="card-title">f-વિભાગ = 2 શ્રેણી</div>
+        <ul>
+          <li>4f: Ce → Lu <em>(લેન્થેનોઈડ્સ)</em></li>
+          <li>5f: Th → Lr <em>(એક્ટિનોઈડ્સ)</em></li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
-                {/* Email form - handcrafted feel */}
-                <div className="relative">
-                  <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your@email.com"
-                      required
-                      className="flex-1 px-6 py-4 bg-white/70 border border-stone-300 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-500 transition-colors"
-                      style={{ 
-                        transform: 'rotate(-0.3deg)',
-                        boxShadow: '4px 4px 0px rgba(0,0,0,0.05)'
-                      }}
-                    />
-                    <button
-                      type="submit"
-                      className="px-8 py-4 bg-stone-700 text-stone-100 hover:bg-stone-800 transition-colors font-light tracking-wide"
-                      style={{ 
-                        transform: 'rotate(0.5deg)',
-                        boxShadow: '4px 4px 0px rgba(0,0,0,0.1)'
-                      }}
-                    >
-                      begin
-                    </button>
-                  </form>
-                  
-                  {showThankYou && (
-                    <p className="absolute -bottom-12 left-4 text-stone-600 italic font-light"
-                       style={{ transform: 'rotate(-1deg)' }}>
-                      ~ thank you, we'll be in touch
-                    </p>
-                  )}
-                </div>
-              </div>
+  <div class="divider"></div>
 
-              {/* Right visual - abstract note representation */}
-              <div className="relative hidden lg:block" style={{ transform: 'rotate(1deg)' }}>
-                <div className="relative w-full h-96">
-                  {/* Stacked papers effect */}
-                  <div className="absolute top-0 left-8 w-72 h-80 bg-stone-200 border border-stone-300 opacity-60"
-                       style={{ transform: 'rotate(-3deg)', boxShadow: '6px 6px 0px rgba(0,0,0,0.05)' }} />
-                  <div className="absolute top-4 left-12 w-72 h-80 bg-amber-50 border border-stone-300 opacity-70"
-                       style={{ transform: 'rotate(2deg)', boxShadow: '6px 6px 0px rgba(0,0,0,0.05)' }} />
-                  <div className="absolute top-8 left-16 w-72 h-80 bg-white border border-stone-300 p-8"
-                       style={{ transform: 'rotate(-1deg)', boxShadow: '8px 8px 0px rgba(0,0,0,0.08)' }}>
-                    {/* Handwritten-style lines */}
-                    <div className="space-y-4">
-                      <div className="h-px bg-stone-400 opacity-30 w-3/4" style={{ transform: 'rotate(-0.5deg)' }} />
-                      <div className="h-px bg-stone-400 opacity-30 w-full" style={{ transform: 'rotate(0.3deg)' }} />
-                      <div className="h-px bg-stone-400 opacity-30 w-2/3" style={{ transform: 'rotate(-0.2deg)' }} />
-                      <div className="h-8" />
-                      <div className="h-px bg-stone-400 opacity-30 w-5/6" style={{ transform: 'rotate(0.5deg)' }} />
-                      <div className="h-px bg-stone-400 opacity-30 w-3/4" style={{ transform: 'rotate(-0.3deg)' }} />
-                      <div className="h-8" />
-                      <div className="h-px bg-stone-400 opacity-30 w-1/2" style={{ transform: 'rotate(0.2deg)' }} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+  <!-- ── d-BLOCK ── -->
+  <div id="d-block">
+    <div class="sec-title"><div class="num">1</div> d-વિભાગ (સંક્રાંતિ ધાતુઓ)</div>
 
-            {/* Features - scattered, organic layout */}
-            <div className="mt-48 grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="p-8" style={{ transform: 'rotate(-0.8deg)' }}>
-                <div className="text-4xl mb-4 opacity-60">○</div>
-                <h3 className="text-xl font-light text-stone-800 mb-3">imperfect by design</h3>
-                <p className="text-stone-600 font-light leading-relaxed">
-                  No templates. No forced structure. Your notes find their own shape.
-                </p>
-              </div>
-              
-              <div className="p-8 md:mt-12" style={{ transform: 'rotate(0.6deg)' }}>
-                <div className="text-4xl mb-4 opacity-60">△</div>
-                <h3 className="text-xl font-light text-stone-800 mb-3">age gracefully</h3>
-                <p className="text-stone-600 font-light leading-relaxed">
-                  Watch your ideas evolve. Old notes gain character, not obsolescence.
-                </p>
-              </div>
-              
-              <div className="p-8 md:-mt-8" style={{ transform: 'rotate(-0.4deg)' }}>
-                <div className="text-4xl mb-4 opacity-60">□</div>
-                <h3 className="text-xl font-light text-stone-800 mb-3">simply present</h3>
-                <p className="text-stone-600 font-light leading-relaxed">
-                  Minimal features. Maximum focus. Just you and your thoughts.
-                </p>
-              </div>
-            </div>
+    <div class="card highlight">
+      <div class="card-title">IUPAC વ્યાખ્યા — સંક્રાંતિ ધાતુ એટલે શું?</div>
+      <p>જે ધાતુના <strong>તટસ્થ પરમાણુ અથવા તેના આયનોમાં d-કક્ષક અપૂર્ણ ભરાયેલ હોય</strong> તે સંક્રાંતિ ધાતુ.</p>
+      <p style="margin-top:8px">બસ, એક જ વાક્ય. આ યાદ રાખો.</p>
+    </div>
 
-            {/* Footer - minimal */}
-            <footer className="mt-32 mb-8 text-center">
-              <p className="text-stone-500 text-sm font-light tracking-wider" style={{ transform: 'rotate(-0.2deg)' }}>
-                ~ embracing the beauty of impermanence ~
-              </p>
-            </footer>
-          </div>
+    <div class="card red">
+      <div class="card-title">⚠️ Zn, Cd, Hg સંક્રાંતિ ધાતુ કેમ નથી?</div>
+      <p>Zn²⁺ ની રચના <strong>3d¹⁰</strong> — d-કક્ષક સંપૂર્ણ ભરેલ. તેથી Zn લાયક નથી.</p>
+      <p>Cd અને Hg માટે પણ એ જ. છતાં આ ત્રણેયનો અભ્યાસ d-block સાથે કરીએ છીએ, કારણ કે તે 3d, 4d, 5d શ્રેણીના છેલ્લા સભ્ય છે.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">સામાન્ય ઇલેક્ટ્રોનીય રચના</div>
+      <div class="formula">(n–1)d¹⁻¹⁰ ns¹⁻²</div>
+      <p><strong>(n–1)d</strong> = ઉપાંતિમ (penultimate) ઊર્જા સ્તર. <strong>ns</strong> = બહારનું સ્તર.</p>
+      <div class="analogy">કૉલેજ હૉસ્ટેલ સમજો. ns માળ સૌથી ઉપર (બહારનો). d ના માળ નીચે. નવા વિદ્યાર્થીઓ (ઇલેક્ટ્રોન) આવે ત્યારે નીચેના d-માળ ભરે.</div>
+    </div>
+
+    <div class="card teal">
+      <div class="card-title">Cr અને Cu — પરીક્ષામાં ચોક્કસ આવે!</div>
+      <table class="styled-table">
+        <tr><th>તત્ત્વ</th><th>અપેક્ષિત રચના</th><th>વાસ્તવ રચના</th><th>કારણ</th></tr>
+        <tr><td><strong>Cr (Z=24)</strong></td><td>3d⁴ 4s²</td><td><em>3d⁵ 4s¹</em></td><td>અર્ધ ભરેલ d = વધુ સ્થાયી</td></tr>
+        <tr><td><strong>Cu (Z=29)</strong></td><td>3d⁹ 4s²</td><td><em>3d¹⁰ 4s¹</em></td><td>સંપૂર્ણ ભરેલ d = વધુ સ્થાયી</td></tr>
+      </table>
+      <div class="memory">Cr અને Cu બંને 4s માંથી એક ઇલેક્ટ્રોન 3d ને આપે છે — અર્ધ ભરેલ અને સંપૂર્ણ ભરેલ d = ખુશ!</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── ગુણધર્મો ── -->
+  <div id="properties">
+    <div class="sec-title"><div class="num">2</div> સંક્રાંતિ ધાતુઓના ગુણધર્મો</div>
+
+    <div class="accordion">
+      <div class="acc-header" onclick="toggle(this)">
+        🔩 ભૌતિક ગુણધર્મો <span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <ul>
+          <li>ઉચ્ચ ગલનબિંદુ, ઉચ્ચ ઉત્કલનબિંદુ ધરાવે છે</li>
+          <li>ઉષ્મા અને વિદ્યુતના સારા વાહક</li>
+          <li>ધાત્વીય ચમક, ઊંચી તનન-પ્રબળતા</li>
+          <li>અપવાદ: Zn, Cd, Hg — નરમ, ઓછા ગલનબિંદુ (d સંપૂર્ણ ભરેલ → d ઇલેક્ટ્રોન બંધમાં ભાગ ન લે)</li>
+          <li><strong>Cr, Mo, W</strong> = પોત-પોતાની શ્રેણીમાં સૌથી ઊંચું ગલનબિંદુ</li>
+        </ul>
+        <div class="analogy">જેટલા ઇલેક્ટ્રોન ધાત્વીય બંધ બનાવે, તેટલો બંધ મજબૂત = પીગળવા ઊર્જા વધારે જોઈએ = ઊંચું ગલનબિંદુ.</div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <div class="acc-header" onclick="toggle(this)">
+        📏 પરમાણ્વીય કદ અને લેન્થેનોઈડ સંકોચન <span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <p>ડાબેથી જમણે જતાં: <strong>કદ ઘટે</strong> (ન્યુક્લિયસ ચાર્જ વધે, d-ઇલેક્ટ્રોન ખરાબ શીલ્ડ કરે).</p>
+        <div class="card teal" style="margin-top:12px">
+          <div class="card-title">લેન્થેનોઈડ સંકોચન — ખૂબ અગત્યનો ખ્યાલ</div>
+          <p>5d શ્રેણી શરૂ થાય તે પહેલાં 4f કક્ષક ભરાય. 4f ઇલેક્ટ્રોન શીલ્ડ ખૂબ નબળું કરે → અસરકારક ન્યુક્લિયર ચાર્જ વધે → પરમાણુ સંકોચાય.</p>
+          <p style="margin-top:8px"><strong>પરિણામ:</strong> 4d અને 5d તત્ત્વો લગભગ સરખા કદ!</p>
+          <div class="formula">Zr = 160 pm ≈ Hf = 159 pm</div>
+          <p>Zr અને Hf ને રાસાયણિક ગુણધર્મ લગભગ સરખા — અલગ કરવા ખૂબ મુશ્કેલ.</p>
         </div>
-      );
-    }
+        <div class="memory">f-ઇલેક્ટ્રોન "નબળા ચોકીદાર" — ખૂબ ઓછું શીલ્ડ કરે. ન્યુક્લિયસ બહારના ઇલેક્ટ્રોન ખેંચે → પરમાણુ નાનો.</div>
+      </div>
+    </div>
 
-    ReactDOM.render(<WabiSabiNotes />, document.getElementById('root'));
-  </script>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggle(this)">
+        ⚡ આયનીકરણ એન્થાલ્પી <span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <p>ડાબેથી જમણે: આયનીકરણ એન્થાલ્પી <strong>ધીમે ધીમે વધે</strong> (s/p-block જેટલો ઝડપી વધારો નહીં).</p>
+        <p><strong>અગત્યનો નિયમ:</strong> d-block ધાતુ આયન બનાવે ત્યારે <em>ns ઇલેક્ટ્રોન પહેલાં જાય</em>, (n–1)d પછી.</p>
+        <div class="analogy">ઇમારતમાં આગ લાગે ત્યારે ઉપરના માળ (ns) ના લોકો પહેલા નીકળે, નીચેના (d) પછી.</div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <div class="acc-header" onclick="toggle(this)">
+        🔢 ઑક્સિડેશન અવસ્થા — સૌથી ખાસ ગુણ <span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <p><strong>કેમ?</strong> (n–1)d અને ns ની ઊર્જા ઘણી નજીક → બંને ઇલેક્ટ્રોન બંધ બનાવવા વપરાય.</p>
+        <p><strong>Mn = સૌથી વધુ ઑક્સિડેશન અવસ્થા:</strong> +2, +3, +4, +5, +6, +7</p>
+        <table class="styled-table">
+          <tr><th>ધાતુ</th><th>ઑક્સિડેશન અવસ્થા</th><th>સૌથી સ્થાયી</th></tr>
+          <tr><td>Mn</td><td>+2 થી +7</td><td>+2 (3d⁵ — અર્ધ ભરેલ)</td></tr>
+          <tr><td>Fe</td><td>+2, +3</td><td>+3 (3d⁵)</td></tr>
+          <tr><td>Cu</td><td>+1, +2</td><td>+2</td></tr>
+          <tr><td>Cr</td><td>+2, +3, +6</td><td>+3</td></tr>
+        </table>
+        <div class="card highlight" style="margin-top:12px">
+          <div class="card-title">પ્રિય પ્રશ્ન: Mn²⁺ Fe²⁺ કરતાં વધારે સ્થાયી કેમ?</div>
+          <p><strong>Mn²⁺</strong> = 3d⁵ (અર્ધ ભરેલ = ખૂબ સ્થાયી). Mn³⁺ (3d⁴) બનાવવું અઘરું.</p>
+          <p><strong>Fe²⁺</strong> = 3d⁶. એક ઇલેક્ટ્રોન ગુમાવી Fe³⁺ (3d⁵) = વધુ સ્થાયી. તેથી Fe²⁺ સહેલાઈથી ઑક્સિડ થાય.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <div class="acc-header" onclick="toggle(this)">
+        🧲 ચુંબકીય ગુણધર્મ <span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <p>અયુગ્મિત ઇલેક્ટ્રોન → <strong>અનુચુંબકીય (Paramagnetic)</strong> — ચુંબક તરફ ખેંચાય.</p>
+        <p>બધા ઇલેક્ટ્રોન યુગ્મ → <strong>પ્રતિચુંબકીય (Diamagnetic)</strong> — ચુંબકથી દૂર ધકેલાય.</p>
+        <div class="formula">μ = √n(n+2) BM</div>
+        <p>જ્યાં <strong>n = અયુગ્મિત ઇલેક્ટ્રોનની સંખ્યા</strong>, BM = બોહ્ર મૅગ્નેટોન</p>
+        <div class="analogy">અયુગ્મિત ઇલેક્ટ્રોન = ફરતી ટોચ. જેટલી વધારે ટોચ, તેટલું ચુંબકીય આકર્ષણ.</div>
+        <table class="styled-table">
+          <tr><th>આયન</th><th>રચના</th><th>અ. ઇ.</th><th>μ (BM)</th></tr>
+          <tr><td>Sc³⁺</td><td>3d⁰</td><td>0</td><td>0 (પ્રતિ ચુ.)</td></tr>
+          <tr><td>Ti³⁺</td><td>3d¹</td><td>1</td><td>1.73</td></tr>
+          <tr><td>Fe³⁺</td><td>3d⁵</td><td>5</td><td>5.92 (સૌથી વધુ)</td></tr>
+          <tr><td>Zn²⁺</td><td>3d¹⁰</td><td>0</td><td>0 (પ્રતિ ચુ.)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <div class="acc-header" onclick="toggle(this)">
+        🌈 રંગીન આયનો <span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <p><strong>રંગ કેમ?</strong> અધૂરી d-કક્ષક → દૃશ્ય પ્રકાશ અવશોષે (d-d ઉત્તેજના). બાકી (complementary) રંગ દેખાય.</p>
+        <table class="styled-table">
+          <tr><th>આયન</th><th>રચના</th><th>રંગ</th></tr>
+          <tr><td>Cu²⁺</td><td>3d⁹</td><td>વાદળી</td></tr>
+          <tr><td>Ni²⁺</td><td>3d⁸</td><td>લીલો</td></tr>
+          <tr><td>Mn²⁺</td><td>3d⁵</td><td>ગુલાબી</td></tr>
+          <tr><td>Sc³⁺</td><td>3d⁰</td><td>રંગ-વિહીન</td></tr>
+          <tr><td>Zn²⁺</td><td>3d¹⁰</td><td>રંગ-વિહીન</td></tr>
+        </table>
+        <div class="memory">3d⁰ અને 3d¹⁰ = d-d ઉત્તેજના નહીં = રંગ નહીં. વચ્ચેના બધા = રંગ.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">બીજા ગુણધર્મો (ટૂંકમાં)</div>
+      <table class="styled-table">
+        <tr><th>ગુણ</th><th>અર્થ</th><th>ઉદાહરણ</th></tr>
+        <tr><td><strong>સંકીર્ણ નિર્માણ</strong></td><td>નાનું કદ + ઊંચો ચાર્જ + ખાલી d = ligand ખેંચે</td><td>[Fe(CN)₆]³⁻, [Cu(NH₃)₄]²⁺</td></tr>
+        <tr><td><strong>ઉદ્દીપક</strong></td><td>વિવિધ OS → પ્રક્રિયામાં ભાગ લઈ ઝડપ વધારે</td><td>V₂O₅ (SO₃), Fe (NH₃), Ni (હાઇડ્રોજ.)</td></tr>
+        <tr><td><strong>આંતરાલીય સંયોજન</strong></td><td>H, C, N ધાતુ લૅટિસ ગૅપ ભરે</td><td>TiC, Mn₄N, Fe₃H</td></tr>
+        <tr><td><strong>મિશ્રધાતુ</strong></td><td>સરખા કદ → એક ધાતુ બીજીના ક્રિસ્ટલ-ગ્રિડ ભરે</td><td>સ્ટેઇન.સ્ટીલ, પિત્તળ, કાંસુ</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── સંયોજનો ── -->
+  <div id="compounds">
+    <div class="sec-title"><div class="num">3</div> અગત્યના સંયોજનો</div>
+
+    <div class="card highlight">
+      <div class="card-title">1. પૉટૅશિયમ ડાઇક્રોમેટ — K₂Cr₂O₇ (નારંગી)</div>
+      <p><strong>બનાવટ:</strong></p>
+      <ul>
+        <li>ક્રોમાઈટ (FeCr₂O₄) + Na₂CO₃ + હવા → ગરમ → <em>સોડિયમ ક્રોમેટ (પીળો)</em></li>
+        <li>એસિડ ઉમેરો → <em>સોડિયમ ડાઇક્રોમેટ</em></li>
+        <li>KCl ઉમેરો → <em>K₂Cr₂O₇ ના નારંગી સ્ફટિક</em></li>
+      </ul>
+      <div class="card teal" style="margin-top:12px">
+        <div class="card-title">pH ની અસર — રંગ બદલે!</div>
+        <div class="formula">CrO₄²⁻ (પીળો) + 2H⁺ ⇌ Cr₂O₇²⁻ (નારંગી) + H₂O</div>
+        <p>એસિડ ઉમેરો → નારંગી. બેઝ ઉમેરો → પીળો. આ ઉલટ-સુલટ થઈ શકે.</p>
+      </div>
+      <div class="card red" style="margin-top:12px">
+        <div class="card-title">એસિડ માધ્યમમાં ઑક્સિડેશનકર્તા</div>
+        <div class="formula">Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H₂O &nbsp;(E° = +1.33 V)</div>
+        <p>Cr: <strong>+6 → +3</strong> (ઘટાડો = ઑક્સિડેશનકર્તા)</p>
+        <p>ઑક્સિડ કરે: Fe²⁺ → Fe³⁺ અને I⁻ → I₂</p>
+      </div>
+    </div>
+
+    <div class="card purple">
+      <div class="card-title">2. પૉટૅશિયમ પરમૅંગેનેટ — KMnO₄ (ઘેરો જાંબુ)</div>
+      <p><strong>બનાવટ:</strong></p>
+      <ul>
+        <li>MnO₂ + KOH + KNO₃ → ગરમ → <em>K₂MnO₄ (ઘેરો લીલો મૅંગેનેટ)</em></li>
+        <li>એસિડ અથવા વિદ્યુત-વિભાજન → <em>KMnO₄ (ઘેરો જાંબુ)</em></li>
+      </ul>
+      <div class="card red" style="margin-top:12px">
+        <div class="card-title">એસિડ માધ્યમમાં ઑક્સિડેશનકર્તા</div>
+        <div class="formula">MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O &nbsp;(E° = +1.52 V)</div>
+        <p>Mn: <strong>+7 → +2</strong> (ઘટાડો). E° = 1.52 V — ઘણો શક્તિશાળી ઑક્સિડ.</p>
+        <p>ઑક્સિડ કરે: C₂O₄²⁻ → CO₂ અને H₂S → S</p>
+      </div>
+      <div class="memory" style="margin-top:10px">KMnO₄ > K₂Cr₂O₇ ઑક્સિડ-શક્તિ (1.52 V > 1.33 V). વધારે V = વધારે શક્તિ.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── f-BLOCK ── -->
+  <div id="f-block">
+    <div class="sec-title"><div class="num">4</div> f-વિભાગ (આંતરસંક્રાંતિ ધાતુઓ)</div>
+
+    <div class="grid2">
+      <div class="card teal">
+        <div class="card-title">લેન્થેનોઈડ્સ (4f)</div>
+        <ul>
+          <li>Ce (Z=58) → Lu (Z=71)</li>
+          <li>સંજ્ઞા: <strong>Ln</strong></li>
+          <li>સામાન્ય OS: <strong>+3</strong></li>
+          <li>ક્યારેક +2 (Eu) અથવા +4 (Ce) — f⁰, f⁷, f¹⁴ સ્થાયિ</li>
+          <li><strong>કિરણોત્સારી નથી</strong></li>
+        </ul>
+      </div>
+      <div class="card red">
+        <div class="card-title">એક્ટિનોઈડ્સ (5f)</div>
+        <ul>
+          <li>Th (Z=90) → Lr (Z=103)</li>
+          <li><strong>બધા કિરણોત્સારી</strong></li>
+          <li>OS: +3 ઉપરાંત +4, +5, +6, +7 પણ</li>
+          <li>5f, 6d, 7s ઊર્જા સમાન → વધારે OS</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card highlight">
+      <div class="card-title">લેન્થેનોઈડ સંકોચન — સરળ ભાષામાં</div>
+      <p>Ce → Lu જતાં પ્રોટોન વધે, પણ 4f ઇલેક્ટ્રોન આંતરિક કક્ષકમાં ભળે — <strong>ખૂબ નબળું શીલ્ડ</strong>.</p>
+      <p>→ ન્યુક્લિયસ ખેંચ વધે → પરમાણુ ક્રમશઃ નાના.</p>
+      <div class="analogy">ક્લાસ-રૂમ જ્યાં શિક્ષક (ન્યુક્લિયસ) ની સત્તા વધે, પણ ચોકી-ઇ(f-ઇ.) ખૂબ ઢીલા. બહારના વિદ્યાર્થી (ઇ.) ખૂબ નજીક આવી જાય.</div>
+      <div class="card" style="margin-top:12px; border-left: 3px solid var(--accent1)">
+        <div class="card-title">પરિણામ</div>
+        <p>5d-શ્રેણી (Hf, Ta, W...) 4d-શ્રેણી (Zr, Nb, Mo...) જેટલા <strong>જ</strong> કદ બને.</p>
+        <p>→ <strong>Zr અને Hf</strong> અલગ કરવા ખૂબ અઘરા — કદ, ગુણ બધું સરખું.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">લેન્થેનોઈડ ઉપયોગ</div>
+      <ul>
+        <li><strong>મિશ્ચ-ધાતુ (Mischmetall)</strong> = 95% Ln + 5% Fe → સિગારેટ-લાઈટર ફ્લિન્ટ, ગોળીના આવરણ</li>
+        <li>ઉચ્ચ-ક્ષમતા વાળા ઍલૉય સ્ટીલ ઉત્પાદન</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── સરખામણી ── -->
+  <div id="compare">
+    <div class="sec-title"><div class="num">5</div> લેન્થેનોઈડ vs એક્ટિનોઈડ — સરખામણી</div>
+    <div class="card">
+      <table class="styled-table">
+        <tr><th>મુદ્દો</th><th>લેન્થેનોઈડ (4f)</th><th>એક્ટિનોઈડ (5f)</th></tr>
+        <tr><td>શ્રેણી</td><td>Ce → Lu</td><td>Th → Lr</td></tr>
+        <tr><td>કિરણોત્સારિ</td><td>નથી</td><td><strong>બધા</strong></td></tr>
+        <tr><td>સામાન્ય OS</td><td>+3</td><td>+3 + +4, +5, +6, +7</td></tr>
+        <tr><td>OS વધારે શા માટે?</td><td>4f, 5d, 6s ઊર્જા દૂર</td><td>5f, 6d, 7s ઊર્જા નજીક → બધા ભાગ લે</td></tr>
+        <tr><td>સંકોચન</td><td>લેન્થ. સંકોચન</td><td>એક્ટ. સંકોચન (વધારે તીવ્ર)</td></tr>
+        <tr><td>વધારે તીવ્ર કેમ?</td><td>—</td><td>5f ઇ. 4f કરતાં પણ નબળ શીલ્ડ</td></tr>
+        <tr><td>ઉપ.</td><td>કુદ. પ્રાપ્ય</td><td>U પછી મોટે ભાગે કૃત્રિમ</td></tr>
+      </table>
+    </div>
+
+    <div class="card red">
+      <div class="card-title">વિષમીકરણ (Disproportionation) — પ્રિય પ્રશ્ન!</div>
+      <p><strong>વ્યાખ્યા:</strong> જ્યારે <em>એક જ પદાર્થ</em> ના ઑક્સિડેશન અને રિડક્શન <em>એક સાથે</em> થાય.</p>
+      <div class="formula">2Cu⁺(aq) → Cu²⁺(aq) + Cu(s)</div>
+      <p>Cu⁺ → Cu²⁺ (ઑક્સિ.) અને Cu⁺ → Cu (રિડ.) — એ જ Cu⁺ માંથી!</p>
+      <div class="analogy">જોડિયા ભાઈ — એક પૈસા આપે (ઑક્સ.) અને બીજો પૈસા લે (રિ.) — પણ બંને એક જ વ્યક્તિ.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── QUIZ ── -->
+  <div id="quiz">
+    <div class="sec-title"><div class="num">6</div> જાત-કસોટી (Self-Test)</div>
+
+    <div class="quiz-card">
+      <div class="quiz-q">પ્ર.1. Zn સંક્રાંતિ ધાતુ કેમ નથી?</div>
+      <div class="quiz-option" onclick="answer(this, false, 'q1')">કારણ કે Zn ઘણું નરમ છે</div>
+      <div class="quiz-option" onclick="answer(this, true, 'q1')">કારણ કે Zn અને Zn²⁺ બંનેની 3d¹⁰ — સંપૂર્ણ ભરેલ d-કક્ષક</div>
+      <div class="quiz-option" onclick="answer(this, false, 'q1')">કારણ કે Zn સંયોજન નથી બનાવતું</div>
+      <div class="quiz-feedback" id="q1">IUPAC કહે: સંક્રાંતિ ધાતુ = અધૂરી d-કક્ષક (પરમાણુ અથવા સામ. આ.). Zn²⁺ = 3d¹⁰ (ભરેલ). ટેસ્ટ ફૅઇલ!</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q">પ્ર.2. Cr (Z=24) ની વાસ્તવ ઇ.રચના?</div>
+      <div class="quiz-option" onclick="answer(this, false, 'q2')">3d⁴ 4s²</div>
+      <div class="quiz-option" onclick="answer(this, true, 'q2')">3d⁵ 4s¹</div>
+      <div class="quiz-option" onclick="answer(this, false, 'q2')">3d⁶ 4s⁰</div>
+      <div class="quiz-feedback" id="q2">Cr 4s માંથી 1 ઇ. ચોરી 3d ને આપે — અર્ધ ભરેલ 3d⁵ = ખૂબ સ્થાયી!</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q">પ્ર.3. K₂Cr₂O₇ એસિડ માધ્યમમાં શું ભૂમિકા ભજવે?</div>
+      <div class="quiz-option" onclick="answer(this, false, 'q3')">રિડ્યુસિંગ એજન્ટ (Cr⁶⁺ → Cr⁷⁺)</div>
+      <div class="quiz-option" onclick="answer(this, true, 'q3')">ઑક્સિડ. એજન્ટ (Cr⁶⁺ → Cr³⁺)</div>
+      <div class="quiz-option" onclick="answer(this, false, 'q3')">ફક્ત ઉત્પ્રેરક</div>
+      <div class="quiz-feedback" id="q3">Cr +6 → +3 (ઇ. મળે = ઘટાડો). ઘટ્ટ = ઑક્સિડ. એજ. Cr₂O₇²⁻ ઑક્સ. એ. છે.</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q">પ્ર.4. લેન્થેનોઈડ સંકોચન — સૌથી મોટું પરિણામ?</div>
+      <div class="quiz-option" onclick="answer(this, false, 'q4')">લેન્થ. કિ.ઉ. બને</div>
+      <div class="quiz-option" onclick="answer(this, false, 'q4')">બધા Ln +7 ઑ.અ. દર્શાવે</div>
+      <div class="quiz-option" onclick="answer(this, true, 'q4')">4d અને 5d (Zr & Hf) ના કદ લગભગ સરખા</div>
+      <div class="quiz-feedback" id="q4">સાચું! 5d-tત્ત્વ Hf = 159 pm ≈ 4d-તત્ત્વ Zr = 160 pm. બંને ઑ.ગ. સરખા — અ. ક. !</div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-q">પ્ર.5. કઈ આ. રંગ-વિહીન છે અને કેમ?</div>
+      <div class="quiz-option" onclick="answer(this, false, 'q5')">Cu²⁺ — 9 d-ઇ. ધરાવે</div>
+      <div class="quiz-option" onclick="answer(this, true, 'q5')">Zn²⁺ — 3d¹⁰ (ભરેલ) → d-d ઉ. ન. → રંગ ન.</div>
+      <div class="quiz-option" onclick="answer(this, false, 'q5')">Fe³⁺ — 5 d-ઇ. ધ.</div>
+      <div class="quiz-feedback" id="q5">Zn²⁺ = 3d¹⁰ — ખાલી d-ક. નહીં → ઉ. ન. → ર. ન. 3d⁰ & 3d¹⁰ = ર.વ.</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── ચીટ-શીટ ── -->
+  <div class="card highlight">
+    <div class="card-title">📋 ચીટ-શીટ — દીવાલ પર લગાવો!</div>
+    <table class="styled-table">
+      <tr><th>ખ્યાલ</th><th>મુખ્ય વાત</th></tr>
+      <tr><td>સ. ધ. વ્યાખ્યા</td><td>પ.અ. / સા. આ. માં અધૂ. d-ક.</td></tr>
+      <tr><td>Zn સ.ધ. નહીં</td><td>Zn²⁺ = 3d¹⁰ (ભ.ભ.)</td></tr>
+      <tr><td>Cr રચના</td><td>3d⁵ 4s¹ (3d⁴ 4s² નહીં)</td></tr>
+      <tr><td>Cu રચના</td><td>3d¹⁰ 4s¹ (3d⁹ 4s² નહીં)</td></tr>
+      <tr><td>રંગ ક્યાંથી?</td><td>d-d ઉ. (અધ. d-ક. જ.)</td></tr>
+      <tr><td>ચ. સૂ.</td><td>μ = √n(n+2) BM</td></tr>
+      <tr><td>લે. સ.</td><td>નબ. 4f → Zr ≈ Hf</td></tr>
+      <tr><td>K₂Cr₂O₇ (ઍ.)</td><td>Cr⁶⁺ → Cr³⁺, E° = 1.33V</td></tr>
+      <tr><td>KMnO₄ (ઍ.)</td><td>Mn⁷⁺ → Mn²⁺, E° = 1.52V (વ.)</td></tr>
+      <tr><td>Ac vs Ln</td><td>Ac: બ. કિ., વ. OS</td></tr>
+      <tr><td>વિષ. (Disp.)</td><td>2Cu⁺ → Cu + Cu²⁺ (ઑ. + રિ.)</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  header.classList.toggle('active', !isOpen);
+}
+
+function answer(el, correct, qId) {
+  const card = el.closest('.quiz-card');
+  const options = card.querySelectorAll('.quiz-option');
+  const feedback = document.getElementById(qId);
+  options.forEach(o => {
+    o.style.pointerEvents = 'none';
+    o.classList.remove('correct', 'wrong');
+  });
+  el.classList.add(correct ? 'correct' : 'wrong');
+  feedback.classList.add('show', correct ? 'good' : 'bad');
+  feedback.textContent = (correct ? '✅ સાચો જવાબ! ' : '❌ ખોટો જવાબ! ') + feedback.textContent;
+}
+</script>
+
 </body>
 </html>
